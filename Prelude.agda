@@ -60,7 +60,7 @@ open import Data.List
 
 open import Data.List.All
   using (All ; _∷_ ; []) 
-  renaming (map to mapᵢ)
+  renaming (map to All-map)
   public
 
 open import Data.List.Any

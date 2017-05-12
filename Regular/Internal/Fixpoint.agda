@@ -23,6 +23,10 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
 
   Atμ = At Alμ
 
+  getCtx : ∀{π} → Ctx π → Alμ
+  getCtx (there _ ctx) = getCtx ctx
+  getCtx (here res _)  = res
+
 -- ** Interpretation
 
   -- XXX: write in monadic style

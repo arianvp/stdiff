@@ -3,7 +3,7 @@ open import Generic.Regular
 
 module Regular.Internal.Functor
            (Rec : Set)
-           (_≟Rec_ : (⟨x⟩ ⟨y⟩ : Rec) → Dec (⟨x⟩ ≡ ⟨y⟩))
+           (_≟Rec_ : (x y : Rec) → Dec (x ≡ y))
        where
 
   open DecEq Rec _≟Rec_

@@ -1,0 +1,96 @@
+open import Prelude
+open import Generic.Regular
+
+module Regular.Lab.2-3-Tree where
+
+  2-3-treeF : Sum
+  2-3-treeF =
+    let leafT = [] in
+    let 2nodeT = K `ℕ ∷ I ∷ I ∷ [] in
+    let 3nodeT = K `ℕ ∷ I ∷ I ∷ I ∷ [] in
+    leafT ∷ 2nodeT ∷ 3nodeT ∷ []
+
+  `leaf `2-node `3-node : Constr 2-3-treeF
+  `leaf = zero
+  `2-node = suc zero
+  `3-node = suc (suc zero)
+
+  is-2-node? : ∀ {A} → ⟦ 2-3-treeF ⟧S A → Bool
+  is-2-node? x with sop x
+  ... | tag (suc zero) ls = true
+  ... | tag _ ls = false
+
+  2-3-tree : Set
+  2-3-tree = Fix 2-3-treeF
+
+  leaf : 2-3-tree
+  leaf = ⟨ here [] ⟩
+
+  2-node : ℕ → 2-3-tree → 2-3-tree → 2-3-tree
+  2-node n l r = ⟨ there (here (n ∷ l ∷ r ∷ [])) ⟩
+
+  3-node : ℕ → 2-3-tree → 2-3-tree → 2-3-tree → 2-3-tree
+  3-node n l c r = ⟨ (there (there (here (n ∷ l ∷ c ∷ r ∷ [])))) ⟩
+
+  t₁ : 2-3-tree
+  t₁ = 3-node 1 leaf (2-node 2 leaf leaf) (2-node 3 leaf leaf)
+
+  t₂ : 2-3-tree
+  t₂ = 3-node 1 leaf (2-node 5 leaf leaf) (2-node 3 leaf leaf)
+
+  t₃ : 2-3-tree
+  t₃ = 3-node 1 leaf (2-node 2 leaf leaf) (3-node 3 leaf leaf leaf)
+
+  t₄ : 2-3-tree
+  t₄ = 2-node 1 (2-node 2 leaf leaf) (2-node 3 leaf leaf)
+  
+  open import Regular.Functor 2-3-tree _≟Fix_
+    public
+
+  open import Regular.Fixpoint 2-3-treeF
+    public
+
+  p12 : Alμ
+  p12 = spn
+        (Scns (suc (suc zero))
+         (set (1 , 1) ∷
+          fix (spn Scp) ∷
+          fix
+          (spn
+           (Scns (suc zero)
+            (set (2 , 5) ∷ fix (spn Scp) ∷ fix (spn Scp) ∷ [])))
+          ∷ fix (spn Scp) ∷ []))
+  
+  p13 : Alμ
+  p13 = spn
+        (Scns (suc (suc zero))
+        (set (1 , 1) ∷
+          fix (spn Scp) ∷
+          fix (spn Scp) ∷
+          fix
+          (spn
+          (Schg (suc zero) (suc (suc zero)) {λ ()}
+            (AX (set (3 , 3))
+            (AX (fix (spn Scp)) (AX (fix (spn Scp)) (Ains ⟨ here [] ⟩ A0))))))
+          ∷ []))
+
+  p14 : Alμ
+  p14 = spn
+        (Schg (suc (suc zero)) (suc zero) {λ ()}
+        (AX (set (1 , 1))
+          (Adel ⟨ here [] ⟩ (AX (fix (spn Scp)) (AX (fix (spn Scp)) A0)))))
+
+  open import Regular.Predicates.Identity.Fixpoint 2-3-treeF
+  open import Regular.Predicates.Span.Fixpoint 2-3-treeF
+
+  isSpan213 : Set
+  isSpan213 = spanAlμ p12 p13
+
+  proof213 : isSpan213
+  proof213 = refl , (refl , (unit , (unit , (unit , unit))))
+
+  isSpan214 : Set
+  isSpan214 = spanAlμ p12 p14
+
+  proof214 : isSpan214
+  proof214 = refl , (refl , unit , unit , unit , unit)
