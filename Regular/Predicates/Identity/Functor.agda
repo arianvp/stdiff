@@ -14,12 +14,12 @@ module Regular.Predicates.Identity.Functor
   identityAl : {π₁ π₂ : Prod} → Al (At PatchRec) π₁ π₂          → Set
   identityAt : {α     : Atom} → At PatchRec α                   → Set
 
+  all-identityAt : ∀{l} → All (At PatchRec) l → Set
+  all-identityAt []       = Unit
+  all-identityAt (a ∷ as) = identityAt a × all-identityAt as
+
   identityS Scp = Unit
   identityS (Scns C₁ al) = all-identityAt al
-    where
-      all-identityAt : ∀{l} → All (At PatchRec) l → Set
-      all-identityAt []       = Unit
-      all-identityAt (a ∷ as) = identityAt a × all-identityAt as
   identityS _   = ⊥
 
   identityAl A0         = Unit

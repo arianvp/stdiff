@@ -42,7 +42,7 @@ module Regular.Lab.2-3-Tree where
   t₃ = 3-node 1 leaf (2-node 2 leaf leaf) (3-node 3 leaf leaf leaf)
 
   t₄ : 2-3-tree
-  t₄ = 2-node 1 (2-node 2 leaf leaf) (2-node 3 leaf leaf)
+  t₄ = 2-node 3 leaf leaf
   
   open import Regular.Functor 2-3-tree _≟Fix_
     public
@@ -75,10 +75,11 @@ module Regular.Lab.2-3-Tree where
           ∷ []))
 
   p14 : Alμ
-  p14 = spn
-        (Schg (suc (suc zero)) (suc zero) {λ ()}
-        (AX (set (1 , 1))
-          (Adel ⟨ here [] ⟩ (AX (fix (spn Scp)) (AX (fix (spn Scp)) A0)))))
+  p14 = del (suc (suc zero))
+        (there 1
+        (there ⟨ here [] ⟩
+          (there ⟨ there (here (2 ∷ ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ [])) ⟩
+          (here (spn Scp) []))))
 
   open import Regular.Predicates.Identity.Fixpoint 2-3-treeF
   open import Regular.Predicates.Span.Fixpoint 2-3-treeF
@@ -93,4 +94,4 @@ module Regular.Lab.2-3-Tree where
   isSpan214 = spanAlμ p12 p14
 
   proof214 : isSpan214
-  proof214 = refl , (refl , unit , unit , unit , unit)
+  proof214 = refl , (unit , unit)
