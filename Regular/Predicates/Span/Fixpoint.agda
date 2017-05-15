@@ -5,8 +5,8 @@ module Regular.Predicates.Span.Fixpoint (σμ : Sum) where
 
   open import Regular.Internal.Fixpoint σμ
   open import Regular.Internal.Functor (Fix σμ) _≟Fix_
-  open import Regular.Predicates.Identity.Fixpoint σμ
-  open import Regular.Predicates.Span.Functor (Fix σμ) _≟Fix_ Alμ identityAlμ
+  open import Regular.Predicates.Domain.Fixpoint σμ
+  open import Regular.Predicates.Span.Functor (Fix σμ) _≟Fix_ Alμ applyAlμ
     public
 
   {-# TERMINATING #-}
@@ -40,6 +40,13 @@ module Regular.Predicates.Span.Fixpoint (σμ : Sum) where
   spanCtx (there a₁ ctx₁)   (there a₂ ctx₂)   = a₁ ≡ a₂ × spanCtx ctx₁ ctx₂
   spanCtx _                 _                 = ⊥
 
+
+  all-∈domAt : ∀{l} → All (λ α → ⟦ α ⟧A (Fix σμ)) l → All Atμ l → Set
+  all-∈domAt [] [] = Unit
+  all-∈domAt (a ∷ as) (at ∷ ats) = (a ∈domAt at) × all-∈domAt as ats
+
+
   spanAtCtx [] ()
-  spanAtCtx (fix a ∷ as) (here alμ rest) = spanAlμ a alμ × all-identityAt identityAlμ as
-  spanAtCtx (a ∷ as) (there a' ctx)      = spanAtCtx as ctx
+  spanAtCtx (fix a ∷ as) (here alμ rest) = spanAlμ a alμ × all-∈domAt rest as 
+  spanAtCtx (a ∷ as) (there a' ctx)      = (a' ∈domAt a) × spanAtCtx as ctx
+

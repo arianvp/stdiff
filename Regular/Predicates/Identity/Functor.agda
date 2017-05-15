@@ -28,3 +28,17 @@ module Regular.Predicates.Identity.Functor
 
   identityAt (set ks)  = proj₁ ks ≡ proj₂ ks
   identityAt (fix spμ) = idRec spμ
+
+
+{-
+  The following is not true!
+
+  module Correctness (applyR : PatchRec → Rec → Maybe Rec) where
+    
+    id-correct-s : {σ : Sum}(sp : S (At PatchRec) (Al (At PatchRec)) σ)
+                 → identityS sp
+                 → ∀{s} → applySAlAt applyR sp s ≡ just s
+    id-correct-s Scp             hip = refl
+    id-correct-s (Scns C ats)    hip = {!!}
+    id-correct-s (Schg C₁ C₂ al) hip = {!!}
+-}

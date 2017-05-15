@@ -5,12 +5,12 @@ module Regular.Predicates.Span.Functor
        (Rec      : Set)
        (_≟Rec_   : (x y : Rec) → Dec (x ≡ y))
        (PatchRec : Set)
-       (idRec    : PatchRec → Set)
+       (applyRec : PatchRec → Rec → Maybe Rec)
        (spanRec  : PatchRec → PatchRec → Set)
     where
 
   open import Regular.Internal.Functor Rec _≟Rec_
-  open import Regular.Predicates.Identity.Functor Rec _≟Rec_ PatchRec idRec
+  open import Regular.Predicates.Domain.Functor Rec _≟Rec_ PatchRec applyRec
 
   spanS  : {σ        : Sum}  → (s₁ s₂ : S (At PatchRec) (Al (At PatchRec)) σ) → Set
   spanAl : {π₁ π₂ π₃ : Prod} → Al (At PatchRec) π₁ π₂ → Al (At PatchRec) π₁ π₃ → Set
@@ -19,7 +19,7 @@ module Regular.Predicates.Span.Functor
   spanAtAll : ∀{l₁ l₂} → All (At PatchRec) l₁ → Al (At PatchRec) l₁ l₂ → Set
   spanAtAll []       _  = Unit
   spanAtAll (a ∷ as) (Ains at al) = spanAtAll (a ∷ as) al
-  spanAtAll (a ∷ as) (Adel at al) = identityAt a × spanAtAll as al
+  spanAtAll (a ∷ as) (Adel at al) = (at ∈domAt a) × spanAtAll as al
   spanAtAll (a ∷ as) (AX at al)   = spanAt a at × spanAtAll as al
 
   -- * When one spine is a copy, they are obviously a span.
@@ -66,8 +66,8 @@ module Regular.Predicates.Span.Functor
 
   -- * If we have a change and a deletion, however, the change
   --   must be an identity.
-  spanAl (Adel a₁ al₁) (AX at₂ al₂)  = identityAt at₂ × spanAl al₁ al₂
-  spanAl (AX at₁ al₁)  (Adel a₂ al₂) = identityAt at₁ × spanAl al₁ al₂
+  spanAl (Adel a₁ al₁) (AX at₂ al₂)  = a₁ ∈domAt at₂ × spanAl al₁ al₂
+  spanAl (AX at₁ al₁)  (Adel a₂ al₂) = a₂ ∈domAt at₁ × spanAl al₁ al₂
   spanAl (AX at₁ al₁)  (AX at₂ al₂)  = spanAt at₁ at₂ × spanAl al₁ al₂
 
   spanAt (set ks₁)  (set ks₂)  = proj₁ ks₁ ≡ proj₁ ks₂
