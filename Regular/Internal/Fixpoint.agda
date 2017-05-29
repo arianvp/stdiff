@@ -27,6 +27,11 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
   getCtx (there _ ctx) = getCtx ctx
   getCtx (here res _)  = res
 
+  selectP : ∀{π} → ⟦ π ⟧P (Fix μσ) → Ctx π → Fix μσ
+  selectP [] ()
+  selectP (p ∷ ps) (here _ _)  = p
+  selectP (p ∷ ps) (there _ c) = selectP ps c
+
 -- ** Interpretation
 
   -- XXX: write in monadic style
