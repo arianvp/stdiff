@@ -60,21 +60,21 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
   costCtx : ∀{π} → Ctx π → ℕ
 
   costAlμ (spn sp) = costS costAtμ (costAl costAtμ) sp
-  costAlμ (ins C al) = 1 + costCtx al
-  costAlμ (del C al) = 1 + costCtx al
+  costAlμ (ins C al) = costCtx al
+  costAlμ (del C al) = costCtx al
 
-  costCtx (here spμ atμs) = costAlμ spμ
-  costCtx (there atμ alμ) = costCtx alμ
+  costCtx {π} (here spμ atμs) = costAlμ spμ + length π
+  costCtx     (there atμ alμ) = 1 + costCtx alμ
 
   costAtμ = costAt costAlμ
 
 -- ** Aliasses
 
-  Patch : Set
-  Patch = Alμ
+  Patchμ : Set
+  Patchμ = Alμ
 
-  apply : Patch → Fix μσ → Maybe (Fix μσ)
-  apply = applyAlμ
+  applyμ : Patchμ → Fix μσ → Maybe (Fix μσ)
+  applyμ = applyAlμ
 
-  cost : Patch → ℕ
-  cost = costAlμ
+  costμ : Patchμ → ℕ
+  costμ = costAlμ

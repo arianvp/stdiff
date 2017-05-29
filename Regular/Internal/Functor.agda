@@ -114,3 +114,10 @@ module Regular.Internal.Functor
   costAt costR (set k₁k₂) = costK k₁k₂
   costAt costR (fix spμ) = costR spμ
 
+-- * Mixing Everything
+
+  applySAlAt : ∀{PatchRec}{σ : Sum}(applyR : PatchRec → Rec → Maybe Rec) 
+             → S (At PatchRec) (Al (At PatchRec)) σ
+             → ⟦ σ ⟧S Rec
+             → Maybe (⟦ σ ⟧S Rec)
+  applySAlAt applyR = applyS (applyAt applyR) (applyAl (applyAt applyR))

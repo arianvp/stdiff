@@ -35,6 +35,9 @@ open import Data.Maybe
   renaming (map to Maybe-map)
   public
 
+data IsJust {α}{A : Set α} : Maybe A → Set where
+  indeed : (x : A) → IsJust (just x)
+
 open import Data.Bool
   using (Bool ; true ; false) 
   renaming (_≟_ to _≟B_)

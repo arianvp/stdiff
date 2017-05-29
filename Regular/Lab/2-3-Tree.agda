@@ -74,6 +74,25 @@ module Regular.Lab.2-3-Tree where
             (AX (fix (spn Scp)) (AX (fix (spn Scp)) (Ains ⟨ here [] ⟩ A0))))))
           ∷ []))
 
+
+  p23 : Alμ
+  p23 = spn (Scns (suc (suc zero)) 
+             ( (set ((1 , 1))) 
+             ∷ fix (spn Scp) 
+             ∷ fix (spn (Scns (suc zero) 
+                        ( set ((5 , 2)) 
+                        ∷ fix (spn Scp)
+                        ∷ fix (spn Scp)
+                        ∷ [])))
+             ∷ fix (spn (Schg (suc zero) (suc (suc zero)) {λ ()}
+                   (AX (set (1 , 1)) 
+                   (Ains ⟨ here [] ⟩ 
+                   (AX (fix (spn Scp)) 
+                   (AX (fix (spn Scp)) 
+                   A0)))))) 
+             ∷ []))
+       
+
   p14 : Alμ
   p14 = del (suc (suc zero))
         (there 1
@@ -94,4 +113,17 @@ module Regular.Lab.2-3-Tree where
   isSpan214 = spanAlμ p12 p14
 
   proof214 : isSpan214
-  proof214 = refl , (unit , unit)
+  proof214 = refl , indeed (suc zero) ,
+                      indeed ⟨ here [] ⟩ ,
+                      indeed
+                      ⟨
+                      there
+                      (here
+                       (suc (suc (suc (suc (suc zero)))) ∷
+                        ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ []))
+                      ⟩
+                      , unit , unit
+
+
+  proof : spanAlμ p23 p13 → ⊥
+  proof (refl , _ , _ , unit , (refl , () , _) , _)
