@@ -27,6 +27,15 @@ module Regular.Internal.Functor
 
 -- *** Spine application
 
+  applySP : {π : Prod}{At : Atom → Set}
+          → (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec))
+          → All At π → ⟦ π ⟧P Rec → Maybe (⟦ π ⟧P Rec)
+  applySP         applyAt [] [] = just []
+  applySP {α ∷ π} applyAt (at ∷ ats) (a₁ ∷ as₁) 
+    with applyAt at a₁ | applySP applyAt ats as₁
+  ...| just a₂ | just as₂ = just (a₂ ∷ as₂)
+  ...| _       | _        = nothing
+
   applyS : {σ : Sum}{At : Atom → Set}{Al : Rel Prod _}
         → (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec))
         → (applyAl : ∀ {π₁ π₂} → Al π₁ π₂ → ⟦ π₁ ⟧P Rec → Maybe (⟦ π₂ ⟧P Rec)) 
@@ -39,14 +48,7 @@ module Regular.Internal.Functor
   applyS {At = At} applyAt applyAl (Scns C₁ p₁) s with sop s
   ... | tag C₂ p₂ with C₁ ≟F C₂
   ... | no ¬p = nothing
-  ... | yes refl = Maybe-map (inj C₁) (applySP p₁ p₂)
-    where applySP : {π : Prod}
-                  → All At π → ⟦ π ⟧P Rec → Maybe (⟦ π ⟧P Rec)
-          applySP [] [] = just []
-          applySP {α ∷ π} (at ∷ ats) (a₁ ∷ as₁) 
-            with applyAt at a₁ | applySP ats as₁
-          ...| just a₂ | just as₂ = just (a₂ ∷ as₂)
-          ...| _       | _        = nothing
+  ... | yes refl = Maybe-map (inj C₁) (applySP applyAt p₁ p₂)
 
 -- *** Spine cost
 
