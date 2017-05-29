@@ -10,6 +10,12 @@ module Regular.Predicates.Domain.Functor
 
   open import Regular.Internal.Functor Rec _≟Rec_
 
+  -- XXX: We need a more intentional notion of domain.
+  --      Later we should prove the intentional and the
+  --      presentation given below to be equivalent.
+  -- 
+  --      The extensional pres. below is not calculational.
+
   _∈domS_ : {σ : Sum} → ⟦ σ ⟧S Rec → S (At PatchRec) (Al (At PatchRec)) σ 
           → Set
   s ∈domS sp = IsJust (applyS (applyAt applyRec) (applyAl (applyAt applyRec)) sp s)

@@ -101,3 +101,10 @@ zipd : {A : Set}{P Q : A → Set}{xs : List A}
      → All P xs → All Q xs → All (λ x → P x × Q x) xs
 zipd {xs = []} [] [] = []
 zipd {xs = x ∷ xs} (px ∷ p) (qx ∷ q) = (px , qx) ∷ zipd p q
+
+All-set : {A : Set}{P : A → Set}{xs : List A}
+        → (f : ∀{a} → P a → Set)
+        → All P xs
+        → Set
+All-set f [] = Unit
+All-set f (x ∷ xs) = f x × All-set f xs

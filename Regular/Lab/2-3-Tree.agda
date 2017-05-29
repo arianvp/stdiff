@@ -100,7 +100,6 @@ module Regular.Lab.2-3-Tree where
           (there ⟨ there (here (2 ∷ ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ [])) ⟩
           (here (spn Scp) []))))
 
-  open import Regular.Predicates.Identity.Fixpoint 2-3-treeF
   open import Regular.Predicates.Span.Fixpoint 2-3-treeF
 
   isSpan213 : Set

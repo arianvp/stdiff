@@ -121,3 +121,8 @@ module Regular.Internal.Functor
              → ⟦ σ ⟧S Rec
              → Maybe (⟦ σ ⟧S Rec)
   applySAlAt applyR = applyS (applyAt applyR) (applyAl (applyAt applyR))
+
+-- * Some renamings
+
+  Patch : Set → Sum → Set
+  Patch PatchRec = S (At PatchRec) (Al (At PatchRec))

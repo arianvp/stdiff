@@ -3,31 +3,38 @@ open import Generic.Regular
 open import Regular.Predicates.Disjointness.Abstract
 
 module Regular.Predicates.Disjointness.Functor
-       (Rec     : Set)
-       (_≟Rec_  : (x y : Rec) → Dec (x ≡ y))
-       (RecDisj : Disjoint Rec)
+       (Rec      : Set)
+       (_≟Rec_   : (x y : Rec) → Dec (x ≡ y))
+       (PatchRec : Set)
+       (applyRec : PatchRec → Rec → Maybe Rec)
+       (spanRec  : PatchRec → PatchRec → Set)
+       (disjRec  : PatchRec → PatchRec → Set)
     where
 
   open import Regular.Internal.Functor Rec _≟Rec_
+  open import Regular.Predicates.Span.Functor Rec _≟Rec_ PatchRec applyRec spanRec
 
-  disjS'  : {σ     : Sum}  → (s₁ s₂ : S (At Rec) (Al (At Rec)) σ) → Set
-  disjAl' : {π₁ π₂ : Prod} → (π₁ π₂ : Al (At Rec) π₁ π₂)          → Set
-  disjAt' : {α     : Atom} → (a₁ a₂ : At Rec α)                   → Set
+  disjS  : {σ     : Sum}  
+         → (s₁ s₂ : S (At PatchRec) (Al (At PatchRec)) σ) 
+         → (hip   : spanS s₁ s₂)
+         → Set
+  disjAl : {π₁ π₂ : Prod} → (π₁ π₂ : Al (At Rec) π₁ π₂)          → Set
+  disjAt : {α     : Atom} → (a₁ a₂ : At PatchRec α)              → Set
 
-  disjS' Scp              s   = Unit
-  disjS' s                Scp = Unit
-  disjS' (Scns C₁ at₁)    (Scns C₂ at₂) 
+  disjS Scp              s   hip = Unit
+  disjS s                Scp hip = Unit
+  disjS (Scns C₁ at₁)    (Scns .C₁ at₂) (refl , hip)
+    = All-set (uncurry {!!}) (zipd at₁ at₂)
+  disjS (Scns C₁ at₁)    (Schg .C₁ C₃ al₂) (refl , hip)
     = {!!}
-  disjS' (Scns C₁ at₁)    (Schg C₂ C₃ al₂)
+  disjS (Schg C₁ C₂ al₁) (Scns .C₁ at₂) (refl , hip)
     = {!!}
-  disjS' (Schg C₁ C₂ al₁) (Scns C₃ at₂)
-    = {!!}
-  disjS' (Schg C₁ C₂ al₁) (Schg C₃ C₄ al₂)
+  disjS (Schg C₁ C₂ al₁) (Schg .C₁ C₄ al₂) (refl , hip)
     = {!!}
 
-  disjAl' = {!!}
+  disjAl = {!!}
 
-  disjAt' = {!!}
+  disjAt = {!!}
 
   private
     disjSpred : {σ : Sum}{At : Atom → Set}{Al : Rel Prod _} 

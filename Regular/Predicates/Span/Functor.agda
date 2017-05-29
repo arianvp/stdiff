@@ -12,7 +12,7 @@ module Regular.Predicates.Span.Functor
   open import Regular.Internal.Functor Rec _≟Rec_
   open import Regular.Predicates.Domain.Functor Rec _≟Rec_ PatchRec applyRec
 
-  spanS  : {σ        : Sum}  → (s₁ s₂ : S (At PatchRec) (Al (At PatchRec)) σ) → Set
+  spanS  : {σ        : Sum}  → (s₁ s₂ : Patch PatchRec σ) → Set
   spanAl : {π₁ π₂ π₃ : Prod} → Al (At PatchRec) π₁ π₂ → Al (At PatchRec) π₁ π₃ → Set
   spanAt : {α        : Atom} → (a₁ a₂ : At PatchRec α)                   → Set
 
@@ -21,6 +21,10 @@ module Regular.Predicates.Span.Functor
   spanAtAll (a ∷ as) (Ains at al) = spanAtAll (a ∷ as) al
   spanAtAll (a ∷ as) (Adel at al) = (at ∈domAt a) × spanAtAll as al
   spanAtAll (a ∷ as) (AX at al)   = spanAt a at × spanAtAll as al
+
+  spanAts : ∀{l}(a₁ a₂ : All (At PatchRec) l) → Set
+  spanAts []         []         = Unit
+  spanAts (a₁ ∷ as₁) (a₂ ∷ as₂) = spanAt a₁ a₂ × spanAts as₁ as₂
 
   -- * When one spine is a copy, they are obviously a span.
   spanS Scp              s   = Unit
@@ -31,10 +35,6 @@ module Regular.Predicates.Span.Functor
   --   children to be pairwise spans.
   spanS {σ} (Scns C₁ at₁)    (Scns C₂ at₂) 
     = Σ (C₁ ≡ C₂) (λ { refl → spanAts at₁ at₂ })
-    where
-     spanAts : ∀{l}(a₁ a₂ : All (At PatchRec) l) → Set
-     spanAts []         []         = Unit
-     spanAts (a₁ ∷ as₁) (a₂ ∷ as₂) = spanAt a₁ a₂ × spanAts as₁ as₂
 
   -- * A constructor change can be a span with a change,
   --   as long as they start at the same constructor and their 
@@ -72,3 +72,14 @@ module Regular.Predicates.Span.Functor
 
   spanAt (set ks₁)  (set ks₂)  = proj₁ ks₁ ≡ proj₁ ks₂
   spanAt (fix spμ₁) (fix spμ₂) = spanRec spμ₁ spμ₂
+
+
+  -- Extensionally, if patches s₁ and s₂ are a span,
+  -- then either dom s₁ ⊆ dom s₂ or dom s₂ ⊆ dom s₁ 
+  --
+  {-
+  spanS-ext : {σ : Sum}(s₁ s₂ : Patch PatchRec σ)
+            → (hip : spanS s₁ s₂)
+            → {!dom!}
+  spanS-ext = {!!}
+  -}
