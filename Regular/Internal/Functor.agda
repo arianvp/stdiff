@@ -73,22 +73,20 @@ module Regular.Internal.Functor
 
 -- *** Alignment application
 
-  -- XXX: write in monadic style
+  open import Data.Maybe using (monadPlus)
+  open RawMonadPlus {lz} monadPlus
+
   applyAl : ∀{π₁ π₂ At} → 
            (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec)) →
            Al At π₁ π₂ → ⟦ π₁ ⟧P Rec → Maybe (⟦ π₂ ⟧P Rec)
   applyAl applyAt A0 [] = just []
-  applyAl applyAt (AX at al) (a₁ ∷ as₁) with applyAt at a₁ | applyAl applyAt al as₁
-  ... | just a₂ | just as₂ = just (a₂ ∷ as₂)
-  ... | _ | _ = nothing
-  applyAl applyAt (Ains a al) p₁ with applyAl applyAt al p₁
-  ... | just p₂ = just (a ∷ p₂)
-  ... | nothing = nothing
-  applyAl applyAt (Adel {α} a₁ al) (a₂ ∷ p) with _≟A_ {α} a₁ a₂
-  ... | yes refl = applyAl applyAt al p
-  ... | no ¬p = nothing
-
--- *** Alignment cost
+  applyAl applyAt (Ains a' al) p        
+    = (a' ∷_) <$> applyAl applyAt al p
+  applyAl applyAt (AX at al)   (a ∷ as) 
+    = _∷_ <$> applyAt at a ⊛ applyAl applyAt al as
+  -- XXX: should we check whether a' == a or ignore this?
+  applyAl applyAt (Adel a' al) (a ∷ as) 
+    = applyAl applyAt al as
 
   costAl : ∀{π₁ π₂ At} 
           → (costAt : ∀ {α} → At α → ℕ) 

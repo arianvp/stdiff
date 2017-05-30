@@ -1,5 +1,10 @@
 module Prelude where
 
+open import Level
+  using () 
+  renaming (zero to lz; suc to ls)
+  public
+
 open import Function 
   hiding (_⟨_⟩_)
   public
@@ -38,6 +43,17 @@ open import Data.Maybe
 data IsJust {α}{A : Set α} : Maybe A → Set where
   indeed : (x : A) → IsJust (just x)
 
+IsJust-map : {A B : Set}{f : A → B}{x : Maybe A}
+            → IsJust x
+            → IsJust (Maybe-map f x)
+IsJust-map {f = f} (indeed x) = indeed (f x)
+
+IsJust-magic : ∀{a}{A : Set a} → IsJust {A = A} nothing → ⊥
+IsJust-magic ()
+
+IsJust-ext : ∀{a}{A : Set a}{x : Maybe A} → IsJust x → ∃ (λ k → x ≡ just k)
+IsJust-ext (indeed x) = x , refl
+
 open import Data.Bool
   using (Bool ; true ; false) 
   renaming (_≟_ to _≟B_)
@@ -57,8 +73,8 @@ open import Data.Nat
   public
 
 open import Data.List
+  using (List ; _∷_ ; [] ; length)
   renaming (map to List-map ; zip to List-zip)
-  hiding ([_] ; all ; any)
   public
 
 open import Data.List.All
