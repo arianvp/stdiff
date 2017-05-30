@@ -35,6 +35,10 @@ open import Data.Empty
 open import Data.Product
   public
 
+open import Data.Sum
+  renaming (map to Sum-map)
+  public
+
 open import Data.Maybe 
   using (Maybe ; nothing ; just)
   renaming (map to Maybe-map)
@@ -47,6 +51,12 @@ IsJust-map : {A B : Set}{f : A → B}{x : Maybe A}
             → IsJust x
             → IsJust (Maybe-map f x)
 IsJust-map {f = f} (indeed x) = indeed (f x)
+
+IsJust-unmap : {A B : Set}{f : A → B}{x : Maybe A}
+             → IsJust (Maybe-map f x)
+             → IsJust x
+IsJust-unmap {x = nothing} ()
+IsJust-unmap {x = just x} (indeed _) = indeed x
 
 IsJust-magic : ∀{a}{A : Set a} → IsJust {A = A} nothing → ⊥
 IsJust-magic ()

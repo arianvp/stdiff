@@ -2,15 +2,16 @@ open import Prelude
 open import Generic.Regular
 
 module Regular.Predicates.Span.Functor
-       (Rec      : Set)
-       (_≟Rec_   : (x y : Rec) → Dec (x ≡ y))
-       (PatchRec : Set)
-       (applyRec : PatchRec → Rec → Maybe Rec)
-       (spanRec  : PatchRec → PatchRec → Set)
+       (Rec       : Set)
+       (_≟Rec_    : (x y : Rec) → Dec (x ≡ y))
+       (PatchRec  : Set)
+       (applyRec  : PatchRec → Rec → Maybe Rec)
+       (_∈domRec_ : Rec → PatchRec → Set)
+       (spanRec   : PatchRec → PatchRec → Set)
     where
 
   open import Regular.Internal.Functor Rec _≟Rec_
-  open import Regular.Predicates.Domain.Functor Rec _≟Rec_ PatchRec applyRec
+  open import Regular.Predicates.Domain.Functor Rec _≟Rec_ PatchRec applyRec _∈domRec_
 
   spanS  : {σ        : Sum}  → (s₁ s₂ : Patch PatchRec σ) → Set
   spanAl : {π₁ π₂ π₃ : Prod} → Al (At PatchRec) π₁ π₂ → Al (At PatchRec) π₁ π₃ → Set

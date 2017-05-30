@@ -65,3 +65,60 @@ module Regular.Predicates.Domain.Correctness.Functor
   ...| yes _  = indeed k₂
   domAt-ok a (fix rec) hip = domRecExt a rec hip
 
+  -- XXX: Prove compleness: IsJust (apply p x) ⇒ x ∈dom p
+  -- 
+  domS-cplt : {σ : Sum}(s : ⟦ σ ⟧S Rec)(ps : Patch PatchRec σ)
+          → IsJust (applySAlAt applyRec ps s)
+          → s ∈domS ps
+
+  domAl-cplt : {π₁ π₂ : Prod}(p : ⟦ π₁ ⟧P Rec)(ps : Al (At PatchRec) π₁ π₂)
+           → IsJust (applyAl (applyAt applyRec) ps p)
+           → p ∈domAl ps
+
+  domAt-cplt : {α : Atom}(a : ⟦ α ⟧A Rec)(ps : At PatchRec α)
+           → IsJust (applyAt applyRec ps a)
+           → a ∈domAt ps
+
+  domSP-cplt : ∀{π}(p : ⟦ π ⟧P Rec)(ats : All (At PatchRec) π)
+           → IsJust (applySP (applyAt applyRec) ats p)
+           → All-set (uncurry _∈domAt_) (zipd p ats)
+  domSP-cplt [] [] hip = unit 
+  domSP-cplt (p ∷ ps) (at ∷ ats) hip
+    with applyAt applyRec at p | inspect (applyAt applyRec at) p
+  ...| nothing | _ = ⊥-elim (IsJust-magic hip)
+  ...| just p' | [ P ]
+    with applySP (applyAt applyRec) ats ps | inspect (applySP (applyAt applyRec) ats) ps
+  ...| nothing  | _ = ⊥-elim (IsJust-magic hip)
+  ...| just ps' | [ PS ]
+      = domAt-cplt p at (subst IsJust (sym P) (indeed p')) 
+      , domSP-cplt ps ats (subst IsJust (sym PS) (indeed ps'))
+
+
+  domS-cplt s Scp hip = unit
+  domS-cplt s (Scns C ats) hip with sop s
+  ...| tag Cs Ps with C ≟F Cs 
+  ...| no _     = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = domSP-cplt Ps ats (IsJust-unmap hip)
+  domS-cplt s (Schg C₁ C₂ al) hip with sop s
+  ...| tag Cs Ps with C₁ ≟F Cs
+  ...| no _     = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = domAl-cplt Ps al (IsJust-unmap hip)
+
+  domAl-cplt []       A0 _             = unit
+  domAl-cplt []       (Ains a' al) hip = domAl-cplt [] al (IsJust-unmap hip)
+  domAl-cplt (a ∷ as) (Ains a' al) hip = domAl-cplt (a ∷ as) al (IsJust-unmap hip)
+  domAl-cplt (a ∷ as) (Adel a' al) hip = domAl-cplt as al hip
+  domAl-cplt (a ∷ as) (AX at al) hip   
+    with applyAt applyRec at a | inspect (applyAt applyRec at) a
+  ...| nothing  | _ = ⊥-elim (IsJust-magic hip)
+  ...| just a'  | [ A ]
+    with applyAl (applyAt applyRec) al as | inspect (applyAl (applyAt applyRec) al) as 
+  ...| nothing  | _ = ⊥-elim (IsJust-magic hip)
+  ...| just as' | [ AS ] 
+    = domAt-cplt a at (subst IsJust (sym A) (indeed a')) 
+    , domAl-cplt as al (subst IsJust (sym AS) (indeed as'))
+
+
+  -- XXX: WE need completness for Rec and PatchRec, obviously. Ugh
+  domAt-cplt = magic
+    where postulate magic : ∀{a}{A : Set a} → A
