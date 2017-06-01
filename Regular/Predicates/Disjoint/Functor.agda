@@ -1,7 +1,7 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.Predicates.Disjointness.Functor
+module Regular.Predicates.Disjoint.Functor
        (Rec       : Set)
        (_≟Rec_    : (x y : Rec) → Dec (x ≡ y))
        (PatchRec  : Set)
@@ -47,12 +47,11 @@ module Regular.Predicates.Disjointness.Functor
   disjS (Schg C₁ C₂ al₁) (Scns C₃ at₂)
     = Σ (C₁ ≡ C₃) (λ { refl → disjAtAll at₂ al₁ })
 
-  -- * Two constructor changes are disj whenever they
-  --   change the same constructor and their alignments are
-  --   a disj. 
+  -- * Two constructor changes are never disjoint.
+  --   
   disjS (Schg C₁ C₂ al₁) (Schg C₃ C₄ al₂)
-    = Σ (C₁ ≡ C₃) (λ { refl → disjAl al₁ al₂ })
-
+    = ⊥ 
+ 
   -- * Two alignments al₁ and al₂ are disjoint whenever
   --   they change a different part of the product in question.
   --

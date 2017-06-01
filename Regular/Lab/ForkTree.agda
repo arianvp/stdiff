@@ -65,7 +65,7 @@ module Regular.Lab.ForkTree where
           here (⟨ there (here (3 ∷ [])) ⟩ ∷ ⟨ there (here (4 ∷ [])) ⟩ ∷ []) ⟩
           ∷ []))
 
-  open import Regular.Predicates.Disjointness.Fixpoint ForkTreeF public
+  open import Regular.Predicates.Disjoint.Fixpoint ForkTreeF public
 
   lemma123 : disjAlμ p12 p13
   lemma123 = refl , (unit , (unit , unit))

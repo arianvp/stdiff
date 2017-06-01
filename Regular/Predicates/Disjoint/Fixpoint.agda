@@ -1,12 +1,12 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.Predicates.Disjointness.Fixpoint (σμ : Sum) where
+module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
 
-  open import Regular.Internal.Fixpoint σμ
-  open import Regular.Internal.Functor (Fix σμ) _≟Fix_
-  open import Regular.Predicates.Identity.Fixpoint σμ
-  open import Regular.Predicates.Disjointness.Functor (Fix σμ) _≟Fix_ Alμ identityAlμ
+  open import Regular.Internal.Fixpoint μσ
+  open import Regular.Internal.Functor (Fix μσ) _≟Fix_
+  open import Regular.Predicates.Identity.Fixpoint μσ
+  open import Regular.Predicates.Disjoint.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ
     public
 
   {-# TERMINATING #-}
@@ -16,7 +16,7 @@ module Regular.Predicates.Disjointness.Fixpoint (σμ : Sum) where
   disjAtCtx : ∀{π} → All Atμ π → Ctx π → Set
 
   -- * Insertions are trivially disjoint from anything.
-  disjAlμ (ins C₁ s₁) s₂          = disjAlμ (getCtx s₁) s₂
+  disjAlμ (ins C₁ s₁) s₂          = disjAlμ s₂ (getCtx s₁) 
   disjAlμ s₁ (ins C₂ s₂)          = disjAlμ s₁ (getCtx s₂)
 
   -- * Two spines might be disjoint,
