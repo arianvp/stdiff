@@ -6,7 +6,6 @@ module Regular.Predicates.Domain.Fixpoint (μσ : Sum) where
   open import Regular.Internal.Fixpoint μσ
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Predicates.Domain.Functor (Fix μσ) _≟Fix_ Alμ applyAlμ
-    public
 
   {-# TERMINATING #-}
   _∈domAlμ_ : Fix μσ → Alμ → Set

@@ -100,8 +100,8 @@ module Regular.Lab.2-3-Tree where
           (there ⟨ there (here (2 ∷ ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ [])) ⟩
           (here (spn Scp) []))))
 
-  open import Regular.Predicates.Span.Fixpoint 2-3-treeF
-
+  open import Regular.Predicates.Disjointness.Fixpoint 2-3-treeF
+{-
   isSpan213 : Set
   isSpan213 = spanAlμ p12 p13
 
@@ -126,3 +126,4 @@ module Regular.Lab.2-3-Tree where
 
   proof : spanAlμ p23 p13 → ⊥
   proof (refl , _ , _ , unit , (refl , () , _) , _)
+-}
