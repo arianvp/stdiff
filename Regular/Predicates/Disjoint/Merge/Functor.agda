@@ -13,7 +13,6 @@ module Regular.Predicates.Disjoint.Merge.Functor
   open import Regular.Internal.Functor Rec _≟Rec_
   open import Regular.Predicates.Identity.Functor Rec _≟Rec_ PatchRec identityR
   open import Regular.Predicates.Disjoint.Functor Rec _≟Rec_ PatchRec identityR disjRec
-    public
 
   mergeS  : {σ : Sum}(s₁ s₂ : Patch PatchRec σ)(hip : disjS s₁ s₂) → Patch PatchRec σ
 
