@@ -57,6 +57,7 @@ module Regular.Predicates.Disjoint.Functor
   --
   --   Insertions are trivially disjoint, so we ignore them.
   disjAl A0            A0            = Unit
+  disjAl (Ains _ al₁)  (Ains _ al₂)  = disjAl al₁ al₂
   disjAl (Ains _ al₁)  al₂           = disjAl al₁ al₂
   disjAl al₁           (Ains _ al₂)  = disjAl al₁ al₂
   
@@ -105,8 +106,7 @@ module Regular.Predicates.Disjoint.Functor
     disjAl-sym A0            (Ains _ al₂)  hip = disjAl-sym A0 al₂ hip
     disjAl-sym (Adel a₁ al₁) (Ains _ al₂)  hip = disjAl-sym (Adel a₁ al₁) al₂ hip
     disjAl-sym (AX at₁ al₁)  (Ains _ al₂)  hip = disjAl-sym (AX at₁ al₁) al₂ hip
-    disjAl-sym (Ains a₁ al₁) (Ains a₂ al₂)  hip = disjAl-sym (Ains a₁ al₁) al₂ trustme
-      where postulate trustme : ∀{a}{A : Set a} → A
+    disjAl-sym (Ains a₁ al₁) (Ains a₂ al₂)  hip = disjAl-sym al₁ al₂ hip
     disjAl-sym (Adel a₁ al₁) (Adel a₂ al₂) hip = disjAl-sym al₁ al₂ hip
     disjAl-sym (Adel a₁ al₁) (AX at₂ al₂)  (h0 , h1) = h0 , disjAl-sym al₁ al₂ h1 
     disjAl-sym (AX at₁ al₁)  (Adel a₂ al₂) (h0 , h1) = h0 , disjAl-sym al₁ al₂ h1

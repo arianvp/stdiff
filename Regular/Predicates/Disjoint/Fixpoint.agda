@@ -7,6 +7,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Predicates.Identity.Fixpoint μσ
   open import Regular.Predicates.Disjoint.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ
+    renaming (module Symmetry to FunctorSymmetry)
     public
 
   {-# TERMINATING #-}
@@ -16,7 +17,8 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   disjAtCtx : ∀{π} → All Atμ π → Ctx π → Set
 
   -- * Insertions are trivially disjoint from anything.
-  disjAlμ (ins C₁ s₁) s₂          = disjAlμ s₂ (getCtx s₁) 
+  disjAlμ (ins C₁ s₁) (ins C₂ s₂) = disjAlμ (getCtx s₁) (getCtx s₂)
+  disjAlμ (ins C₁ s₁) s₂          = disjAlμ (getCtx s₁) s₂  
   disjAlμ s₁ (ins C₂ s₂)          = disjAlμ s₁ (getCtx s₂)
 
   -- * Two spines might be disjoint,
@@ -60,3 +62,23 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   disjAtCtx (fix a ∷ as) (here alμ rest) = disjAlμ a alμ × All-set identityAtμ as 
   disjAtCtx (a ∷ as)     (there a' ctx)  = identityAtμ a × disjAtCtx as ctx
 
+  module Symmetry where
+
+    {-# TERMINATING #-}
+    disjAlμ-sym : (alμ₁ alμ₂ : Alμ) → disjAlμ alμ₁ alμ₂ → disjAlμ alμ₂ alμ₁
+ 
+    open FunctorSymmetry disjAlμ disjAlμ-sym
+   
+    disjAlμ-sym (ins C₁ s₁) (ins C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (getCtx s₂) hip
+    disjAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip
+    disjAlμ-sym (ins C₁ s₁) (spn s₂) hip                    = disjAlμ-sym (getCtx s₁) (spn s₂) hip
+    disjAlμ-sym (del C₁ s₁) (ins C₂ s₂) hip                 = disjAlμ-sym (del C₁ s₁) (getCtx s₂) hip
+    disjAlμ-sym (spn s₁)    (ins C₂ s₂) hip                 = disjAlμ-sym (spn s₁) (getCtx s₂) hip
+    disjAlμ-sym (spn s₁) (spn s₂) hip                       = disjS-sym s₁ s₂ hip
+    disjAlμ-sym (spn Scp) (del C₂ s₂) hip                   = unit
+    disjAlμ-sym (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl , h1
+    disjAlμ-sym (spn (Schg _ _ _)) (del C₂ s₂)    ()
+    disjAlμ-sym (del C₁ s₁) (spn Scp) hip                   = unit
+    disjAlμ-sym (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl , h1
+    disjAlμ-sym (del C₁ s₁) (spn (Schg _ _ _))  ()
+    disjAlμ-sym (del C₁ s₁) (del C₂ s₂)  ()
