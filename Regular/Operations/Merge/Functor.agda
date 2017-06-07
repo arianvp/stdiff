@@ -1,7 +1,7 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.Predicates.Disjoint.Merge.Functor
+module Regular.Operations.Merge.Functor
        (Rec       : Set)
        (_≟Rec_    : (x y : Rec) → Dec (x ≡ y))
        (PatchRec  : Set)
@@ -15,12 +15,6 @@ module Regular.Predicates.Disjoint.Merge.Functor
   open import Regular.Predicates.Disjoint.Functor Rec _≟Rec_ PatchRec identityR disjRec
 
   mergeS  : {σ : Sum}(s₁ s₂ : Patch PatchRec σ)(hip : disjS s₁ s₂) → Patch PatchRec σ
-
-{-
-  mergeAl : {π₁ π₂ : Prod}(p₁ p₂ : Al (At PatchRec) π₁ π₂)
-          → (hip : disjAl p₁ p₂)
-          → Al (At PatchRec) π₁ π₂
--}
 
   mergeAt : {α : Atom}(a₁ a₂ : At PatchRec α)(hip : disjAt a₁ a₂)
           → At PatchRec α
@@ -54,17 +48,7 @@ module Regular.Predicates.Disjoint.Merge.Functor
     = Schg C₁ C₂ {q} (mergeAtAll at₂ al₁ hip)
 
   mergeS (Schg C₁ C₂ al₁) (Schg C₃ C₄ al₂) ()
-{-
-  mergeAl A0            A0            hip = {!!}
-  mergeAl (Ains _ al₁)  al₂           hip = {!!}
-  mergeAl al₁           (Ains _ al₂)  hip = {!!}
 
-  mergeAl (Adel a₁ al₁) (Adel a₂ al₂) hip = {!!}
-
-  mergeAl (Adel a₁ al₁) (AX at₂ al₂)  hip = {!!}
-  mergeAl (AX at₁ al₁)  (Adel a₂ al₂) hip = {!!}
-  mergeAl (AX at₁ al₁)  (AX at₂ al₂)  hip = {!!}
--}
   mergeAt (set ks₁)  (set ks₂)  (inj₁ _) = set ks₂
   mergeAt (set ks₁)  (set ks₂)  (inj₂ _) = set ks₁
   mergeAt (fix spμ₁) (fix spμ₂) hip      = fix (mergeRec spμ₁ spμ₂ hip)

@@ -1,13 +1,13 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.Predicates.Disjoint.Merge.Fixpoint (μσ : Sum) where
+module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
 
   open import Regular.Internal.Fixpoint μσ
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Predicates.Identity.Fixpoint μσ
   open import Regular.Predicates.Disjoint.Fixpoint μσ
-  open import Regular.Predicates.Disjoint.Merge.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ disjAlμ
+  open import Regular.Operations.Merge.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ disjAlμ
     public
 
   {-# TERMINATING #-}
