@@ -58,3 +58,42 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   module MergeSymmetry where
 
    
+    mergeAlμ-sym : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂)
+                 → mergeAlμ alμ₁ alμ₂ hip ≡ mergeAlμ alμ₂ alμ₁ (disjAlμ-sym alμ₁ alμ₂ hip)
+
+    mergeAtCtx-sym : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)(hip : disjAtCtx atμs ctx) → {!!}
+
+    mergeInCtx-sym : ∀{π}(alμ : Alμ)(ctx : Ctx π)(hip : disjAlμ alμ (getCtx ctx)) → {!!}
+    mergeInCtx-sym alμ (here alμ' rest) hip = {!!}
+    mergeInCtx-sym alμ (there a   ctx)  hip = {!!}
+
+    mergeAlμ-sym (ins C₁ s₁) (ins C₂ s₂) ()
+    mergeAlμ-sym (ins C₁ s₁) (spn s₂)    hip = refl
+    mergeAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip = refl
+    mergeAlμ-sym (spn s₁)   (ins C₂ s₂)  hip = cong (ins C₂) {!!}
+    mergeAlμ-sym (del C s₁) (ins C₂ s₂)  hip = {!!}
+
+    mergeAlμ-sym (spn s₁) (spn s₂)       hip = {!!}
+
+    mergeAlμ-sym (spn Scp) (del C₂ s₂)   hip = {!!}
+
+    mergeAlμ-sym (spn (Scns C₁ at₁))  (del C₂ s₂) (refl , hip) 
+      = {!!}
+
+    mergeAlμ-sym (spn (Schg _ _ _)) (del C₂ s₂) ()
+
+    mergeAlμ-sym (del C₁ s₁) (spn Scp)   hip 
+      = {!!}
+    mergeAlμ-sym (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , hip)
+      = {!!}
+    mergeAlμ-sym (del C₁ s₁) (spn (Schg _ _ _)) ()
+
+    mergeAlμ-sym (del C₁ s₁) (del C₂ s₂) ()
+
+    mergeAtCtx-sym [] ()
+    mergeAtCtx-sym (fix a ∷ as) (here alμ rest) (ha , hip) 
+      = {!!}
+    mergeAtCtx-sym {p ∷ ps} (fix a ∷ as) (there a' ctx) hip
+      = {!!}
+    mergeAtCtx-sym {p ∷ ps} (set a ∷ as) (there a' ctx) hip
+      = {!!}

@@ -82,3 +82,21 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
     disjAlμ-sym (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl , h1
     disjAlμ-sym (del C₁ s₁) (spn (Schg _ _ _))  ()
     disjAlμ-sym (del C₁ s₁) (del C₂ s₂)  ()
+
+    
+    {-# TERMINATING #-}
+    disjAlμ-sym-idenp : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂)
+                      → disjAlμ-sym alμ₂ alμ₁ (disjAlμ-sym alμ₁ alμ₂ hip) ≡ hip
+    disjAlμ-sym-idenp (ins C₁ s₁) (ins C₂ s₂) ()
+    disjAlμ-sym-idenp (ins C₁ s₁) (del C₂ s₂) hip                 = {!!}
+    disjAlμ-sym-idenp (ins C₁ s₁) (spn s₂) hip                    = {!!}
+    disjAlμ-sym-idenp (del C₁ s₁) (ins C₂ s₂) hip                 = {!!}
+    disjAlμ-sym-idenp (spn s₁)    (ins C₂ s₂) hip                 = {!!}
+    disjAlμ-sym-idenp (spn s₁) (spn s₂) hip                       = {!!}
+    disjAlμ-sym-idenp (spn Scp) (del C₂ s₂) unit                  = refl
+    disjAlμ-sym-idenp (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl
+    disjAlμ-sym-idenp (spn (Schg _ _ _)) (del C₂ s₂)    ()
+    disjAlμ-sym-idenp (del C₁ s₁) (spn Scp) unit                  = refl
+    disjAlμ-sym-idenp (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl
+    disjAlμ-sym-idenp (del C₁ s₁) (spn (Schg _ _ _))  ()
+    disjAlμ-sym-idenp (del C₁ s₁) (del C₂ s₂)  ()
