@@ -53,12 +53,15 @@ module Regular.Operations.Merge.Functor
   mergeAt (set ks₁)  (set ks₂)  (inj₂ _) = set ks₁
   mergeAt (fix spμ₁) (fix spμ₂) hip      = fix (mergeRec spμ₁ spμ₂ hip)
 
-  module MergeSymmetry (disjRecSym  : (r₁ r₂ : PatchRec) → disjRec r₁ r₂ → disjRec r₂ r₁)
-                       (mergeRecSym : (r₁ r₂ : PatchRec)(h : disjRec r₁ r₂)
-                                    → mergeRec r₁ r₂ h ≡ mergeRec r₂ r₁ (disjRecSym r₁ r₂ h))
+  module MergeSymmetry 
+         (disjRecSym    : (r₁ r₂ : PatchRec) → disjRec r₁ r₂ → disjRec r₂ r₁)
+         (disjRecSymInv : (r₁ r₂ : PatchRec)(h : disjRec r₁ r₂)
+                        → disjRecSym r₂ r₁ (disjRecSym r₁ r₂ h) ≡ h) 
+         (mergeRecSym   : (r₁ r₂ : PatchRec)(h : disjRec r₁ r₂)
+                        → mergeRec r₁ r₂ h ≡ mergeRec r₂ r₁ (disjRecSym r₁ r₂ h))
       where
 
-    open DisjSymmetry disjRecSym
+    open DisjSymmetry disjRecSym disjRecSymInv
 
     mergeS-sym : {σ : Sum}(s₁ s₂ : Patch PatchRec σ)(hip : disjS s₁ s₂) 
                → mergeS s₁ s₂ hip ≡ mergeS s₂ s₁ (disjS-sym s₁ s₂ hip)
