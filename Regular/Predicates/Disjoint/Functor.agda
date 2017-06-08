@@ -77,8 +77,8 @@ module Regular.Predicates.Disjoint.Functor
 
 
   module DisjSymmetry 
-         (disjRecSym      : (r₁ r₂ : PatchRec) → disjRec r₁ r₂ → disjRec r₂ r₁) 
-         (disjRecSymIdenp : (r₁ r₂ : PatchRec)(h : disjRec r₁ r₂)
+         (disjRecSym    : (r₁ r₂ : PatchRec) → disjRec r₁ r₂ → disjRec r₂ r₁) 
+         (disjRecSymInv : (r₁ r₂ : PatchRec)(h : disjRec r₁ r₂)
                           → disjRecSym r₂ r₁ (disjRecSym r₁ r₂ h) ≡ h) 
       where
 
@@ -104,32 +104,32 @@ module Regular.Predicates.Disjoint.Functor
     disjAt-sym (set ks₁)  (set ks₂)  (inj₂ hip) = inj₁ hip
     disjAt-sym (fix spμ₁) (fix spμ₂) hip = disjRecSym spμ₁ spμ₂ hip
 
-    disjS-sym-idenp : {σ : Sum}(s₁ s₂ : Patch PatchRec σ)
+    disjS-sym-inv : {σ : Sum}(s₁ s₂ : Patch PatchRec σ)
                     → (h : disjS s₁ s₂)
                     → disjS-sym s₂ s₁ (disjS-sym s₁ s₂ h) ≡ h
     
-    disjAt-sym-idenp : {α : Atom}(a₁ a₂ : At PatchRec α)(h : disjAt a₁ a₂)
+    disjAt-sym-inv : {α : Atom}(a₁ a₂ : At PatchRec α)(h : disjAt a₁ a₂)
                      → disjAt-sym a₂ a₁ (disjAt-sym a₁ a₂ h) ≡ h
 
-    disjAts-sym-idenp : ∀{l}(a₁ a₂ : All (At PatchRec) l)(h : disjAts a₁ a₂)
+    disjAts-sym-inv : ∀{l}(a₁ a₂ : All (At PatchRec) l)(h : disjAts a₁ a₂)
                       → disjAts-sym a₂ a₁ (disjAts-sym a₁ a₂ h) ≡ h
-    disjAts-sym-idenp []         []         unit      = refl
-    disjAts-sym-idenp (a₁ ∷ as₁) (a₂ ∷ as₂) (h0 , h1) = cong₂ _,_ (disjAt-sym-idenp a₁ a₂ h0) 
-                                                                  (disjAts-sym-idenp as₁ as₂ h1)
+    disjAts-sym-inv []         []         unit      = refl
+    disjAts-sym-inv (a₁ ∷ as₁) (a₂ ∷ as₂) (h0 , h1) = cong₂ _,_ (disjAt-sym-inv a₁ a₂ h0) 
+                                                                  (disjAts-sym-inv as₁ as₂ h1)
 
-    disjS-sym-idenp Scp  (Scns _ _)    unit   = refl
-    disjS-sym-idenp Scp  (Schg _ _ _)  unit   = refl
-    disjS-sym-idenp Scp              Scp unit = refl
-    disjS-sym-idenp (Scns _ _)       Scp unit = refl
-    disjS-sym-idenp (Schg _ _ _)     Scp unit = refl
-    disjS-sym-idenp {σ} (Scns C₁ at₁)    (Scns C₂ at₂) (refl , h1)
-      = cong (λ P → refl , P) (disjAts-sym-idenp at₁ at₂ h1)
-    disjS-sym-idenp (Scns C₁ at₁)    (Schg C₂ C₃ al₂) (refl , h1)
+    disjS-sym-inv Scp  (Scns _ _)    unit   = refl
+    disjS-sym-inv Scp  (Schg _ _ _)  unit   = refl
+    disjS-sym-inv Scp              Scp unit = refl
+    disjS-sym-inv (Scns _ _)       Scp unit = refl
+    disjS-sym-inv (Schg _ _ _)     Scp unit = refl
+    disjS-sym-inv {σ} (Scns C₁ at₁)    (Scns C₂ at₂) (refl , h1)
+      = cong (λ P → refl , P) (disjAts-sym-inv at₁ at₂ h1)
+    disjS-sym-inv (Scns C₁ at₁)    (Schg C₂ C₃ al₂) (refl , h1)
       = refl
-    disjS-sym-idenp (Schg C₁ C₂ al₁) (Scns C₃ at₂) (refl , h1) 
+    disjS-sym-inv (Schg C₁ C₂ al₁) (Scns C₃ at₂) (refl , h1) 
       = refl
-    disjS-sym-idenp (Schg C₁ C₂ al₁) (S.Schg C₃ C₄ al₂) ()
+    disjS-sym-inv (Schg C₁ C₂ al₁) (S.Schg C₃ C₄ al₂) ()
     
-    disjAt-sym-idenp (set ks₁)  (set ks₂)  (inj₁ hip) = refl
-    disjAt-sym-idenp (set ks₁)  (set ks₂)  (inj₂ hip) = refl
-    disjAt-sym-idenp (fix spμ₁) (fix spμ₂) hip = disjRecSymIdenp spμ₁ spμ₂ hip
+    disjAt-sym-inv (set ks₁)  (set ks₂)  (inj₁ hip) = refl
+    disjAt-sym-inv (set ks₁)  (set ks₂)  (inj₂ hip) = refl
+    disjAt-sym-inv (fix spμ₁) (fix spμ₂) hip = disjRecSymInv spμ₁ spμ₂ hip

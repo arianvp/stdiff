@@ -67,7 +67,11 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
     {-# TERMINATING #-}
     disjAlμ-sym : (alμ₁ alμ₂ : Alμ) → disjAlμ alμ₁ alμ₂ → disjAlμ alμ₂ alμ₁
  
-    open DisjSymmetryF disjAlμ disjAlμ-sym public
+    {-# TERMINATING #-}
+    disjAlμ-sym-inv : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂)
+                      → disjAlμ-sym alμ₂ alμ₁ (disjAlμ-sym alμ₁ alμ₂ hip) ≡ hip
+
+    open DisjSymmetryF disjAlμ disjAlμ-sym disjAlμ-sym-inv public
    
     disjAlμ-sym (ins C₁ s₁) (ins C₂ s₂) ()
     disjAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip
@@ -84,19 +88,16 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
     disjAlμ-sym (del C₁ s₁) (del C₂ s₂)  ()
 
     
-    {-# TERMINATING #-}
-    disjAlμ-sym-idenp : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂)
-                      → disjAlμ-sym alμ₂ alμ₁ (disjAlμ-sym alμ₁ alμ₂ hip) ≡ hip
-    disjAlμ-sym-idenp (ins C₁ s₁) (ins C₂ s₂) ()
-    disjAlμ-sym-idenp (ins C₁ s₁) (del C₂ s₂) hip                 = {!!}
-    disjAlμ-sym-idenp (ins C₁ s₁) (spn s₂) hip                    = {!!}
-    disjAlμ-sym-idenp (del C₁ s₁) (ins C₂ s₂) hip                 = {!!}
-    disjAlμ-sym-idenp (spn s₁)    (ins C₂ s₂) hip                 = {!!}
-    disjAlμ-sym-idenp (spn s₁) (spn s₂) hip                       = {!!}
-    disjAlμ-sym-idenp (spn Scp) (del C₂ s₂) unit                  = refl
-    disjAlμ-sym-idenp (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl
-    disjAlμ-sym-idenp (spn (Schg _ _ _)) (del C₂ s₂)    ()
-    disjAlμ-sym-idenp (del C₁ s₁) (spn Scp) unit                  = refl
-    disjAlμ-sym-idenp (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl
-    disjAlμ-sym-idenp (del C₁ s₁) (spn (Schg _ _ _))  ()
-    disjAlμ-sym-idenp (del C₁ s₁) (del C₂ s₂)  ()
+    disjAlμ-sym-inv (ins C₁ s₁) (ins C₂ s₂) ()
+    disjAlμ-sym-inv (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym-inv (getCtx s₁) (del C₂ s₂) hip
+    disjAlμ-sym-inv (ins C₁ s₁) (spn s₂) hip                    = disjAlμ-sym-inv (getCtx s₁) (spn s₂) hip
+    disjAlμ-sym-inv (del C₁ s₁) (ins C₂ s₂) hip                 = disjAlμ-sym-inv (del C₁ s₁) (getCtx s₂) hip
+    disjAlμ-sym-inv (spn s₁)    (ins C₂ s₂) hip                 = disjAlμ-sym-inv (spn s₁) (getCtx s₂) hip
+    disjAlμ-sym-inv (spn s₁) (spn s₂) hip                       = disjS-sym-inv s₁ s₂ hip
+    disjAlμ-sym-inv (spn Scp) (del C₂ s₂) unit                  = refl
+    disjAlμ-sym-inv (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl
+    disjAlμ-sym-inv (spn (Schg _ _ _)) (del C₂ s₂)    ()
+    disjAlμ-sym-inv (del C₁ s₁) (spn Scp) unit                  = refl
+    disjAlμ-sym-inv (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl
+    disjAlμ-sym-inv (del C₁ s₁) (spn (Schg _ _ _))  ()
+    disjAlμ-sym-inv (del C₁ s₁) (del C₂ s₂)  ()
