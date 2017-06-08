@@ -7,7 +7,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Predicates.Identity.Fixpoint μσ
   open import Regular.Predicates.Disjoint.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ
-    renaming (module Symmetry to FunctorSymmetry)
+    renaming (module DisjSymmetry to DisjSymmetryF)
     public
 
   {-# TERMINATING #-}
@@ -62,12 +62,12 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   disjAtCtx (fix a ∷ as) (here alμ rest) = disjAlμ a alμ × All-set identityAtμ as 
   disjAtCtx (a ∷ as)     (there a' ctx)  = identityAtμ a × disjAtCtx as ctx
 
-  module Symmetry where
+  module DisjSymmetry where
 
     {-# TERMINATING #-}
     disjAlμ-sym : (alμ₁ alμ₂ : Alμ) → disjAlμ alμ₁ alμ₂ → disjAlμ alμ₂ alμ₁
  
-    open FunctorSymmetry disjAlμ disjAlμ-sym
+    open DisjSymmetryF disjAlμ disjAlμ-sym public
    
     disjAlμ-sym (ins C₁ s₁) (ins C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (getCtx s₂) hip
     disjAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip

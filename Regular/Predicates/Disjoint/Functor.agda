@@ -75,7 +75,7 @@ module Regular.Predicates.Disjoint.Functor
   disjAt (fix spμ₁) (fix spμ₂) = disjRec spμ₁ spμ₂
 
 
-  module Symmetry (disjRecSym : (r₁ r₂ : PatchRec) → disjRec r₁ r₂ → disjRec r₂ r₁) where
+  module DisjSymmetry (disjRecSym : (r₁ r₂ : PatchRec) → disjRec r₁ r₂ → disjRec r₂ r₁) where
 
     disjS-sym : {σ : Sum}(s₁ s₂ : Patch PatchRec σ) → disjS s₁ s₂ → disjS s₂ s₁
     

@@ -8,6 +8,7 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   open import Regular.Predicates.Identity.Fixpoint μσ
   open import Regular.Predicates.Disjoint.Fixpoint μσ
   open import Regular.Operations.Merge.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ disjAlμ
+    renaming (module MergeSymmetry to MergeSymmetryF)
     public
 
   {-# TERMINATING #-}
@@ -19,9 +20,9 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   mergeInCtx alμ (here alμ' rest) hip = here (mergeAlμ alμ alμ' hip) rest
   mergeInCtx alμ (there a   ctx)  hip = there a (mergeInCtx alμ ctx hip)
 
-  mergeAlμ (ins C₁ s₁) s₂         hip = ins C₁ (mergeInCtx s₂ s₁ hip)
-  mergeAlμ (spn s₁)   (ins C₂ s₂) hip = ins C₂ (mergeInCtx (spn s₁) s₂ hip)
-  mergeAlμ (del C s₁) (ins C₂ s₂) hip = ins C₂ (mergeInCtx (del C s₁) s₂ hip)
+  mergeAlμ (ins C₁ s₁) (ins C₂ s₂) hip = ins C₁ (mergeInCtx s₂ s₁ {!!})
+  mergeAlμ (spn s₁)   (ins C₂ s₂)  hip = ins C₂ (mergeInCtx (spn s₁) s₂ hip)
+  mergeAlμ (del C s₁) (ins C₂ s₂)  hip = ins C₂ (mergeInCtx (del C s₁) s₂ hip)
 
   mergeAlμ (spn s₁) (spn s₂)       hip = spn (mergeS mergeAlμ s₁ s₂ hip)
 
@@ -47,3 +48,7 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
     = there a' (mergeAtCtx as ctx (proj₂ hip))
   mergeAtCtx {p ∷ ps} (set a ∷ as) (there a' ctx) hip
     = there a' (mergeAtCtx as ctx (proj₂ hip))
+
+  module MergeSymmetry where
+
+    open DisjSymmetry
