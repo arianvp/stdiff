@@ -17,7 +17,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   disjAtCtx : ∀{π} → All Atμ π → Ctx π → Set
 
   -- * Insertions are trivially disjoint from anything.
-  disjAlμ (ins C₁ s₁) (ins C₂ s₂) = disjAlμ (getCtx s₁) (getCtx s₂)
+  disjAlμ (ins C₁ s₁) (ins C₂ s₂) = ⊥
   disjAlμ (ins C₁ s₁) s₂          = disjAlμ (getCtx s₁) s₂  
   disjAlμ s₁ (ins C₂ s₂)          = disjAlμ s₁ (getCtx s₂)
 
@@ -69,7 +69,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
  
     open DisjSymmetryF disjAlμ disjAlμ-sym public
    
-    disjAlμ-sym (ins C₁ s₁) (ins C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (getCtx s₂) hip
+    disjAlμ-sym (ins C₁ s₁) (ins C₂ s₂) ()
     disjAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip
     disjAlμ-sym (ins C₁ s₁) (spn s₂) hip                    = disjAlμ-sym (getCtx s₁) (spn s₂) hip
     disjAlμ-sym (del C₁ s₁) (ins C₂ s₂) hip                 = disjAlμ-sym (del C₁ s₁) (getCtx s₂) hip

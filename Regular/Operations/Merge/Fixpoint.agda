@@ -11,6 +11,8 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
     renaming (module MergeSymmetry to MergeSymmetryF)
     public
 
+  open DisjSymmetry
+
   {-# TERMINATING #-}
   mergeAlμ : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂) → Alμ
 
@@ -20,7 +22,11 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   mergeInCtx alμ (here alμ' rest) hip = here (mergeAlμ alμ alμ' hip) rest
   mergeInCtx alμ (there a   ctx)  hip = there a (mergeInCtx alμ ctx hip)
 
-  mergeAlμ (ins C₁ s₁) (ins C₂ s₂) hip = ins C₁ (mergeInCtx s₂ s₁ {!!})
+  mergeAlμ (ins C₁ s₁) (ins C₂ s₂) ()
+  mergeAlμ (ins C₁ s₁) (spn s₂)    hip 
+    = ins C₁ (mergeInCtx (spn s₂) s₁ (disjAlμ-sym (getCtx s₁) (spn s₂) hip))
+  mergeAlμ (ins C₁ s₁) (del C₂ s₂) hip 
+    = ins C₁ (mergeInCtx (del C₂ s₂) s₁ (disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip))
   mergeAlμ (spn s₁)   (ins C₂ s₂)  hip = ins C₂ (mergeInCtx (spn s₁) s₂ hip)
   mergeAlμ (del C s₁) (ins C₂ s₂)  hip = ins C₂ (mergeInCtx (del C s₁) s₂ hip)
 
@@ -51,4 +57,4 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
 
   module MergeSymmetry where
 
-    open DisjSymmetry
+   
