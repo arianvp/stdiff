@@ -84,6 +84,13 @@ sop (here p) = tag zero p
 sop (there s) with sop s
 ... | tag C p = tag (suc C) p
 
+sop-inj-lemma : {σ : Sum}{X : Set}(C : Constr σ)(p : ⟦ typeOf σ C ⟧P X)
+              → sop (inj C p) ≡ tag {σ} C p
+sop-inj-lemma {[]} () p
+sop-inj-lemma {x ∷ σ} zero    p = refl
+sop-inj-lemma {x ∷ σ} (suc C) p 
+  rewrite sop-inj-lemma {σ} C p = refl
+
 match : {σ : Sum}{X : Set}(C : Constr σ)
       → ⟦ σ ⟧S X → Maybe (⟦ typeOf σ C ⟧P X)
 match C x with sop x
