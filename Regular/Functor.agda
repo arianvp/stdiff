@@ -30,3 +30,5 @@ module Regular.Functor
 
     ⟪_⟫S : {σ : Sum} → Patch PatchRec σ → ⟦ σ ⟧S Rec → Maybe (⟦ σ ⟧S Rec)
     ⟪ p ⟫S = applyS ⟪_⟫A ⟪_⟫P p
+
+                
