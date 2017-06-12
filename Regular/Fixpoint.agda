@@ -24,3 +24,9 @@ module Regular.Fixpoint (σμ : Sum) where
       aux a (b ∷ bs) with costAlμ a ≤? costAlμ b
       ...| yes _ = aux a bs
       ...| no  _ = aux b bs
+
+  ⟪_⟫μ : Alμ → Fix σμ → Maybe (Fix σμ)
+  ⟪ alμ ⟫μ = applyAlμ alμ 
+
+  open import Regular.Functor (Fix σμ) _≟Fix_ as RF
+  open RF.FunctorApplication Alμ ⟪_⟫μ public

@@ -5,6 +5,7 @@ module Regular.Predicates.Identity.Functor
        (Rec       : Set)
        (_≟Rec_    : (x y : Rec) → Dec (x ≡ y))
        (PatchRec  : Set)
+       (makeidR   : Rec → PatchRec)
        (identityR : PatchRec → Set)
     where
 
@@ -26,4 +27,17 @@ module Regular.Predicates.Identity.Functor
 
   identityAt (set k₁k₂) = identityK k₁k₂
   identityAt (fix rec)  = identityR rec
+
+
+  makeidS  : {σ : Sum } → ⟦ σ ⟧S Rec → Patch PatchRec σ
+  makeidAl : {π : Prod} → ⟦ π ⟧P Rec → Al (At PatchRec) π π
+  makeidAt : {α : Atom} → ⟦ α ⟧A Rec → At PatchRec α
+  
+  makeidS _ = Scp
+
+  makeidAl []       = A0
+  makeidAl (a ∷ as) = AX (makeidAt a) (makeidAl as)
+
+  makeidAt {I}   x = fix (makeidR x)
+  makeidAt {K κ} x = set (x , x)
 

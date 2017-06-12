@@ -40,7 +40,7 @@ open import Data.Sum
   public
 
 open import Data.Maybe 
-  using (Maybe ; nothing ; just)
+  using (Maybe ; nothing ; just ; maybe)
   renaming (map to Maybe-map)
   public
 

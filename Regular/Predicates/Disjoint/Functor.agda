@@ -5,22 +5,29 @@ module Regular.Predicates.Disjoint.Functor
        (Rec       : Set)
        (_≟Rec_    : (x y : Rec) → Dec (x ≡ y))
        (PatchRec  : Set)
+       (makeidR   : Rec → PatchRec)
        (identityR : PatchRec → Set)
        (disjRec   : PatchRec → PatchRec → Set)
     where
 
   open import Regular.Internal.Functor Rec _≟Rec_
-  open import Regular.Predicates.Identity.Functor Rec _≟Rec_ PatchRec identityR
+  open import Regular.Predicates.Identity.Functor Rec _≟Rec_ PatchRec makeidR identityR
 
   disjS  : {σ        : Sum}  → (s₁ s₂ : Patch PatchRec σ) → Set
  --  disjAl : {π₁ π₂ π₃ : Prod} → Al (At PatchRec) π₁ π₂ → Al (At PatchRec) π₁ π₃ → Set
   disjAt : {α        : Atom} → (a₁ a₂ : At PatchRec α)                   → Set
 
-  disjAtAll : ∀{l₁ l₂} → All (At PatchRec) l₁ → Al (At PatchRec) l₁ l₂ → Set
-  disjAtAll []       _  = Unit
-  disjAtAll (a ∷ as) (Ains at al) = disjAtAll (a ∷ as) al
-  disjAtAll (a ∷ as) (Adel at al) = identityAt a × disjAtAll as al
-  disjAtAll (a ∷ as) (AX at al)   = disjAt a at × disjAtAll as al
+  disj-At-Al : ∀{l₁ l₂} → All (At PatchRec) l₁ → Al (At PatchRec) l₁ l₂ → Set
+  disj-At-Al []       _  = Unit
+  disj-At-Al (a ∷ as) (Ains at al) = disj-At-Al (a ∷ as) al
+  disj-At-Al (a ∷ as) (Adel at al) = identityAt a × disj-At-Al as al
+  disj-At-Al (a ∷ as) (AX at al)   = disjAt a at × disj-At-Al as al
+
+  disj-Al-At : ∀{l₁ l₂} → Al (At PatchRec) l₁ l₂ → All (At PatchRec) l₁ → Set
+  disj-Al-At _            []       = Unit
+  disj-Al-At (Ains at al) (a ∷ as) = disj-Al-At al (a ∷ as) 
+  disj-Al-At (Adel at al) (a ∷ as) = identityAt a × disj-Al-At al as
+  disj-Al-At (AX at al)   (a ∷ as) = disjAt at a  × disj-Al-At al as
 
   disjAts : ∀{l}(a₁ a₂ : All (At PatchRec) l) → Set
   disjAts []         []         = Unit
@@ -38,14 +45,14 @@ module Regular.Predicates.Disjoint.Functor
 
   -- * A constructor change can be disj with a change,
   --   as long as they start at the same constructor and their 
-  --   changes are disjAtAll
+  --   changes are disj-At-Al
   disjS (Scns C₁ at₁)    (Schg C₂ C₃ al₂)
-    = Σ (C₁ ≡ C₂) (λ { refl → disjAtAll at₁ al₂ })
+    = Σ (C₁ ≡ C₂) (λ { refl → disj-At-Al at₁ al₂ })
 
   -- * Disj is obviously symmetric, so the definition here
   --   is the very same.
   disjS (Schg C₁ C₂ al₁) (Scns C₃ at₂)
-    = Σ (C₁ ≡ C₃) (λ { refl → disjAtAll at₂ al₁ })
+    = Σ (C₁ ≡ C₃) (λ { refl → disj-Al-At al₁ at₂ })
 
   -- * Two constructor changes are never disjoint.
   --   
@@ -89,15 +96,29 @@ module Regular.Predicates.Disjoint.Functor
     disjAts-sym []         []         hip       = unit
     disjAts-sym (a₁ ∷ as₁) (a₂ ∷ as₂) (h0 , h1) = disjAt-sym a₁ a₂ h0 , disjAts-sym as₁ as₂ h1
 
+    disj-At-Al-sym : ∀{l₁ l₂}(ats : All (At PatchRec) l₁)(al : Al (At PatchRec) l₁ l₂)
+                   → disj-At-Al ats al → disj-Al-At al ats
+    disj-At-Al-sym []       _  unit      = unit
+    disj-At-Al-sym (a ∷ as) (Ains at al) hip = disj-At-Al-sym (a ∷ as) al hip
+    disj-At-Al-sym (a ∷ as) (Adel at al) (h0 , h1) = h0 , disj-At-Al-sym as al h1
+    disj-At-Al-sym (a ∷ as) (AX at al)   (h0 , h1) = disjAt-sym a at h0 , disj-At-Al-sym as al h1
+
+    disj-Al-At-sym : ∀{l₁ l₂}(al : Al (At PatchRec) l₁ l₂)(ats : All (At PatchRec) l₁)
+                   → disj-Al-At al ats → disj-At-Al ats al
+    disj-Al-At-sym _            [] unit      = unit
+    disj-Al-At-sym (Ains at al) (a ∷ as) hip = disj-Al-At-sym al (a ∷ as) hip
+    disj-Al-At-sym (Adel at al) (a ∷ as) (h0 , h1) = h0 , disj-Al-At-sym al as h1
+    disj-Al-At-sym (AX at al) (a ∷ as)   (h0 , h1) = disjAt-sym at a h0 , disj-Al-At-sym al as h1
+
     disjS-sym Scp  (Scns _ _)    hip   = unit
     disjS-sym Scp  (Schg _ _ _)  hip   = unit
     disjS-sym s                Scp hip = unit
     disjS-sym {σ} (Scns C₁ at₁)    (Scns C₂ at₂) (refl , h1)
       = refl , disjAts-sym at₁ at₂ h1
     disjS-sym (Scns C₁ at₁)    (Schg C₂ C₃ al₂) (refl , h1)
-      = refl , h1
+      = refl , disj-At-Al-sym at₁ al₂ h1
     disjS-sym (Schg C₁ C₂ al₁) (Scns C₃ at₂) (refl , h1) 
-      = refl , h1
+      = refl , disj-Al-At-sym al₁ at₂ h1
     disjS-sym (Schg C₁ C₂ al₁) (S.Schg C₃ C₄ al₂) ()
 
     disjAt-sym (set ks₁)  (set ks₂)  (inj₁ hip) = inj₂ hip
@@ -110,6 +131,16 @@ module Regular.Predicates.Disjoint.Functor
     
     disjAt-sym-inv : {α : Atom}(a₁ a₂ : At PatchRec α)(h : disjAt a₁ a₂)
                      → disjAt-sym a₂ a₁ (disjAt-sym a₁ a₂ h) ≡ h
+
+    disj-Al-At-sym-inv : ∀{l₁ l₂}(al : Al (At PatchRec) l₁ l₂)(ats : All (At PatchRec) l₁)
+                       → (hip : disj-Al-At al ats)
+                       → disj-At-Al-sym ats al (disj-Al-At-sym al ats hip) ≡ hip
+    disj-Al-At-sym-inv _            [] unit      = refl
+    disj-Al-At-sym-inv (Ains at al) (a ∷ as) hip = disj-Al-At-sym-inv al (a ∷ as) hip
+    disj-Al-At-sym-inv (Adel at al) (a ∷ as) (h0 , h1) 
+      = cong₂ _,_ refl (disj-Al-At-sym-inv al as h1)
+    disj-Al-At-sym-inv (AX at al) (a ∷ as)   (h0 , h1) 
+      = cong₂ _,_ (disjAt-sym-inv at a h0) (disj-Al-At-sym-inv al as h1)
 
     disjAts-sym-inv : ∀{l}(a₁ a₂ : All (At PatchRec) l)(h : disjAts a₁ a₂)
                       → disjAts-sym a₂ a₁ (disjAts-sym a₁ a₂ h) ≡ h
@@ -125,11 +156,12 @@ module Regular.Predicates.Disjoint.Functor
     disjS-sym-inv {σ} (Scns C₁ at₁)    (Scns C₂ at₂) (refl , h1)
       = cong (λ P → refl , P) (disjAts-sym-inv at₁ at₂ h1)
     disjS-sym-inv (Scns C₁ at₁)    (Schg C₂ C₃ al₂) (refl , h1)
-      = refl
+      = TODO
+      where postulate TODO : ∀{a}{A : Set a} → A
     disjS-sym-inv (Schg C₁ C₂ al₁) (Scns C₃ at₂) (refl , h1) 
-      = refl
+      = TODO
+      where postulate TODO : ∀{a}{A : Set a} → A
     disjS-sym-inv (Schg C₁ C₂ al₁) (S.Schg C₃ C₄ al₂) ()
-    
     disjAt-sym-inv (set ks₁)  (set ks₂)  (inj₁ hip) = refl
     disjAt-sym-inv (set ks₁)  (set ks₂)  (inj₂ hip) = refl
     disjAt-sym-inv (fix spμ₁) (fix spμ₂) hip = disjRecSymInv spμ₁ spμ₂ hip

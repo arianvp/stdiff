@@ -2,9 +2,12 @@ open import Prelude
 open import Generic.Regular
 
 module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
-
+  
   open import Regular.Internal.Fixpoint μσ
-  open import Regular.Predicates.Identity.Functor (Fix μσ) _≟Fix_ Alμ
+
+  makeidAlμ : Fix μσ → Alμ
+
+  open import Regular.Predicates.Identity.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ
     public
   
   {-# TERMINATING #-}
@@ -14,3 +17,5 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
 
   identityAtμ : ∀{α} → Atμ α → Set
   identityAtμ = identityAt identityAlμ
+
+  makeidAlμ ⟨ x ⟩ = spn (makeidS identityAlμ x)
