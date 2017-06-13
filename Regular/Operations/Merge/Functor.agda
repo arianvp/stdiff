@@ -23,7 +23,8 @@ module Regular.Operations.Merge.Functor
   merge-At-Al : ∀{l₁ l₂}(ats : All (At PatchRec) l₁)(al : Al (At PatchRec) l₁ l₂)
              → (hip : disj-At-Al ats al) 
              → Al (At PatchRec) l₁ l₂ 
-  merge-At-Al []       al  hip = al
+  merge-At-Al []       A0  hip = A0
+  merge-At-Al []       (Ains at al)  hip = (Ains at al)
   merge-At-Al (a ∷ as) (Ains at al) hip 
     = Ains at (merge-At-Al (a ∷ as) al hip)
   merge-At-Al (a ∷ as) (Adel at al) (ida , hip) 
@@ -42,7 +43,7 @@ module Regular.Operations.Merge.Functor
   merge-Al-At (Adel at al) (a ∷ as) (ida , hip) 
     = merge-Al-At al as hip
   merge-Al-At (AX at al)   (a ∷ as)   (ha , hip) 
-    = at ∷ merge-Al-At al as hip
+    = mergeAt at a ha ∷ merge-Al-At al as hip
 
   mergeAts : ∀{l}(a₁ a₂ : All (At PatchRec) l)(hip : disjAts a₁ a₂) → All (At PatchRec) l
   mergeAts []         []         hip = []
@@ -63,7 +64,7 @@ module Regular.Operations.Merge.Functor
   mergeS (Schg C₁ C₂ al₁) (Schg C₃ C₄ al₂) ()
 
   mergeAt (set ks₁)  (set ks₂)  (inj₁ _) = set ks₂
-  mergeAt (set ks₁)  (set ks₂)  (inj₂ _) = set ks₁
+  mergeAt (set ks₁)  (set ks₂)  (inj₂ _) = set ks₂
   mergeAt (fix spμ₁) (fix spμ₂) hip      = fix (mergeRec spμ₁ spμ₂ hip)
 
   module MergeSymmetry 

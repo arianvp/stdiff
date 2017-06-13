@@ -23,6 +23,13 @@ module Regular.Predicates.Disjoint.Functor
   disj-At-Al (a ∷ as) (Adel at al) = identityAt a × disj-At-Al as al
   disj-At-Al (a ∷ as) (AX at al)   = disjAt a at × disj-At-Al as al
 
+  disj-At-Al-ins : {α : Atom}{π₁ π₂ : Prod}(ats : All (At PatchRec) π₁)(at : ⟦ α ⟧A Rec)
+                 → (al : Al (At PatchRec) π₁ π₂)
+                 → disj-At-Al ats (Ains {α = α} at al)
+                 → disj-At-Al ats al
+  disj-At-Al-ins [] at al hip = unit
+  disj-At-Al-ins (a ∷ as) at al hip = hip
+
   disj-Al-At : ∀{l₁ l₂} → Al (At PatchRec) l₁ l₂ → All (At PatchRec) l₁ → Set
   disj-Al-At _            []       = Unit
   disj-Al-At (Ains at al) (a ∷ as) = disj-Al-At al (a ∷ as) 
@@ -141,6 +148,16 @@ module Regular.Predicates.Disjoint.Functor
       = cong₂ _,_ refl (disj-Al-At-sym-inv al as h1)
     disj-Al-At-sym-inv (AX at al) (a ∷ as)   (h0 , h1) 
       = cong₂ _,_ (disjAt-sym-inv at a h0) (disj-Al-At-sym-inv al as h1)
+
+    disj-At-Al-sym-inv : ∀{l₁ l₂}(ats : All (At PatchRec) l₁)(al : Al (At PatchRec) l₁ l₂)
+                       → (hip : disj-At-Al ats al)
+                       → disj-Al-At-sym al ats (disj-At-Al-sym ats al hip) ≡ hip
+    disj-At-Al-sym-inv [] _ unit      = refl
+    disj-At-Al-sym-inv (a ∷ as) (Ains at al) hip = disj-At-Al-sym-inv (a ∷ as) al hip
+    disj-At-Al-sym-inv (a ∷ as) (Adel t al) (h0 , h1) 
+      = cong₂ _,_ refl (disj-At-Al-sym-inv as al h1)
+    disj-At-Al-sym-inv (a ∷ as)  (AX at al) (h0 , h1) 
+      = cong₂ _,_ (disjAt-sym-inv a at h0) (disj-At-Al-sym-inv as al h1)
 
     disjAts-sym-inv : ∀{l}(a₁ a₂ : All (At PatchRec) l)(h : disjAts a₁ a₂)
                       → disjAts-sym a₂ a₁ (disjAts-sym a₁ a₂ h) ≡ h

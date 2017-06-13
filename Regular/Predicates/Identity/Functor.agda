@@ -28,7 +28,6 @@ module Regular.Predicates.Identity.Functor
   identityAt (set k₁k₂) = identityK k₁k₂
   identityAt (fix rec)  = identityR rec
 
-
   makeidS  : {σ : Sum } → ⟦ σ ⟧S Rec → Patch PatchRec σ
   makeidAl : {π : Prod} → ⟦ π ⟧P Rec → Al (At PatchRec) π π
   makeidAt : {α : Atom} → ⟦ α ⟧A Rec → At PatchRec α
@@ -41,3 +40,12 @@ module Regular.Predicates.Identity.Functor
   makeidAt {I}   x = fix (makeidR x)
   makeidAt {K κ} x = set (x , x)
 
+  module IdentityPropertiesF 
+         (applyRec  : PatchRec → Rec → Maybe Rec)
+      where
+
+    postulate
+      identityAt-correct : {α : Atom}(a : At PatchRec α)(hip : identityAt a)
+                        → ∀ x → applyAt applyRec a x ≡ just x
+
+      makeidAt-correct : {α : Atom}(a : ⟦ α ⟧A Rec) → identityAt {α} (makeidAt a)

@@ -32,6 +32,12 @@ open import Data.Unit.NonEta
 open import Data.Empty
   public
 
+dec-refl : ∀{a}{A : Set a}(_≟_ : (a₁ a₂ : A) → Dec (a₁ ≡ a₂))(x : A)
+         → (x ≟ x) ≡ yes refl
+dec-refl _≟_ x with x ≟ x
+...| no abs   = ⊥-elim (abs refl)
+...| yes refl = refl
+
 open import Data.Product
   public
 

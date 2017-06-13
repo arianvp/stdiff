@@ -27,14 +27,20 @@ module Regular.Internal.Functor
 
 -- *** Spine application
 
+  open import Data.Maybe using (monadPlus)
+  open RawMonadPlus {lz} monadPlus
+
+  All-head-map : {A : Set}{l k : A}{ls ks : List A}{P Q : A → Set}
+               → (f : P l → Maybe (Q k))(fs : All P ls → Maybe (All Q ks))
+               → All P (l ∷ ls) → Maybe (All Q (k ∷ ks))
+  All-head-map f fs (x ∷ xs) = _∷_ <$> f x ⊛ fs xs
+               
   applySP : {π : Prod}{At : Atom → Set}
           → (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec))
           → All At π → ⟦ π ⟧P Rec → Maybe (⟦ π ⟧P Rec)
   applySP         applyAt [] [] = just []
-  applySP {α ∷ π} applyAt (at ∷ ats) (a₁ ∷ as₁) 
-    with applyAt at a₁ | applySP applyAt ats as₁
-  ...| just a₂ | just as₂ = just (a₂ ∷ as₂)
-  ...| _       | _        = nothing
+  applySP {α ∷ π} applyAt (at ∷ ats) prod
+    = All-head-map (applyAt at) (applySP applyAt ats) prod
 
   applyS : {σ : Sum}{At : Atom → Set}{Al : Rel Prod _}
         → (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec))
@@ -72,9 +78,6 @@ module Regular.Internal.Functor
     AX : ∀{α π₁ π₂} → At α → Al At π₁ π₂ → Al At (α ∷ π₁) (α ∷ π₂)
 
 -- *** Alignment application
-
-  open import Data.Maybe using (monadPlus)
-  open RawMonadPlus {lz} monadPlus
 
   applyAl : ∀{π₁ π₂ At} → 
            (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec)) →
