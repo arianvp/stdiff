@@ -6,7 +6,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   open import Regular.Internal.Fixpoint μσ
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Predicates.Identity.Fixpoint μσ
-  open import Regular.Predicates.Disjoint.Functor (Fix μσ) _≟Fix_ Alμ identityAlμ
+  open import Regular.Predicates.Disjoint.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ identityAlμ
     renaming (module DisjSymmetry to DisjSymmetryF)
     public
 
@@ -15,6 +15,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   disjCtx : ∀{π} → Ctx π → Ctx π → Set
 
   disjAtCtx : ∀{π} → All Atμ π → Ctx π → Set
+  disjCtxAt : ∀{π} → Ctx π → All Atμ π → Set
 
   -- * Insertions are trivially disjoint from anything.
   disjAlμ (ins C₁ s₁) (ins C₂ s₂) = ⊥
@@ -39,7 +40,7 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   -- * Since disjointness is symmetric, here we just repeat the cases above.
   disjAlμ (del C₁ s₁) (spn Scp)   = Unit
   disjAlμ (del C₁ s₁) (spn (Scns C₂ at₂))   
-    = Σ (C₁ ≡ C₂) (λ { refl → disjAtCtx at₂ s₁ })
+    = Σ (C₁ ≡ C₂) (λ { refl → disjCtxAt s₁ at₂ })
   disjAlμ (del C₁ s₁) (spn _) 
     = ⊥
 
@@ -62,6 +63,10 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
   disjAtCtx (fix a ∷ as) (here alμ rest) = disjAlμ a alμ × All-set identityAtμ as 
   disjAtCtx (a ∷ as)     (there a' ctx)  = identityAtμ a × disjAtCtx as ctx
 
+  disjCtxAt () []
+  disjCtxAt (here alμ rest) (fix a ∷ as) = disjAlμ alμ a × All-set identityAtμ as 
+  disjCtxAt (there a' ctx)  (a ∷ as)     = identityAtμ a × disjCtxAt ctx as
+  
   module DisjSymmetry where
 
     {-# TERMINATING #-}
@@ -73,6 +78,27 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
 
     open DisjSymmetryF disjAlμ disjAlμ-sym disjAlμ-sym-inv public
    
+    disjCtxAt-sym : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)
+                  → disjCtxAt ctx atμs → disjAtCtx atμs ctx
+    disjCtxAt-sym () []
+    disjCtxAt-sym (here alμ rest) (fix a ∷ as) (h0 , h1) 
+      = disjAlμ-sym alμ a h0 , h1
+    disjCtxAt-sym (there a' ctx)  (fix a ∷ as)     (h0 , h1)
+      = h0 , disjCtxAt-sym ctx as h1 
+    disjCtxAt-sym (there a' ctx)  (set a ∷ as)     (h0 , h1) 
+      = h0 , disjCtxAt-sym ctx as h1
+    
+    disjAtCtx-sym : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)
+                  → disjAtCtx atμs ctx → disjCtxAt ctx atμs 
+    disjAtCtx-sym [] () 
+    disjAtCtx-sym (fix a ∷ as) (here alμ rest) (h0 , h1) 
+      = disjAlμ-sym a alμ h0 , h1
+    disjAtCtx-sym (fix a ∷ as) (there a' ctx) (h0 , h1) 
+      = h0 , disjAtCtx-sym as ctx h1
+    disjAtCtx-sym (set a ∷ as) (there a' ctx) (h0 , h1)
+      = h0 , disjAtCtx-sym as ctx h1
+
+    
     disjAlμ-sym (ins C₁ s₁) (ins C₂ s₂) ()
     disjAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip
     disjAlμ-sym (ins C₁ s₁) (spn s₂) hip                    = disjAlμ-sym (getCtx s₁) (spn s₂) hip
@@ -80,14 +106,35 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
     disjAlμ-sym (spn s₁)    (ins C₂ s₂) hip                 = disjAlμ-sym (spn s₁) (getCtx s₂) hip
     disjAlμ-sym (spn s₁) (spn s₂) hip                       = disjS-sym s₁ s₂ hip
     disjAlμ-sym (spn Scp) (del C₂ s₂) hip                   = unit
-    disjAlμ-sym (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl , h1
+    disjAlμ-sym (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl , disjAtCtx-sym at₁ s₂ h1 
     disjAlμ-sym (spn (Schg _ _ _)) (del C₂ s₂)    ()
     disjAlμ-sym (del C₁ s₁) (spn Scp) hip                   = unit
-    disjAlμ-sym (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl , h1
+    disjAlμ-sym (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl , disjCtxAt-sym s₁ at₂ h1
     disjAlμ-sym (del C₁ s₁) (spn (Schg _ _ _))  ()
     disjAlμ-sym (del C₁ s₁) (del C₂ s₂)  ()
 
-    
+    disjCtxAt-sym-inv : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)
+                      → (hip : disjAtCtx atμs ctx) 
+                      → disjCtxAt-sym ctx atμs (disjAtCtx-sym atμs ctx hip) ≡ hip
+    disjCtxAt-sym-inv () []
+    disjCtxAt-sym-inv (here alμ rest) (fix a ∷ as) (h0 , h1)
+      = cong (λ P → P , h1) (disjAlμ-sym-inv a alμ h0)
+    disjCtxAt-sym-inv (there a' ctx) (fix a ∷ as) (h0 , h1)
+      = cong (λ P → h0 , P) (disjCtxAt-sym-inv ctx as h1)
+    disjCtxAt-sym-inv (there a' ctx) (set a ∷ as) (h0 , h1)
+      = cong (λ P → h0 , P) (disjCtxAt-sym-inv ctx as h1)
+
+    disjAtCtx-sym-inv : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)
+                     → (hip : disjCtxAt ctx atμs)
+                     → disjAtCtx-sym atμs ctx (disjCtxAt-sym ctx atμs hip) ≡ hip
+    disjAtCtx-sym-inv [] ()
+    disjAtCtx-sym-inv (fix a ∷ as) (here alμ rest) (h0 , h1)
+      = cong (λ P → P , h1) (disjAlμ-sym-inv alμ a h0)
+    disjAtCtx-sym-inv (fix a ∷ as) (there a' ctx) (h0 , h1)
+      = cong (λ P → h0 , P) (disjAtCtx-sym-inv as ctx h1)
+    disjAtCtx-sym-inv (set a ∷ as) (there a' ctx) (h0 , h1)
+      = cong (λ P → h0 , P) (disjAtCtx-sym-inv as ctx h1)
+
     disjAlμ-sym-inv (ins C₁ s₁) (ins C₂ s₂) ()
     disjAlμ-sym-inv (ins C₁ s₁) (del C₂ s₂) hip                 = disjAlμ-sym-inv (getCtx s₁) (del C₂ s₂) hip
     disjAlμ-sym-inv (ins C₁ s₁) (spn s₂) hip                    = disjAlμ-sym-inv (getCtx s₁) (spn s₂) hip
@@ -95,9 +142,11 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
     disjAlμ-sym-inv (spn s₁)    (ins C₂ s₂) hip                 = disjAlμ-sym-inv (spn s₁) (getCtx s₂) hip
     disjAlμ-sym-inv (spn s₁) (spn s₂) hip                       = disjS-sym-inv s₁ s₂ hip
     disjAlμ-sym-inv (spn Scp) (del C₂ s₂) unit                  = refl
-    disjAlμ-sym-inv (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) = refl
+    disjAlμ-sym-inv (spn (Scns C₁ at₁)) (del C₂ s₂) (refl , h1) 
+      = cong (λ P → refl , P) (disjCtxAt-sym-inv s₂ at₁ h1)
     disjAlμ-sym-inv (spn (Schg _ _ _)) (del C₂ s₂)    ()
     disjAlμ-sym-inv (del C₁ s₁) (spn Scp) unit                  = refl
-    disjAlμ-sym-inv (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) = refl
+    disjAlμ-sym-inv (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , h1) 
+      = cong (λ P → refl , P) (disjAtCtx-sym-inv at₂ s₁ h1)
     disjAlμ-sym-inv (del C₁ s₁) (spn (Schg _ _ _))  ()
     disjAlμ-sym-inv (del C₁ s₁) (del C₂ s₂)  ()

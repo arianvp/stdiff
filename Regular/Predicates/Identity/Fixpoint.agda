@@ -4,6 +4,7 @@ open import Generic.Regular
 module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
   
   open import Regular.Internal.Fixpoint μσ
+  open import Regular.Internal.Functor (Fix μσ) _≟Fix_
 
   makeidAlμ : Fix μσ → Alμ
 
@@ -19,3 +20,7 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
   identityAtμ = identityAt identityAlμ
 
   makeidAlμ ⟨ x ⟩ = spn (makeidS identityAlμ x)
+
+  makeidAtμ : ∀{α} → ⟦ α ⟧A (Fix μσ) → Atμ α
+  makeidAtμ {I}   x = fix (spn Scp)
+  makeidAtμ {K κ} x = set (x , x)

@@ -103,6 +103,9 @@ match C x with sop x
 data Fix (σ : Sum) : Set where
   ⟨_⟩ : ⟦ σ ⟧S (Fix σ) → Fix σ 
 
+unfix : {σ : Sum} → Fix σ → ⟦ σ ⟧S (Fix σ)
+unfix ⟨ x ⟩ = x
+
 {-# TERMINATING #-}
 _≟Fix_ : {σ : Sum} → (x y : Fix σ) → Dec (x ≡ y)
 _≟Fix_ {σ = σ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix σ) _≟Fix_ sx sy

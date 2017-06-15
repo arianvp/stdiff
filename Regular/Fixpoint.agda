@@ -25,8 +25,10 @@ module Regular.Fixpoint (σμ : Sum) where
       ...| yes _ = aux a bs
       ...| no  _ = aux b bs
 
-  ⟪_⟫μ : Alμ → Fix σμ → Maybe (Fix σμ)
-  ⟪ alμ ⟫μ = applyAlμ alμ 
+  module FixpointApplication where
 
-  open import Regular.Functor (Fix σμ) _≟Fix_ as RF
-  open RF.FunctorApplication Alμ ⟪_⟫μ public
+    ⟪_⟫μ : Alμ → Fix σμ → Maybe (Fix σμ)
+    ⟪ alμ ⟫μ = applyAlμ alμ 
+
+    open import Regular.Functor (Fix σμ) _≟Fix_ as RF
+    open RF.FunctorApplication Alμ ⟪_⟫μ public
