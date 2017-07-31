@@ -83,7 +83,7 @@ module Regular.Internal.Functor
            (applyAt : ∀ {α} → At α → ⟦ α ⟧A Rec → Maybe (⟦ α ⟧A Rec)) →
            Al At π₁ π₂ → ⟦ π₁ ⟧P Rec → Maybe (⟦ π₂ ⟧P Rec)
   applyAl applyAt A0 [] = just []
-  applyAl applyAt (Ains a' al) p        
+  applyAl applyAt (Ains a' al) p 
     = (a' ∷_) <$> applyAl applyAt al p
   applyAl applyAt (AX at al)   (a ∷ as) 
     = _∷_ <$> applyAt at a ⊛ applyAl applyAt al as

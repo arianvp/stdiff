@@ -7,14 +7,17 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Predicates.Identity.Fixpoint μσ
   open import Regular.Predicates.Disjoint.Fixpoint μσ
-  open import Regular.Operations.Merge.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ identityAlμ disjAlμ
+
+
+  {-# TERMINATING #-}
+  mergeAlμ : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂) → Alμ
+
+  open import Regular.Operations.Merge.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ identityAlμ disjAlμ mergeAlμ
     renaming (module MergeSymmetry to MergeSymmetryF)
     public
 
   open DisjSymmetry
 
-  {-# TERMINATING #-}
-  mergeAlμ : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂) → Alμ
 
   mergeAtCtx : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)(hip : disjAtCtx atμs ctx) → Ctx π
 
@@ -39,7 +42,7 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   mergeAlμ (spn s₁)   (ins C₂ s₂)  hip = ins C₂ (mergeAlμCtx (spn s₁) s₂ hip)
   mergeAlμ (del C s₁) (ins C₂ s₂)  hip = ins C₂ (mergeAlμCtx (del C s₁) s₂ hip)
 
-  mergeAlμ (spn s₁) (spn s₂)       hip = spn (mergeS mergeAlμ s₁ s₂ hip)
+  mergeAlμ (spn s₁) (spn s₂)       hip = spn (mergeS s₁ s₂ hip)
 
   mergeAlμ (spn Scp) (del C₂ s₂)   hip = del C₂ s₂
 

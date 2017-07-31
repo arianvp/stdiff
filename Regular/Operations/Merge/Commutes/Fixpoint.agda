@@ -37,12 +37,14 @@ module Regular.Operations.Merge.Commutes.Fixpoint (σμ : Sum) where
   -- * which needs to be passed to our previously developed proof for functors.
   open MergeCommutesHip mergeAlμ-commute
 
-  
   ⟪⟫-spn-spn-fusion
     : (s₁ s₂ : Patch Alμ σμ)
     → ∀ x → (⟪ spn s₁ ⟫μ ∙ ⟪ spn s₂ ⟫μ) x
-          ≡ ((λ x → just ⟨ x ⟩) ∙ ⟪ s₁ ⟫S ∙ ⟪ s₂ ⟫S ∙ (just ∘ unfix)) x
-  ⟪⟫-spn-spn-fusion s₁ s₂ x = {!!}
+          ≡ ((λ x → just ⟨ x ⟩) ∙ (⟪ s₁ ⟫S ∙ ⟪ s₂ ⟫S)) (unfix x)
+  ⟪⟫-spn-spn-fusion s₁ s₂ ⟨ x ⟩
+    with ⟪ s₂ ⟫S x | inspect ⟪ s₂ ⟫S x
+  ...| nothing | [ S2 ] rewrite S2 = {!!}
+  ...| just x' | [ S2 ] = {!!}
 {-
   ⟪⟫Scns-inCtx-commute
     : ⟪ spn (Scns C ats) ⟫μ ∙ ((⟨_⟩ ∘ inj C) <$> inCtx ctx x)
@@ -58,12 +60,6 @@ module Regular.Operations.Merge.Commutes.Fixpoint (σμ : Sum) where
   mergeAlμ-commute (del C s₁) (ins C₂ s₂)  hip x 
     = {!!}
 
-  mergeAlμ-commute (spn s₁) (spn s₂)       hip ⟨ x ⟩ 
-    rewrite mergeS-commute s₁ s₂ hip x 
-          | ⟪⟫-spn-spn-fusion s₁ s₂ ⟨ x ⟩
-          = {!!}
-          -- | mergeS-commute s₁ s₂ hip x
-          -- = {!!}
   mergeAlμ-commute (spn Scp) (del C₂ s₂)   hip x 
     = {!!}
   mergeAlμ-commute (spn (Scns C₁ at₁))  (del C₂ s₂) hip x 
@@ -76,3 +72,8 @@ module Regular.Operations.Merge.Commutes.Fixpoint (σμ : Sum) where
   mergeAlμ-commute (del C₁ s₁) (spn (Schg _ _ _)) ()
   mergeAlμ-commute (del C₁ s₁) (del C₂ s₂) ()
 
+  mergeAlμ-commute (spn s₁) (spn s₂)       hip ⟨ x ⟩ 
+    rewrite ⟪⟫-spn-spn-fusion (mergeS s₁ s₂ hip) s₁ ⟨ x ⟩
+          | mergeS-commute s₁ s₂ hip x
+    with applyS (applyAt applyAlμ) (applyAl (applyAt applyAlμ)) s₂ x
+  ...| res = {!!}
