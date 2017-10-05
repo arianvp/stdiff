@@ -23,12 +23,17 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
 
   mergeCtxAt : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)(hip : disjCtxAt ctx atμs) → Ctx π
 
+  getAtFromCtx : ∀{π}(ctx : Ctx π)(atμs : All Atμ π) → Alμ
+  getAtFromCtx (here _ _) (fix x ∷ _) = x
+  getAtFromCtx (there _ ctx) (_ ∷ as) = getAtFromCtx ctx as
+
   mergeCtxAlμ : ∀{π}(ctx : Ctx π)(alμ : Alμ)(hip : disjAlμ (getCtx ctx) alμ) 
               → All Atμ π
   mergeCtxAlμ (here alμ' rest) alμ hip 
     = fix (mergeAlμ alμ' alμ hip) ∷ All-map makeidAtμ rest 
   mergeCtxAlμ (there a   ctx) alμ hip 
     = makeidAtμ a ∷ mergeCtxAlμ ctx alμ hip
+
 
   mergeAlμCtx : ∀{π}(alμ : Alμ)(ctx : Ctx π)(hip : disjAlμ alμ (getCtx ctx)) → Ctx π
   mergeAlμCtx alμ (here alμ' rest) hip = here (mergeAlμ alμ alμ' hip) rest
@@ -39,8 +44,10 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
     = spn (Scns C₁ (mergeCtxAlμ s₁ (spn s₂) hip))
   mergeAlμ (ins C₁ s₁) (del C₂ s₂) hip 
     = spn (Scns C₁ (mergeCtxAlμ s₁ (del C₂ s₂) hip))
-  mergeAlμ (spn s₁)   (ins C₂ s₂)  hip = ins C₂ (mergeAlμCtx (spn s₁) s₂ hip)
-  mergeAlμ (del C s₁) (ins C₂ s₂)  hip = ins C₂ (mergeAlμCtx (del C s₁) s₂ hip)
+  mergeAlμ (spn s₁)   (ins C₂ s₂)  hip 
+    = ins C₂ (mergeAlμCtx (spn s₁) s₂ hip)
+  mergeAlμ (del C s₁) (ins C₂ s₂)  hip 
+    = ins C₂ (mergeAlμCtx (del C s₁) s₂ hip)
 
   mergeAlμ (spn s₁) (spn s₂)       hip = spn (mergeS s₁ s₂ hip)
 
