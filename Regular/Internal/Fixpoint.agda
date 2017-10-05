@@ -32,6 +32,12 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
   selectP (p ∷ ps) (here _ _)  = p
   selectP (p ∷ ps) (there _ c) = selectP ps c
 
+  selectA : ∀{π}(atμs : All Atμ π)(ctx : Ctx π) → Alμ
+  selectA [] ()
+  selectA (fix x ∷ _) (here _ _) = x
+  selectA (_ ∷ as) (there _ ctx) = selectA as ctx
+
+
 -- ** Interpretation
 
   -- XXX: write in monadic style

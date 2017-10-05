@@ -23,10 +23,6 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
 
   mergeCtxAt : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)(hip : disjCtxAt ctx atμs) → Ctx π
 
-  getAtFromCtx : ∀{π}(ctx : Ctx π)(atμs : All Atμ π) → Alμ
-  getAtFromCtx (here _ _) (fix x ∷ _) = x
-  getAtFromCtx (there _ ctx) (_ ∷ as) = getAtFromCtx ctx as
-
   mergeCtxAlμ : ∀{π}(ctx : Ctx π)(alμ : Alμ)(hip : disjAlμ (getCtx ctx) alμ) 
               → All Atμ π
   mergeCtxAlμ (here alμ' rest) alμ hip 

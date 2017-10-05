@@ -46,6 +46,45 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   ...| nothing | [ S2 ] rewrite S2 = {!!}
   ...| just x' | [ S2 ] = {!!}
 
+  maybe-∘-cong
+    : ∀{a b c}{A : Set a}{B : Set b}{C : Set c}
+    → (g : B → Maybe C){f f' : A → Maybe B}(x y : Maybe A)
+    → maybe {B = const (Maybe B)} f nothing x ≡ maybe f' nothing y
+    → maybe {B = const (Maybe C)} (maybe g nothing ∘ f) nothing x
+    ≡ maybe                       (maybe g nothing ∘ f') nothing y
+  maybe-∘-cong g nothing nothing hip = refl
+  maybe-∘-cong g nothing (just y) hip = cong (maybe g nothing) hip
+  maybe-∘-cong g (just x) nothing hip = cong (maybe g nothing) hip
+  maybe-∘-cong g (just x) (just y) hip = cong (maybe g nothing) hip
+
+  mergeAtCtx-commute
+    : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)
+    → (hip : disjAtCtx atμs ctx)
+    → ∀ x → (inCtx (mergeAtCtx atμs ctx hip) ∙ ⟪ selectA atμs ctx ⟫μ) x
+          ≡ (inCtx (mergeCtxAt ctx  atμs (disjAtCtx-sym atμs ctx hip)) ∙ ⟪ getCtx ctx ⟫μ) x
+  mergeAtCtx-commute (fix atμ ∷ atμs) (here spμ rest) (h , hip) x
+    = maybe-∘-cong (λ x → just (x ∷ rest)) 
+                   {f  = applyAlμ (mergeAlμ atμ spμ h)} 
+                   {f' = applyAlμ (mergeAlμ spμ atμ (disjAlμ-sym atμ spμ h))} 
+                   (applyAlμ atμ x) (applyAlμ spμ x) 
+                   (mergeAlμ-commute atμ spμ h x)
+  mergeAtCtx-commute (fix atμ ∷ atμs) (there atμ' ctx) (h , hip) x 
+    = maybe-∘-cong (λ x → just (atμ' ∷ x)) 
+                   {f  = inCtx (mergeAtCtx atμs ctx hip)} 
+                   {f' = inCtx (mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip))} 
+                   (applyAlμ (selectA atμs ctx) x) 
+                   (applyAlμ (getCtx ctx) x) 
+                   (mergeAtCtx-commute atμs ctx hip x)
+  mergeAtCtx-commute (set atμ ∷ atμs) (there atμ' ctx) (h , hip) x
+    = maybe-∘-cong (λ x → just (atμ' ∷ x)) 
+                   {f  = inCtx (mergeAtCtx atμs ctx hip)} 
+                   {f' = inCtx (mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip))} 
+                   (applyAlμ (selectA atμs ctx) x) 
+                   (applyAlμ (getCtx ctx) x) 
+                   (mergeAtCtx-commute atμs ctx hip x)
+
+
+{-
   injμ : (C : Constr μσ) → ⟦ typeOf μσ C ⟧P (Fix μσ) → Maybe (Fix μσ)
   injμ C as = just ⟨ inj C as ⟩
 
@@ -53,8 +92,9 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
     : {C : Constr μσ}(spμ : Ctx (typeOf μσ C))(ats : All Atμ (typeOf μσ C))
     → (hip : disjAtCtx ats spμ)
     → ∀ x → (⟪ spn (Scns C ats) ⟫μ ∙ injμ C ∙ inCtx spμ) x
-          ≡ ( injμ C ∙ inCtx (mergeAtCtx ats spμ hip) ∙ ⟪ getAtFromCtx spμ ats ⟫μ) x
-  ⟪⟫Scns-inj-inCtx hip spμ ats x = {!!}
+          ≡ ( injμ C ∙ inCtx (mergeAtCtx ats spμ hip) ∙ ⟪ selectA ats spμ ⟫μ) x
+  ⟪⟫Scns-inj-inCtx hip spμ ats x 
+    rewrite mergeAtCtx-commute = {!!}
 
   -- If an insertion is disjoitn from a spine; the context is, in particular,
   -- disjoint.
@@ -64,15 +104,14 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   disjAlμ⇒disjAtCtx (here  alμ' rest) s hip = {!!}
   disjAlμ⇒disjAtCtx (there a    ctx)  s hip = {!!}
 
-{-
+
   ⟪⟫Scns-inCtx-commute
     : ⟪ spn (Scns C ats) ⟫μ ∙ ((⟨_⟩ ∘ inj C) <$> inCtx ctx x)
     ≡ inCtx 
 -}
   mergeAlμ-commute (ins C₁ s₁) (ins C₂ s₂) ()
   mergeAlμ-commute (ins C₁ s₁) (spn s₂)    hip x
-    rewrite ⟪⟫Scns-inj-inCtx s₁ (mergeCtxAlμ s₁ (spn s₂) hip) 
-                            (disjAlμ⇒disjAtCtx s₁ s₂ hip) x
+    rewrite mergeAtCtx-commute (mergeCtxAlμ s₁ (spn s₂) hip) s₁ {!!} x
       = {!!}
   mergeAlμ-commute (ins C₁ s₁) (del C₂ s₂) hip x
     = {!!}
