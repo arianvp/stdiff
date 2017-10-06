@@ -24,3 +24,18 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
   makeidAtμ : ∀{α} → ⟦ α ⟧A (Fix μσ) → Atμ α
   makeidAtμ {I}   x = fix (spn Scp)
   makeidAtμ {K κ} x = set (x , x)
+
+  module IdentityProperties
+      where
+
+    postulate
+      identityAtμ-correct : {α : Atom}(a : Atμ α)(hip : identityAtμ a)
+                        → ∀ x → applyAtμ a x ≡ just x
+
+      makeidAtμ-correct : {α : Atom}(a : ⟦ α ⟧A (Fix μσ)) 
+                        → identityAtμ {α} (makeidAtμ a)
+
+    identityAtμ-uni : ∀{α}(a x : ⟦ α ⟧A (Fix μσ)) 
+                    → applyAtμ {α} (makeidAtμ a) x ≡ just x
+    identityAtμ-uni {α} a x 
+      = identityAtμ-correct {α} (makeidAtμ a) (makeidAtμ-correct {α} a) x

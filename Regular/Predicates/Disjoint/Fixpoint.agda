@@ -19,8 +19,10 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
 
   -- * Insertions are trivially disjoint from anything.
   disjAlμ (ins C₁ s₁) (ins C₂ s₂) = ⊥
-  disjAlμ (ins C₁ s₁) s₂          = disjAlμ (getCtx s₁) s₂  
-  disjAlμ s₁ (ins C₂ s₂)          = disjAlμ s₁ (getCtx s₂)
+  disjAlμ (ins C₁ s₁) (spn s₂)    = disjAlμ (getCtx s₁) (spn s₂)  
+  disjAlμ (ins C₁ s₁) (del C₂ s₂) = disjAlμ (getCtx s₁) (del C₂ s₂)  
+  disjAlμ (spn s₁)    (ins C₂ s₂) = disjAlμ (spn s₁)    (getCtx s₂)
+  disjAlμ (del C₁ s₁) (ins C₂ s₂) = disjAlμ (del C₁ s₁) (getCtx s₂)
 
   -- * Two spines might be disjoint,
   disjAlμ (spn s₁) (spn s₂)       = disjS disjAlμ s₁ s₂
@@ -34,14 +36,14 @@ module Regular.Predicates.Disjoint.Fixpoint (μσ : Sum) where
     = Σ (C₁ ≡ C₂) (λ { refl → disjAtCtx at₁ s₂ })
 
   -- * A Schg is never disjoint from a deletion.
-  disjAlμ (spn _)              (del C₂ s₂)   
+  disjAlμ (spn (Schg _ _ _))  (del C₂ s₂)   
     = ⊥
 
   -- * Since disjointness is symmetric, here we just repeat the cases above.
   disjAlμ (del C₁ s₁) (spn Scp)   = Unit
   disjAlμ (del C₁ s₁) (spn (Scns C₂ at₂))   
     = Σ (C₁ ≡ C₂) (λ { refl → disjCtxAt s₁ at₂ })
-  disjAlμ (del C₁ s₁) (spn _) 
+  disjAlμ (del C₁ s₁) (spn (Schg _ _ _)) 
     = ⊥
 
   -- * Two deletions are never disjoint,

@@ -13,7 +13,6 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   mergeAlμ : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂) → Alμ
 
   open import Regular.Operations.Merge.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ identityAlμ disjAlμ mergeAlμ
-    renaming (module MergeSymmetry to MergeSymmetryF)
     public
 
   open DisjSymmetry
@@ -77,33 +76,4 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
     = there a' (mergeCtxAt ctx as (proj₂ hip))
   mergeCtxAt {p ∷ ps} (there a' ctx) (set a ∷ as) hip
     = there a' (mergeCtxAt ctx as (proj₂ hip))
-{-
-  module MergeSymmetry where
-   
-    {-# TERMINATING #-}
-    mergeAlμ-sym : (alμ₁ alμ₂ : Alμ)(hip : disjAlμ alμ₁ alμ₂)
-                 → mergeAlμ alμ₁ alμ₂ hip ≡ mergeAlμ alμ₂ alμ₁ (disjAlμ-sym alμ₁ alμ₂ hip)
 
-    open MergeSymmetryF mergeAlμ disjAlμ-sym disjAlμ-sym-inv mergeAlμ-sym
-
-    mergeAlμ-sym (ins C₁ s₁) (ins C₂ s₂) ()
-    mergeAlμ-sym (ins C₁ s₁) (spn s₂)    hip = refl
-    mergeAlμ-sym (ins C₁ s₁) (del C₂ s₂) hip = refl
-    mergeAlμ-sym (spn s₁)   (ins C₂ s₂)  hip
-      rewrite disjAlμ-sym-inv (spn s₁) (getCtx s₂) hip = refl
-    mergeAlμ-sym (del C₁ s₁) (ins C₂ s₂)  hip 
-      rewrite disjAlμ-sym-inv (del C₁ s₁) (getCtx s₂) hip = refl
-    mergeAlμ-sym (spn s₁) (spn s₂)       hip 
-      = cong spn (mergeS-sym s₁ s₂ hip)
-    mergeAlμ-sym (spn Scp) (del C₂ s₂)   hip 
-      = refl
-    mergeAlμ-sym (spn (Scns C₁ at₁))  (del C₂ s₂) (refl , hip) 
-      = refl
-    mergeAlμ-sym (spn (Schg _ _ _)) (del C₂ s₂) ()
-    mergeAlμ-sym (del C₁ s₁) (spn Scp)   hip 
-      = refl
-    mergeAlμ-sym (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , hip)
-      = refl
-    mergeAlμ-sym (del C₁ s₁) (spn (Schg _ _ _)) ()
-    mergeAlμ-sym (del C₁ s₁) (del C₂ s₂) ()
--}

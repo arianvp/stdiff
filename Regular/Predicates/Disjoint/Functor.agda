@@ -173,11 +173,11 @@ module Regular.Predicates.Disjoint.Functor
     disjS-sym-inv {σ} (Scns C₁ at₁)    (Scns C₂ at₂) (refl , h1)
       = cong (λ P → refl , P) (disjAts-sym-inv at₁ at₂ h1)
     disjS-sym-inv (Scns C₁ at₁)    (Schg C₂ C₃ al₂) (refl , h1)
-      = TODO
-      where postulate TODO : ∀{a}{A : Set a} → A
+      rewrite disj-At-Al-sym-inv at₁ al₂ h1
+        = refl
     disjS-sym-inv (Schg C₁ C₂ al₁) (Scns C₃ at₂) (refl , h1) 
-      = TODO
-      where postulate TODO : ∀{a}{A : Set a} → A
+      rewrite disj-Al-At-sym-inv al₁ at₂ h1
+        = refl
     disjS-sym-inv (Schg C₁ C₂ al₁) (S.Schg C₃ C₄ al₂) ()
     disjAt-sym-inv (set ks₁)  (set ks₂)  (inj₁ hip) = refl
     disjAt-sym-inv (set ks₁)  (set ks₂)  (inj₂ hip) = refl

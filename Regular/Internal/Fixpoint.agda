@@ -46,7 +46,7 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
   applyAlμ : Alμ → Fix μσ → Maybe (Fix μσ)
   inCtx : ∀ {π} → Ctx π → Fix μσ → Maybe (⟦ π ⟧P (Fix μσ))
   matchCtx : ∀ {π} → Ctx π → ⟦ π ⟧P (Fix μσ) → Maybe (Fix μσ)
-  applyAtμ : ∀{κ} → Atμ κ → ⟦ κ ⟧A (Fix μσ) → Maybe (⟦ κ ⟧A (Fix μσ))
+  applyAtμ : ∀{α} → Atμ α → ⟦ α ⟧A (Fix μσ) → Maybe (⟦ α ⟧A (Fix μσ))
 
   applyAlμ (spn sp) x = Maybe-map ⟨_⟩ (applyS applyAtμ (applyAl applyAtμ) sp (unfix x))
   applyAlμ (ins C alμ) x = Maybe-map (⟨_⟩ ∘ inj C) (inCtx alμ x)
