@@ -46,7 +46,7 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
 
   mergeAlμ (spn s₁) (spn s₂)       hip = spn (mergeS s₁ s₂ hip)
 
-  mergeAlμ (spn Scp) (del C₂ s₂)   hip = del C₂ s₂
+  mergeAlμ (spn Scp) (del C₂ s₂)   hip = del C₂ s₂ 
 
   mergeAlμ (spn (Scns C₁ at₁))  (del C₂ s₂) (refl , hip) 
     = del C₁ (mergeAtCtx at₁ s₂ hip)
@@ -54,7 +54,7 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   mergeAlμ (spn (Schg _ _ _)) (del C₂ s₂) ()
 
   mergeAlμ (del C₁ s₁) (spn Scp)   hip 
-    = del C₁ s₁
+    = spn Scp
   mergeAlμ (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , hip)
     = del C₁ (mergeCtxAt s₁ at₂ hip)
   mergeAlμ (del C₁ s₁) (spn (Schg _ _ _)) ()

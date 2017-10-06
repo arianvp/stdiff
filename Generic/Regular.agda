@@ -106,6 +106,9 @@ data Fix (σ : Sum) : Set where
 unfix : {σ : Sum} → Fix σ → ⟦ σ ⟧S (Fix σ)
 unfix ⟨ x ⟩ = x
 
+fix-unfix-lemma : {σ : Sum}(x : Fix σ) → ⟨ unfix x ⟩ ≡ x
+fix-unfix-lemma ⟨ x ⟩ = refl
+
 {-# TERMINATING #-}
 _≟Fix_ : {σ : Sum} → (x y : Fix σ) → Dec (x ≡ y)
 _≟Fix_ {σ = σ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix σ) _≟Fix_ sx sy

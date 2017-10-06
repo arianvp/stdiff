@@ -5,6 +5,8 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
   
   open import Regular.Internal.Fixpoint μσ
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
+  open import Regular.Fixpoint μσ using (module FixpointApplication)
+  open FixpointApplication
 
   makeidAlμ : Fix μσ → Alμ
 
@@ -39,3 +41,7 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
                     → applyAtμ {α} (makeidAtμ a) x ≡ just x
     identityAtμ-uni {α} a x 
       = identityAtμ-correct {α} (makeidAtμ a) (makeidAtμ-correct {α} a) x
+
+    postulate 
+      makeidAllAt-uni : ∀{π}(a : All (λ α → ⟦ α ⟧A (Fix μσ)) π)
+                      → ∀ x → ⟪ All-map makeidAtμ a ⟫SP x ≡ just x 
