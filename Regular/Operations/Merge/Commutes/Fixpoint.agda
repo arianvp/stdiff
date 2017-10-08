@@ -140,33 +140,6 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
           | disjAtCtx-sym-inv atμs ctx hip
           = refl
 
-{-
-    → ∀ x → (inCtx (mergeAtCtx atμs ctx hip) ∙ ⟪ selectA atμs ctx ⟫μ) x
-          ≡ (inCtx (mergeCtxAt ctx  atμs (disjAtCtx-sym atμs ctx hip)) ∙ ⟪ getCtx ctx ⟫μ) x
--}
-{-
-  mergeAtCtx-commute (fix atμ ∷ atμs) (here spμ rest) (h , hip) x
-    = maybe-kleisli-lift {g = λ x → just (x ∷ rest)} 
-                   {f  = applyAlμ (mergeAlμ atμ spμ h)} 
-                   {f' = applyAlμ (mergeAlμ spμ atμ (disjAlμ-sym atμ spμ h))} 
-                   (applyAlμ atμ x) (applyAlμ spμ x) 
-                   (mergeAlμ-commute atμ spμ h x)
-  mergeAtCtx-commute (fix atμ ∷ atμs) (there atμ' ctx) (h , hip) x 
-    = maybe-kleisli-lift {g = λ x → just (atμ' ∷ x)} 
-                   {f  = inCtx (mergeAtCtx atμs ctx hip)} 
-                   {f' = inCtx (mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip))} 
-                   (applyAlμ (selectA atμs ctx) x) 
-                   (applyAlμ (getCtx ctx) x) 
-                   (mergeAtCtx-commute atμs ctx hip x)
-  mergeAtCtx-commute (set atμ ∷ atμs) (there atμ' ctx) (h , hip) x
-    = maybe-kleisli-lift {g = λ x → just (atμ' ∷ x)} 
-                   {f  = inCtx (mergeAtCtx atμs ctx hip)} 
-                   {f' = inCtx (mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip))} 
-                   (applyAlμ (selectA atμs ctx) x) 
-                   (applyAlμ (getCtx ctx) x) 
-                   (mergeAtCtx-commute atμs ctx hip x)
--}
-
   mergeAlμ-commute (ins C₁ s₁) (ins C₂ s₂) ()
   mergeAlμ-commute (ins C₁ s₁) (spn s₂)    hip x
     rewrite maybe-kleisli-lift 
