@@ -122,6 +122,51 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
           | disjAlμ-sym-inv (getCtx ctx) alμ hip
           = refl
 
+  -- * Merging Ats and Ctx also commutes!
+  mergeAtCtx-commute
+    : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)
+    → (hip : disjAtCtx atμs ctx)
+    → ∀ x → (matchCtx (mergeAtCtx atμs ctx hip) ∙ ⟪ atμs ⟫SP) x
+          ≡ (⟪ mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip) ⟫μ ∙ matchCtx ctx) x
+  mergeAtCtx-commute = {!!}
+
+  mergeCtxAt-commute
+    : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)
+    → (hip : disjCtxAt ctx atμs)
+    → ∀ x → (⟪ mergeCtxAt ctx atμs hip ⟫μ ∙ matchCtx ctx) x
+          ≡ (matchCtx (mergeAtCtx atμs ctx (disjCtxAt-sym ctx atμs hip)) ∙ ⟪ atμs ⟫SP) x
+  mergeCtxAt-commute ctx atμs hip x
+    rewrite mergeAtCtx-commute atμs ctx (disjCtxAt-sym ctx atμs hip) x
+          | disjAtCtx-sym-inv atμs ctx hip
+          = refl
+
+{-
+    → ∀ x → (inCtx (mergeAtCtx atμs ctx hip) ∙ ⟪ selectA atμs ctx ⟫μ) x
+          ≡ (inCtx (mergeCtxAt ctx  atμs (disjAtCtx-sym atμs ctx hip)) ∙ ⟪ getCtx ctx ⟫μ) x
+-}
+{-
+  mergeAtCtx-commute (fix atμ ∷ atμs) (here spμ rest) (h , hip) x
+    = maybe-kleisli-lift {g = λ x → just (x ∷ rest)} 
+                   {f  = applyAlμ (mergeAlμ atμ spμ h)} 
+                   {f' = applyAlμ (mergeAlμ spμ atμ (disjAlμ-sym atμ spμ h))} 
+                   (applyAlμ atμ x) (applyAlμ spμ x) 
+                   (mergeAlμ-commute atμ spμ h x)
+  mergeAtCtx-commute (fix atμ ∷ atμs) (there atμ' ctx) (h , hip) x 
+    = maybe-kleisli-lift {g = λ x → just (atμ' ∷ x)} 
+                   {f  = inCtx (mergeAtCtx atμs ctx hip)} 
+                   {f' = inCtx (mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip))} 
+                   (applyAlμ (selectA atμs ctx) x) 
+                   (applyAlμ (getCtx ctx) x) 
+                   (mergeAtCtx-commute atμs ctx hip x)
+  mergeAtCtx-commute (set atμ ∷ atμs) (there atμ' ctx) (h , hip) x
+    = maybe-kleisli-lift {g = λ x → just (atμ' ∷ x)} 
+                   {f  = inCtx (mergeAtCtx atμs ctx hip)} 
+                   {f' = inCtx (mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip))} 
+                   (applyAlμ (selectA atμs ctx) x) 
+                   (applyAlμ (getCtx ctx) x) 
+                   (mergeAtCtx-commute atμs ctx hip x)
+-}
+
   mergeAlμ-commute (ins C₁ s₁) (ins C₂ s₂) ()
   mergeAlμ-commute (ins C₁ s₁) (spn s₂)    hip x
     rewrite maybe-kleisli-lift 
@@ -211,8 +256,22 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
     with matchCtx s₂ Dx
   ...| nothing  = refl
   ...| just dx' = cong just (sym (fix-unfix-lemma dx'))
-  mergeAlμ-commute (spn (Scns C₁ at₁))  (del C₂ s₂) hip x 
-    = {!!}
+  mergeAlμ-commute (spn (Scns C₁ at₁))  (del C₂ s₂) (refl , hip) ⟨ x ⟩
+    with sop x
+  ...| tag Cx Dx
+    with C₁ ≟F Cx
+  ...| no _ = refl
+  ...| yes refl 
+    rewrite sym (mergeAtCtx-commute at₁ s₂ hip Dx)
+    with ⟪ at₁ ⟫SP Dx
+  ...| nothing  = refl
+  ...| just Dx' 
+    rewrite sop-inj-lemma {μσ} Cx Dx' 
+    with Cx ≟F Cx
+  ...| no abs = ⊥-elim (abs refl)
+  ...| yes refl with matchCtx (mergeAtCtx at₁ s₂ hip) Dx' 
+  ...| nothing = refl
+  ...| just Dx'' = refl
   mergeAlμ-commute (spn (Schg _ _ _)) (del C₂ s₂) ()
   mergeAlμ-commute (del C₁ s₁) (spn Scp)   hip ⟨ x ⟩
     with sop x
@@ -223,13 +282,28 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
     with matchCtx s₁ Dx
   ...| nothing  = refl
   ...| just dx' = cong just (fix-unfix-lemma dx')
-  mergeAlμ-commute (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , hip) x
-    = {!!}
+  mergeAlμ-commute (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , hip) ⟨ x ⟩
+    with sop x
+  ...| tag Cx Dx
+    with C₁ ≟F Cx
+  ...| no _ = refl
+  ...| yes refl 
+    rewrite mergeCtxAt-commute s₁ at₂ hip Dx
+    with ⟪ at₂ ⟫SP Dx
+  ...| nothing  = refl
+  ...| just Dx' 
+    rewrite sop-inj-lemma {μσ} Cx Dx' 
+    with Cx ≟F Cx
+  ...| no abs = ⊥-elim (abs refl)
+  ...| yes refl with matchCtx (mergeAtCtx at₂ s₁ (disjCtxAt-sym s₁ at₂ hip)) Dx'
+  ...| nothing = refl
+  ...| just Dx'' = refl
   mergeAlμ-commute (del C₁ s₁) (spn (Schg _ _ _)) ()
   mergeAlμ-commute (del C₁ s₁) (del C₂ s₂) ()
 
   mergeAlμ-commute (spn s₁) (spn s₂)       hip ⟨ x ⟩ 
     rewrite ⟪⟫-spn-spn-fusion (mergeS s₁ s₂ hip) s₁ ⟨ x ⟩
           | mergeS-commute s₁ s₂ hip x
-    with applyS (applyAt applyAlμ) (applyAl (applyAt applyAlμ)) s₂ x
-  ...| res = {!!}
+    with ⟪ s₂ ⟫S x
+  ...| nothing = {!!}
+  ...| just x' = {!!}

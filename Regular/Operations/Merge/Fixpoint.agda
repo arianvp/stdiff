@@ -18,9 +18,11 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   open DisjSymmetry
 
 
-  mergeAtCtx : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)(hip : disjAtCtx atμs ctx) → Ctx π
+  mergeAtCtx : ∀{π}(atμs : All Atμ π)(ctx : Ctx π)(hip : disjAtCtx atμs ctx) 
+             → Ctx π
 
-  mergeCtxAt : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)(hip : disjCtxAt ctx atμs) → Ctx π
+  mergeCtxAt : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)(hip : disjCtxAt ctx atμs) 
+             → Alμ
 
   mergeCtxAlμ : ∀{π}(ctx : Ctx π)(alμ : Alμ)(hip : disjAlμ (getCtx ctx) alμ) 
               → All Atμ π
@@ -56,7 +58,7 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
   mergeAlμ (del C₁ s₁) (spn Scp)   hip 
     = spn Scp
   mergeAlμ (del C₁ s₁) (spn (Scns C₂ at₂)) (refl , hip)
-    = del C₁ (mergeCtxAt s₁ at₂ hip)
+    = mergeCtxAt s₁ at₂ hip
   mergeAlμ (del C₁ s₁) (spn (Schg _ _ _)) ()
 
   mergeAlμ (del C₁ s₁) (del C₂ s₂) ()
@@ -71,9 +73,9 @@ module Regular.Operations.Merge.Fixpoint (μσ : Sum) where
 
   mergeCtxAt () [] 
   mergeCtxAt (here alμ rest) (fix a ∷ as) (ha , hip) 
-    = here (mergeAlμ alμ a ha) rest
+    = mergeAlμ alμ a ha
   mergeCtxAt {p ∷ ps} (there a' ctx) (fix a ∷ as) hip
-    = there a' (mergeCtxAt ctx as (proj₂ hip))
+    = mergeCtxAt ctx as (proj₂ hip)
   mergeCtxAt {p ∷ ps} (there a' ctx) (set a ∷ as) hip
-    = there a' (mergeCtxAt ctx as (proj₂ hip))
+    = mergeCtxAt ctx as (proj₂ hip)
 

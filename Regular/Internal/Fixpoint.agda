@@ -6,6 +6,10 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
   open DecEq (Fix μσ) _≟Fix_
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   
+  -- * We need monadic functionality for Maybe
+  open import Data.Maybe using (monadPlus)
+  open RawMonadPlus {lz} monadPlus renaming (_<=<_ to _∙_)
+
 -- ** Universe
 
   data Alμ : Set
@@ -40,8 +44,6 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
 
 -- ** Interpretation
 
-  -- XXX: write in monadic style
-
   {-# TERMINATING #-}
   applyAlμ : Alμ → Fix μσ → Maybe (Fix μσ)
   inCtx : ∀ {π} → Ctx π → Fix μσ → Maybe (⟦ π ⟧P (Fix μσ))
@@ -50,10 +52,7 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
 
   applyAlμ (spn sp) x = Maybe-map ⟨_⟩ (applyS applyAtμ (applyAl applyAtμ) sp (unfix x))
   applyAlμ (ins C alμ) x = Maybe-map (⟨_⟩ ∘ inj C) (inCtx alμ x)
-  applyAlμ (del C alμ) ⟨ x ⟩  with sop x
-  ... | tag C₁ p₁ with C ≟F C₁ 
-  ... | no _ = nothing
-  ... | yes refl = matchCtx alμ p₁
+  applyAlμ (del C alμ) x = (matchCtx alμ ∙ match C) (unfix x)
 
   inCtx (here spμ atμs) x = Maybe-map (λ x → x ∷ atμs) (applyAlμ spμ x)
   inCtx (there atμ al) x = Maybe-map (λ ats → atμ ∷ ats) (inCtx al x)
