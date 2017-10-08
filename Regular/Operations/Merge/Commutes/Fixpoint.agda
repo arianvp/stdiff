@@ -75,7 +75,10 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   maybe-kleisli-lift {g = g} (just x) nothing hip  = cong (maybe g nothing) hip
   maybe-kleisli-lift {g = g} (just x) (just y) hip = cong (maybe g nothing) hip
 
-  -- * Auxiliary commutation lemmas
+  -- * Auxiliary commutation lemmas;
+  --
+  --    Merging a Alμ into a Ctx commutes.
+  --
   mergeAlμCtx-commute
     : ∀{π}(alμ : Alμ)(ctx : Ctx π)
     → (hip : disjAlμ alμ (getCtx ctx))
@@ -108,6 +111,16 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   ...| x'' rewrite identityAtμ-uni {α} a a
      = refl
 
+  -- And vice-versa;
+  mergeCtxAlμ-commute
+    : ∀{π}(ctx : Ctx π)(alμ : Alμ)
+    → (hip : disjAlμ (getCtx ctx) alμ)
+    → ∀ x → (⟪ mergeCtxAlμ ctx alμ hip ⟫SP ∙ inCtx ctx) x
+          ≡ (inCtx (mergeAlμCtx alμ ctx (disjAlμ-sym (getCtx ctx) alμ hip)) ∙ ⟪ alμ ⟫μ) x
+  mergeCtxAlμ-commute ctx alμ hip x
+    rewrite mergeAlμCtx-commute alμ ctx (disjAlμ-sym (getCtx ctx) alμ hip) x
+          | disjAlμ-sym-inv (getCtx ctx) alμ hip
+          = refl
 
   mergeAlμ-commute (ins C₁ s₁) (ins C₂ s₂) ()
   mergeAlμ-commute (ins C₁ s₁) (spn s₂)    hip x
@@ -155,32 +168,39 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   ...| nothing  = refl
   ...| just x'' = refl
   mergeAlμ-commute (spn s₁)   (ins C₂ s₂)  hip x 
-    = cong id {!!}
-{-
-    rewrite maybe-kleisli-lift 
-              {g  = λ k → just ⟨ inj C₁ k ⟩}
-              {f  = inCtx (mergeAlμCtx (del C₂ s₂) s₁ (disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip)) }
-              {f' = ⟪ mergeCtxAlμ s₁ (del C₂ s₂)
-                      (disjAlμ-sym (del C₂ s₂) (getCtx s₁)
-                       (disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip)) ⟫SP }
-              ( ⟪ del C₂ s₂ ⟫μ x )
-              (inCtx s₁ x)
-              (mergeAlμCtx-commute (del C₂ s₂) s₁ 
-                (disjAlμ-sym (getCtx s₁) (del C₂ s₂) hip) x)
-    with inCtx s₁ x
+    rewrite maybe-kleisli-lift { g = λ k → just ⟨ inj C₂ k ⟩ }
+              { f  = inCtx (mergeAlμCtx (spn s₁) s₂ hip) }
+              { f' = ⟪ mergeCtxAlμ s₂ (spn s₁) (disjAlμ-sym (spn s₁) (getCtx s₂) hip) ⟫SP }
+              ( ⟪ spn s₁ ⟫μ x )
+              (inCtx s₂ x)
+              (mergeAlμCtx-commute (spn s₁) s₂ hip x)
+    with inCtx s₂ x
   ...| nothing = refl
   ...| just x' 
-    rewrite sop-inj-lemma {μσ} C₁ x'
-    with C₁ ≟F C₁
-  ...| no abs   = ⊥-elim (abs refl)
+    rewrite sop-inj-lemma {μσ} C₂ x'
+    with C₂ ≟F C₂
+  ...| no abs = ⊥-elim (abs refl)
   ...| yes refl 
-    rewrite disjAlμ-sym-inv (getCtx s₁) (del C₂ s₂) hip
-    with ⟪ mergeCtxAlμ s₁ (del C₂ s₂) hip ⟫SP x'
-  ...| nothing  = refl
+    with ⟪ mergeCtxAlμ s₂ (spn s₁) (disjAlμ-sym (spn s₁) (getCtx s₂) hip) ⟫SP x'
+  ...| nothing = refl
   ...| just x'' = refl
--}
-  mergeAlμ-commute (del C s₁) (ins C₂ s₂)  hip x 
-    = {!!}
+  mergeAlμ-commute (del C₁ s₁) (ins C₂ s₂)  hip x 
+    rewrite maybe-kleisli-lift { g = λ k → just ⟨ inj C₂ k ⟩ }
+              { f  = inCtx (mergeAlμCtx (del C₁ s₁) s₂ hip) }
+              { f' = ⟪ mergeCtxAlμ s₂ (del C₁ s₁) (disjAlμ-sym (del C₁ s₁) (getCtx s₂) hip) ⟫SP }
+              ( ⟪ del C₁ s₁ ⟫μ x )
+              (inCtx s₂ x)
+              (mergeAlμCtx-commute (del C₁ s₁) s₂ hip x)
+    with inCtx s₂ x
+  ...| nothing = refl
+  ...| just x' 
+    rewrite sop-inj-lemma {μσ} C₂ x'
+    with C₂ ≟F C₂
+  ...| no abs = ⊥-elim (abs refl)
+  ...| yes refl 
+    with ⟪ mergeCtxAlμ s₂ (del C₁ s₁) (disjAlμ-sym (del C₁ s₁) (getCtx s₂) hip) ⟫SP x'
+  ...| nothing = refl
+  ...| just x'' = refl
 
   mergeAlμ-commute (spn Scp) (del C₂ s₂)   hip ⟨ x ⟩ 
     with sop x
