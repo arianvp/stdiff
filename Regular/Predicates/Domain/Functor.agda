@@ -29,5 +29,8 @@ module Regular.Predicates.Domain.Functor
   (p ∷ ps) ∈domAl (Adel x al) = ps ∈domAl al
   (p ∷ ps) ∈domAl (AX at  al) = p ∈domAt at × ps ∈domAl al 
 
-  a ∈domAt set x = a ≡ proj₁ x
+  a ∈domAt set (k₁ , k₂) 
+    with k₁ ≟K k₂
+  ...| yes _ = Unit
+  ...| no  _ = a ≡ k₁
   a ∈domAt fix x = a ∈domRec x

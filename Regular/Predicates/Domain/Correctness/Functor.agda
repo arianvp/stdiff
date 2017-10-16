@@ -8,6 +8,7 @@ module Regular.Predicates.Domain.Correctness.Functor
        (applyRec  : PatchRec → Rec → Maybe Rec)
        (_∈domRec_ : Rec → PatchRec → Set)
        (domRecExt : (x : Rec)(p : PatchRec) → x ∈domRec p → IsJust (applyRec p x))
+       -- (domRecCpt : (x : Rec)(p : PatchRec) → IsJust (applyRec p x) → x ∈domRec p)
     where
 
   open import Regular.Internal.Functor Rec _≟Rec_
@@ -64,7 +65,7 @@ module Regular.Predicates.Domain.Correctness.Functor
   ...| no abs = ⊥-elim (abs (sym hip))
   ...| yes _  = indeed k₂
   domAt-ok a (fix rec) hip = domRecExt a rec hip
-
+{-
   -- XXX: Prove compleness: IsJust (apply p x) ⇒ x ∈dom p
   -- 
   domS-cplt : {σ : Sum}(s : ⟦ σ ⟧S Rec)(ps : Patch PatchRec σ)
@@ -118,7 +119,12 @@ module Regular.Predicates.Domain.Correctness.Functor
     = domAt-cplt a at (subst IsJust (sym A) (indeed a')) 
     , domAl-cplt as al (subst IsJust (sym AS) (indeed as'))
 
-
-  -- XXX: WE need completness for Rec and PatchRec, obviously. Ugh
-  domAt-cplt = magic
-    where postulate magic : ∀{a}{A : Set a} → A
+  domAt-cplt x (set (k₁ , k₂)) hip 
+    with k₁ ≟K k₂
+  ...| yes _ = unit
+  ...| no  _ 
+    with k₁ ≟K x 
+  ...| yes k₁≡x = sym k₁≡x
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  domAt-cplt x (fix rec) hip = domRecCpt x rec hip
+-}
