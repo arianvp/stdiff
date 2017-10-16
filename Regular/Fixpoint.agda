@@ -11,12 +11,10 @@ module Regular.Fixpoint (σμ : Sum) where
     public
     
   
-  postulate
-    magic : Alμ
-
   diffFix : Fix σμ → Fix σμ → Alμ
   diffFix x y with diff x y
   ...| [] = magic
+    where postulate magic : Alμ
   ...| (p ∷ ps) = aux p ps
     where
       aux : Alμ → List Alμ → Alμ
