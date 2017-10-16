@@ -40,15 +40,43 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   -- * which needs to be passed to our previously developed proof for functors.
   open MergeCommutesHip mergeAlμ-commute
 
+  -- **********************************************
+  -- *
+  -- * Some auxiliary facts about kleisli composition
+  -- *
+  kleisli-sandwich-id 
+      : {A B C H : Set}{f : B → Maybe C}{g : A → Maybe B}
+      → (h : B → H)(h⁻¹ : H → B)
+      → (hip : ∀ b → h⁻¹ (h b) ≡ b)
+      → ∀ x → ((f ∘ h⁻¹) ∙ (just ∘ h) ∙ g) x 
+            ≡ (f ∙ g) x
+  kleisli-sandwich-id {f = f} {g} h hI hip x
+    with g x
+  ...| nothing = refl
+  ...| just gx = cong f (hip gx)
+
+  kleisli-assoc
+    : {A B C D : Set}{f : C → Maybe D}{g : B → Maybe C}{h : A → Maybe B}
+    → ∀ x → ((f ∙ g) ∙ h) x
+          ≡ (f ∙ (g ∙ h)) x
+  kleisli-assoc {f = f} {g} {h} x
+    with h x
+  ...| nothing = refl
+  ...| just hx = refl
+
+  just-⟨⟩ : ⟦ μσ ⟧S (Fix μσ) → Maybe (Fix μσ)
+  just-⟨⟩ x = just ⟨ x ⟩
+
   ⟪⟫-spn-spn-fusion
     : (s₁ s₂ : Patch Alμ μσ)
-    → ∀ x → (⟪ spn s₁ ⟫μ ∙ ⟪ spn s₂ ⟫μ) x
-          ≡ ((λ x → just ⟨ x ⟩) ∙ (⟪ s₁ ⟫S ∙ ⟪ s₂ ⟫S)) (unfix x)
-  ⟪⟫-spn-spn-fusion s₁ s₂ ⟨ x ⟩
-    with ⟪ s₂ ⟫S x | inspect ⟪ s₂ ⟫S x
-  ...| nothing | [ S2 ] rewrite S2 = {!!}
-  ...| just x' | [ S2 ] = {!!}
-
+    → ∀ x → (⟪ spn s₁ ⟫μ ∙ ⟪ spn s₂ ⟫μ) ⟨ x ⟩
+          ≡ ((λ x → just ⟨ x ⟩) ∙ (⟪ s₁ ⟫S ∙ ⟪ s₂ ⟫S)) x
+  ⟪⟫-spn-spn-fusion s₁ s₂ x 
+    = trans (kleisli-sandwich-id 
+                       {f = just-⟨⟩ ∙ ⟪ s₁ ⟫S}
+                       {g = ⟪ s₂ ⟫S}
+                       ⟨_⟩ unfix (λ b → refl) x) 
+            (kleisli-assoc {f = just-⟨⟩} { ⟪ s₁ ⟫S } { ⟪ s₂ ⟫S } x)
 
   -- * Auxiliary functions on the Maybe monad;
   maybe-nothing-nothing≡nothing
@@ -128,7 +156,28 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
     → (hip : disjAtCtx atμs ctx)
     → ∀ x → (matchCtx (mergeAtCtx atμs ctx hip) ∙ ⟪ atμs ⟫SP) x
           ≡ (⟪ mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip) ⟫μ ∙ matchCtx ctx) x
-  mergeAtCtx-commute = {!!}
+  mergeAtCtx-commute (fix atμ ∷ atμs) (here sμ rest) (h , hip) (x ∷ xs)
+    rewrite mergeAlμ-commute sμ atμ (disjAlμ-sym atμ sμ h) x
+    with applyAlμ atμ x
+  ...| nothing = refl
+  ...| just x' 
+    rewrite disjAlμ-sym-inv atμ sμ h
+          | identityAllAtμ-uni atμs hip xs
+          = refl
+  mergeAtCtx-commute (set (k , _) ∷ atμs) (there a ctx)  (refl , hip) (x ∷ xs)
+    with k ≟K k
+  ...| no abs   = ⊥-elim (abs refl)
+  ...| yes refl 
+    rewrite sym (mergeAtCtx-commute atμs ctx hip xs) 
+    with ⟪ atμs ⟫SP xs
+  ...| nothing  = refl
+  ...| just xs' = refl
+  mergeAtCtx-commute (fix alμ ∷ atμs) (there a ctx)  (h , hip) (x ∷ xs)
+    rewrite identityAlμ-correct alμ h x 
+          | sym (mergeAtCtx-commute atμs ctx hip xs) 
+    with ⟪ atμs ⟫SP xs
+  ...| nothing  = refl
+  ...| just xs' = refl
 
   mergeCtxAt-commute
     : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)
@@ -274,9 +323,16 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   mergeAlμ-commute (del C₁ s₁) (spn (Schg _ _ _)) ()
   mergeAlμ-commute (del C₁ s₁) (del C₂ s₂) ()
 
-  mergeAlμ-commute (spn s₁) (spn s₂)       hip ⟨ x ⟩ 
-    rewrite ⟪⟫-spn-spn-fusion (mergeS s₁ s₂ hip) s₁ ⟨ x ⟩
+  mergeAlμ-commute (spn s₁) (spn s₂) hip ⟨ x ⟩
+    rewrite ⟪⟫-spn-spn-fusion (mergeS s₁ s₂ hip) s₁ x 
           | mergeS-commute s₁ s₂ hip x
-    with ⟪ s₂ ⟫S x
-  ...| nothing = {!!}
-  ...| just x' = {!!}
+     = trans (sym (kleisli-assoc 
+                  {f = just-⟨⟩}
+                  {g = ⟪ mergeS s₂ s₁ (disjS-sym s₁ s₂ hip) ⟫S} 
+                  {h = ⟪ s₂ ⟫S} x))
+             (sym (kleisli-sandwich-id 
+                  {f = just-⟨⟩ ∙ ⟪ mergeS s₂ s₁ (disjS-sym s₁ s₂ hip) ⟫S }
+                  {g = ⟪ s₂ ⟫S }
+                  ⟨_⟩ unfix (λ b → refl) x))
+
+

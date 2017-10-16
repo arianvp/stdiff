@@ -31,6 +31,9 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
       where
 
     postulate
+      identityAlμ-correct : (a : Alμ)(hip : identityAlμ a)
+                          → ∀ x → applyAlμ a x ≡ just x
+
       identityAtμ-correct : {α : Atom}(a : Atμ α)(hip : identityAtμ a)
                         → ∀ x → applyAtμ a x ≡ just x
 
@@ -45,3 +48,7 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
     postulate 
       makeidAllAt-uni : ∀{π}(a : All (λ α → ⟦ α ⟧A (Fix μσ)) π)
                       → ∀ x → ⟪ All-map makeidAtμ a ⟫SP x ≡ just x 
+
+      identityAllAtμ-uni : ∀{π}(atμs : All Atμ π)(hip : All-set identityAtμ atμs)
+                         → ∀ xs → ⟪ atμs ⟫SP xs ≡ just xs
+ 
