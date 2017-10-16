@@ -66,7 +66,6 @@ module Regular.Lab.ForkTree where
           ∷ []))
 
   open import Regular.Predicates.Disjoint.Fixpoint ForkTreeF public
-  open import Regular.Predicates.Disjoint.Merge.Fixpoint ForkTreeF public
 
   lemma123 : disjAlμ p12 p13
   lemma123 = refl , (unit , (unit , unit))

@@ -100,30 +100,3 @@ module Regular.Lab.2-3-Tree where
           (there ⟨ there (here (2 ∷ ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ [])) ⟩
           (here (spn Scp) []))))
 
-  open import Regular.Predicates.Disjointness.Fixpoint 2-3-treeF
-{-
-  isSpan213 : Set
-  isSpan213 = spanAlμ p12 p13
-
-  proof213 : isSpan213
-  proof213 = refl , (refl , (unit , (unit , (unit , unit))))
-
-  isSpan214 : Set
-  isSpan214 = spanAlμ p12 p14
-
-  proof214 : isSpan214
-  proof214 = refl , indeed (suc zero) ,
-                      indeed ⟨ here [] ⟩ ,
-                      indeed
-                      ⟨
-                      there
-                      (here
-                       (suc (suc (suc (suc (suc zero)))) ∷
-                        ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ []))
-                      ⟩
-                      , unit , unit
-
-
-  proof : spanAlμ p23 p13 → ⊥
-  proof (refl , _ , _ , unit , (refl , () , _) , _)
--}
