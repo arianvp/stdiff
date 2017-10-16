@@ -24,11 +24,11 @@ module Regular.BetterEnum (μσ : Sum) where
     = {!!}
     where diff-del : ⟦ μσ ⟧S (Fix μσ) → Fix μσ → Alμ⋆
           diff-del s₁ x₂ with sop s₁ 
-          ... | tag C₁ p₁ = del C₁ <$> ? --  diffCtx x₂ p₁
+          ... | tag C₁ p₁ = del C₁ <$> {!!} --  diffCtx x₂ p₁
 
           diff-ins : Fix μσ → ⟦ μσ ⟧S (Fix μσ) → Alμ⋆
           diff-ins x₁ s₂ with sop s₂
-          ... | tag C₂ p₂ = ins C₂ <$> ? -- diffCtx x₁ p₂
+          ... | tag C₂ p₂ = ins C₂ <$> {!!} -- diffCtx x₁ p₂
 
           diff-mod : ⟦ μσ ⟧S (Fix μσ) → ⟦ μσ ⟧S (Fix μσ) → Alμ⋆
-          diff-mod s₁ s₂ = spn <$> ? -- diffS diffAlμ s₁ s₂
+          diff-mod s₁ s₂ = spn <$> {!!} -- diffS diffAlμ s₁ s₂
