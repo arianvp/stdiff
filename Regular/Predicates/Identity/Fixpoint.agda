@@ -10,18 +10,19 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
 
   makeidAlμ : Fix μσ → Alμ
 
-  open import Regular.Predicates.Identity.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ
-    public
-  
   {-# TERMINATING #-}
   identityAlμ : Alμ → Set
-  identityAlμ (spn sp) = identityS identityAlμ sp
+
+  open import Regular.Predicates.Identity.Functor (Fix μσ) _≟Fix_ Alμ makeidAlμ identityAlμ
+    public
+  
+  identityAlμ (spn sp) = identityS sp
   identityAlμ _        = ⊥
 
   identityAtμ : ∀{α} → Atμ α → Set
-  identityAtμ = identityAt identityAlμ
+  identityAtμ = identityAt
 
-  makeidAlμ ⟨ x ⟩ = spn (makeidS identityAlμ x)
+  makeidAlμ ⟨ x ⟩ = spn (makeidS x)
 
   makeidAtμ : ∀{α} → ⟦ α ⟧A (Fix μσ) → Atμ α
   makeidAtμ {I}   x = fix (spn Scp)
@@ -29,13 +30,28 @@ module Regular.Predicates.Identity.Fixpoint (μσ : Sum) where
 
   module IdentityProperties
       where
+    
+    {-# TERMINATING #-}
+    identityAlμ-correct : (a : Alμ)(hip : identityAlμ a)
+                        → ∀ x → applyAlμ a x ≡ just x
+
+    makeidAlμ-correct : (r : Fix μσ) → identityAlμ (makeidAlμ r)
+
+    open IdentityPropertiesF applyAlμ identityAlμ-correct makeidAlμ-correct
+    
+    identityAlμ-correct (spn sp) hip ⟨ x ⟩ 
+      with identityS-correct sp hip x
+    ...| aux with applyPatch applyAlμ sp x
+    ...| nothing = {!!}
+    ...| just x' = {!!}
+    identityAlμ-correct (ins C ctx) () x
+    identityAlμ-correct (del C ctx) () x
+
+    makeidAlμ-correct r = {!!}
 
     postulate
-      identityAlμ-correct : (a : Alμ)(hip : identityAlμ a)
-                          → ∀ x → applyAlμ a x ≡ just x
-
       identityAtμ-correct : {α : Atom}(a : Atμ α)(hip : identityAtμ a)
-                        → ∀ x → applyAtμ a x ≡ just x
+                          → ∀ x → applyAtμ a x ≡ just x
 
       makeidAtμ-correct : {α : Atom}(a : ⟦ α ⟧A (Fix μσ)) 
                         → identityAtμ {α} (makeidAtμ a)

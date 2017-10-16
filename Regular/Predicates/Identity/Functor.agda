@@ -41,11 +41,30 @@ module Regular.Predicates.Identity.Functor
   makeidAt {K κ} x = set (x , x)
 
   module IdentityPropertiesF 
-         (applyRec  : PatchRec → Rec → Maybe Rec)
+         (applyRec            : PatchRec → Rec → Maybe Rec)
+         (identityRec-correct : (p : PatchRec)(hip : identityR p) 
+                              → ∀ x → applyRec p x ≡ just x)
+         (makeidRec-correct   : (r : Rec) → identityR (makeidR r))
       where
 
-    postulate
-      identityAt-correct : {α : Atom}(a : At PatchRec α)(hip : identityAt a)
-                        → ∀ x → applyAt applyRec a x ≡ just x
+    identityS-correct : {σ : Sum}(s : Patch PatchRec σ)(hip : identityS s)
+                      → ∀ x → applyPatch applyRec s x ≡ just x
+    identityS-correct Scp hip x = refl
+    identityS-correct (Scns _ _) () x
+    identityS-correct (Schg _ _ _) () x
 
-      makeidAt-correct : {α : Atom}(a : ⟦ α ⟧A Rec) → identityAt {α} (makeidAt a)
+    identityAt-correct : {α : Atom}(a : At PatchRec α)(hip : identityAt a)
+                      → ∀ x → applyAt applyRec a x ≡ just x
+    identityAt-correct (set (k₁ , k₂)) hip x 
+      with k₁ ≟K k₂ 
+    ...| no abs   = ⊥-elim (abs hip) 
+    ...| yes refl = refl
+    identityAt-correct (fix rec) hip x 
+      = identityRec-correct rec hip x
+
+    makeidAt-correct : {α : Atom}(a : ⟦ α ⟧A Rec) → identityAt {α} (makeidAt a)
+    makeidAt-correct {I}   a = makeidRec-correct a
+    makeidAt-correct {K κ} a = refl
+
+    makeidS-correct : {σ : Sum}(s : ⟦ σ ⟧S Rec) → identityS {σ} (makeidS s)
+    makeidS-correct _ = unit
