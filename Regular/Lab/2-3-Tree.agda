@@ -100,3 +100,14 @@ module Regular.Lab.2-3-Tree where
           (there ⟨ there (here (2 ∷ ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ [])) ⟩
           (here (spn Scp) []))))
 
+  open import Regular.BetterEnum 2-3-treeF as BE
+    using ()
+
+  p12* : BE.Alμ⋆
+  p12* = BE.diffAlμ⋆ t₁ t₂
+
+  p23* : Alμ
+  p23* = BE.crushAlμ⋆ (BE.diffAlμ⋆ t₂ t₃)
+
+  p14* : Alμ
+  p14* = BE.crushAlμ⋆ (BE.diffAlμ⋆ t₁ t₄)

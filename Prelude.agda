@@ -89,7 +89,7 @@ open import Data.Nat
   public
 
 open import Data.List
-  using (List ; _∷_ ; [] ; length)
+  using (List ; _∷_ ; [] ; length; _++_)
   renaming (map to List-map ; zip to List-zip)
   public
 
