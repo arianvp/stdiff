@@ -12,27 +12,20 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
 
 -- ** Universe
 
+  data Alμ : Set
+  data Ctx : Prod → Set
+  Atμ : Atom → Set
 
-  mutual
-    data Alμ' (s : Sum → Set) : Set where
-      spn : (sp : s μσ) → Alμ' s
-      ins : (C : Constr μσ)(spμ : Ctx' s (typeOf μσ C)) → Alμ' s
-      del : (C : Constr μσ)(spμ : Ctx' s (typeOf μσ C)) → Alμ' s
+  data Alμ where
+    spn : (sp : S Atμ (Al Atμ) μσ) → Alμ
+    ins : (C : Constr μσ)(spμ : Ctx (typeOf μσ C)) → Alμ
+    del : (C : Constr μσ)(spμ : Ctx (typeOf μσ C)) → Alμ
 
-    data Ctx' (s : Sum → Set) : Prod → Set  where
-      here  : ∀{π} → (spμ : Alμ' s)(atμs : All (λ α → ⟦ α ⟧A (Fix μσ)) π) 
-            → Ctx' s (I ∷ π)
-      there : ∀{α π} → (atμ : ⟦ α ⟧A (Fix μσ))(alμs : Ctx' s π) → Ctx' s (α ∷ π)
+  data Ctx where
+    here  : ∀{π} → (spμ : Alμ)(atμs : All (λ α → ⟦ α ⟧A (Fix μσ)) π) → Ctx (I ∷ π)
+    there : ∀{α π} → (atμ : ⟦ α ⟧A (Fix μσ))(alμs : Ctx π) → Ctx (α ∷ π)
 
-    Atμ : Atom → Set
-    Atμ = At Alμ
-
-    {-# TERMINATING #-}
-    Alμ : Set
-    Alμ = Alμ' (S Atμ (Al Atμ))
-
-  Ctx : Prod → Set
-  Ctx = Ctx' (S Atμ (Al Atμ))
+  Atμ = At Alμ
 
   getCtx : ∀{π} → Ctx π → Alμ
   getCtx (there _ ctx) = getCtx ctx
