@@ -104,3 +104,9 @@ module Regular.Lab.SExp where
 
   apply-commute-2 : applyAlμ (p-tmp p13) k2 ≡ just k4
   apply-commute-2 = refl
+
+  open import Regular.BetterEnum SExpF as BE
+    using ()
+
+  p13* : Alμ
+  p13* = BE.crushAlμ⋆ (BE.diffAlμ⋆ k1 k3)
