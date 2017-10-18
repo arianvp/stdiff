@@ -7,15 +7,29 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
   open import Regular.Internal.Fixpoint μσ 
   open DecEq (Fix μσ) _≟Fix_
 
-  
-
+  -- *******************************************
+  -- *
+  -- * The extensive enumeration is a great characterization
+  -- * of all possible patches; but is a horrible program for computing them.
+  -- *
+  -- * The Fork-family of types takes advantage of the intrinsic
+  -- * disjointness of changes, when expressed as trees, by pushing
+  -- * the relevant choice points (Forks) to where they actually need
+  -- * to happen.
+  -- *
+  -- * This is a heuristic search and by no means total; nevertheless,
+  -- * the algorithm starts with an eager phase where it consumes as many
+  -- * equal constructors as possible; when it finds a difference, it tries
+  -- * to insert or delete depending in the height of the trees in question.
+  -- * 
+  -- * The datatypes look like: 
+  -- *
   ForkAtμ : Atom → Set
   data ForkAlμ : Set
   data ForkCtx : Prod → Set
 
   ForkS : Set
   ForkS = S (λ α → ForkAtμ α) (λ _ _ → ⊥) μσ
-
 
   data ForkAlμ where
     spn : ForkS → ForkAlμ
@@ -29,6 +43,9 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
   ForkAtμ = At (List ForkAlμ)
 
 
+  --
+  -- We use a generic height function
+  --
   module Height where
     mutual
       {-# TERMINATING #-}
@@ -50,7 +67,10 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
       heightA {I}   ⟨ x ⟩ = 1 + heightS x
 
   open Height
-
+ 
+  --
+  -- And some utilities for comparing and mapping values
+  --
   _<$>_ : {A B : Set} → (A → B) → List A → List B
   f <$> xs = List-map f xs
 
@@ -63,6 +83,22 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
   ...| equal   _   = EQ
   ...| greater _ _ = GT
 
+  S-map : {σ : Sum}
+          {At₁ At₂ : Atom → Set}
+          {Al₁ Al₂ : Rel Prod _}
+        → (At₁ ⊆ At₂)
+        → (∀{π₁ π₂} → Al₁ π₁ π₂ → Al₂ π₁ π₂)
+        → S At₁ Al₁ σ → S At₂ Al₂ σ
+  S-map f g Scp = Scp
+  S-map f g (Scns C ps) = Scns C (All-map f ps)
+  S-map f g (Schg C₁ C₂ {q} al) = Schg C₁ C₂ {q} (g al)
+
+
+  -- 
+  -- Finally, the enumeration produces a a list of options Forks,
+  -- note how we eagerly consume constructors by recursing on diffForkAlμ
+  -- whenever possible.
+  -- 
   mutual
     diffForkAlμ : Fix μσ → Fix μσ → List ForkAlμ
     diffForkAlμ ⟨ x ⟩ ⟨ y ⟩ 
@@ -103,15 +139,12 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
       = here (diffForkAlμ x₁ x₂) ats₂
       ∷ there x₂ <$> diffCtx x₁ ats₂
 
-  S-map : {σ : Sum}
-          {At₁ At₂ : Atom → Set}
-          {Al₁ Al₂ : Rel Prod _}
-        → (At₁ ⊆ At₂)
-        → (∀{π₁ π₂} → Al₁ π₁ π₂ → Al₂ π₁ π₂)
-        → S At₁ Al₁ σ → S At₂ Al₂ σ
-  S-map f g Scp = Scp
-  S-map f g (Scns C ps) = Scns C (All-map f ps)
-  S-map f g (Schg C₁ C₂ {q} al) = Schg C₁ C₂ {q} (g al)
+  
+  --
+  -- Translating a ForkAlμ to a Alμ is easy,
+  -- we just eliminate the Fork-points by choosing
+  -- the one with the least cost.
+  --
 
   minOn : ∀{a}{A : Set a}(f : A → ℕ) → List A → A
   minOn f [] = magic
