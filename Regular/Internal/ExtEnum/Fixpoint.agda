@@ -1,7 +1,7 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.Internal.EnumFix
+module Regular.Internal.ExtEnum.Fixpoint
          (μσ : Sum)
          (M : Set → Set)(m : RawMonadPlus M)
        where
@@ -9,7 +9,7 @@ module Regular.Internal.EnumFix
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open DecEq (Fix μσ) _≟Fix_
   open import Regular.Internal.Fixpoint μσ
-  open import Regular.Internal.EnumFunctor (Fix μσ) _≟Fix_ M m
+  open import Regular.Internal.ExtEnum.Functor (Fix μσ) _≟Fix_ M m
 
   open RawMonadPlus m
 

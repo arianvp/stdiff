@@ -1,7 +1,7 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.Internal.EnumFunctor
+module Regular.Internal.ExtEnum.Functor
          (Rec : Set)(_≟Rec_ : ∀ (⟨x⟩ ⟨y⟩ : Rec) → Dec (⟨x⟩ ≡ ⟨y⟩))
          (M : Set → Set)(m : RawMonadPlus M)
        where
