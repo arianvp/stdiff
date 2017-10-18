@@ -12,9 +12,9 @@ open import Generic.Multirec
 
 -- ** Internals (Data Type definitions and enumeration functions)
 open import Regular.Internal.Functor
-open import Regular.Internal.EnumFunctor
 open import Regular.Internal.Fixpoint
-open import Regular.Internal.EnumFix
+open import Regular.Internal.ExtEnum.Functor
+open import Regular.Internal.ExtEnum.Fixpoint
 
 -- ** Renamings
 open import Regular.Fixpoint
