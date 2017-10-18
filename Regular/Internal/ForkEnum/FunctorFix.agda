@@ -1,32 +1,32 @@
 open import Prelude
 open import Generic.Regular
 
-module Regular.BetterEnum (μσ : Sum) where
+module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
 
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
+  open import Regular.Internal.Fixpoint μσ 
   open DecEq (Fix μσ) _≟Fix_
 
-  Atμ⋆ : Atom → Set
-  data Alμ : Set
-  data Ctx⋆ : Prod → Set
+  
 
-  Alμ⋆ : Set
-  Alμ⋆ = List Alμ
+  ForkAtμ : Atom → Set
+  data ForkAlμ : Set
+  data ForkCtx : Prod → Set
 
-  S⋆ : Set
-  S⋆ = S (λ α → Atμ⋆ α) (λ _ _ → ⊥) μσ
+  ForkS : Set
+  ForkS = S (λ α → ForkAtμ α) (λ _ _ → ⊥) μσ
 
 
-  data Alμ where
-    spn : S⋆ → Alμ
-    ins : (C : Constr μσ)(spμ : Ctx⋆ (typeOf μσ C)) → Alμ
-    del : (C : Constr μσ)(spμ : Ctx⋆ (typeOf μσ C)) → Alμ
+  data ForkAlμ where
+    spn : ForkS → ForkAlμ
+    ins : (C : Constr μσ)(spμ : ForkCtx (typeOf μσ C)) → ForkAlμ
+    del : (C : Constr μσ)(spμ : ForkCtx (typeOf μσ C)) → ForkAlμ
 
-  data Ctx⋆ where
-    here  : ∀{π} → (spμ : Alμ⋆)(atμs : All (λ α → ⟦ α ⟧A (Fix μσ)) π) → Ctx⋆ (I ∷ π)
-    there : ∀{α π} → (atμ : ⟦ α ⟧A (Fix μσ))(alμs : Ctx⋆ π) → Ctx⋆ (α ∷ π)
+  data ForkCtx where
+    here  : ∀{π} → (spμ : List ForkAlμ)(atμs : All (λ α → ⟦ α ⟧A (Fix μσ)) π) → ForkCtx (I ∷ π)
+    there : ∀{α π} → (atμ : ⟦ α ⟧A (Fix μσ))(alμs : ForkCtx π) → ForkCtx (α ∷ π)
 
-  Atμ⋆ = At Alμ⋆
+  ForkAtμ = At (List ForkAlμ)
 
 
   module Height where
@@ -64,47 +64,44 @@ module Regular.BetterEnum (μσ : Sum) where
   ...| greater _ _ = GT
 
   mutual
-    diffAlμ⋆ : Fix μσ → Fix μσ → Alμ⋆
-    diffAlμ⋆ ⟨ x ⟩ ⟨ y ⟩ 
+    diffForkAlμ : Fix μσ → Fix μσ → List ForkAlμ
+    diffForkAlμ ⟨ x ⟩ ⟨ y ⟩ 
       with x ≟S y
     ...| yes _ = spn Scp ∷ []
     ...| no  _
       with sop x | sop y
     ...| tag cx dx | tag cy dy
       with cx ≟F cy
-    ...| yes refl = spn (Scns cx (All-map (λ axy → diffAtμ⋆ axy) (zipd dx dy))) ∷ []
-    ...| no  _    = diffAlμInsDel⋆ ⟨ x ⟩ ⟨ y ⟩
+    ...| yes refl = spn (Scns cx (All-map (λ axy → diffForkAtμ axy) (zipd dx dy))) ∷ []
+    ...| no  _    = diffForkAlμInsDel ⟨ x ⟩ ⟨ y ⟩
 
-    diffAtμ⋆ : ∀{α} → ⟦ α ⟧A (Fix μσ) × ⟦ α ⟧A (Fix μσ) → Atμ⋆ α
-    diffAtμ⋆ {K κ} (x , y) = set (x , y)
-    diffAtμ⋆ {I}   (x , y) = fix (diffAlμ⋆ x y)
+    diffForkAtμ : ∀{α} → ⟦ α ⟧A (Fix μσ) × ⟦ α ⟧A (Fix μσ) → ForkAtμ α
+    diffForkAtμ {K κ} (x , y) = set (x , y)
+    diffForkAtμ {I}   (x , y) = fix (diffForkAlμ x y)
 
-    diffAlμInsDel⋆ : Fix μσ → Fix μσ → Alμ⋆
-    diffAlμInsDel⋆ ⟨ x ⟩ ⟨ y ⟩ 
+    diffForkAlμInsDel : Fix μσ → Fix μσ → List ForkAlμ
+    diffForkAlμInsDel ⟨ x ⟩ ⟨ y ⟩ 
       with compare-PI (heightS x) (heightS y) 
     ...| LT = diff-ins ⟨ x ⟩ y
     ...| EQ = diff-ins ⟨ x ⟩ y ++ diff-del x ⟨ y ⟩
     ...| GT = diff-del x ⟨ y ⟩
 
-    diff-del : ⟦ μσ ⟧S (Fix μσ) → Fix μσ → Alμ⋆
+    diff-del : ⟦ μσ ⟧S (Fix μσ) → Fix μσ → List ForkAlμ
     diff-del s₁ x₂ with sop s₁ 
     ... | tag C₁ p₁ = del C₁ <$> diffCtx x₂ p₁
 
-    diff-ins : Fix μσ → ⟦ μσ ⟧S (Fix μσ) → Alμ⋆
+    diff-ins : Fix μσ → ⟦ μσ ⟧S (Fix μσ) → List ForkAlμ
     diff-ins x₁ s₂ with sop s₂
     ... | tag C₂ p₂ = ins C₂ <$> diffCtx x₁ p₂
 
     {-# TERMINATING #-}
-    diffCtx : ∀ {π} → Fix μσ → ⟦ π ⟧P (Fix μσ) → List (Ctx⋆ π)
+    diffCtx : ∀ {π} → Fix μσ → ⟦ π ⟧P (Fix μσ) → List (ForkCtx π)
     diffCtx x₁ [] = []
     diffCtx {K _ ∷ _} x₁ (k₂ ∷ ats₂) 
       = there k₂ <$> diffCtx x₁ ats₂ 
     diffCtx {I ∷ _} x₁ (x₂ ∷ ats₂) 
-      = here (diffAlμ⋆ x₁ x₂) ats₂
+      = here (diffForkAlμ x₁ x₂) ats₂
       ∷ there x₂ <$> diffCtx x₁ ats₂
-
-  open import Regular.Internal.Fixpoint μσ as BASE
-    using ()
 
   S-map : {σ : Sum}
           {At₁ At₂ : Atom → Set}
@@ -129,19 +126,19 @@ module Regular.BetterEnum (μσ : Sum) where
 
 
   {-# TERMINATING #-}
-  crushAlμ : Alμ → BASE.Alμ
-  crushAlμ⋆ : Alμ⋆ → BASE.Alμ
-  crushCtx⋆ : ∀{π} → Ctx⋆ π → BASE.Ctx π
+  crushForkAlμ : ForkAlμ → Alμ
+  crush        : List ForkAlμ → Alμ
+  crushForkCtx : ∀{π} → ForkCtx π → Ctx π
 
-  crushAtμ⋆ : ∀{α} → Atμ⋆ α → BASE.Atμ α
-  crushAtμ⋆ (set x) = set x
-  crushAtμ⋆ (fix x) = fix (crushAlμ⋆ x )
+  crushForkAtμ : ∀{α} → ForkAtμ α → Atμ α
+  crushForkAtμ (set x) = set x
+  crushForkAtμ (fix x) = fix (crush x )
 
-  crushAlμ⋆ x = minOn BASE.costAlμ (List-map crushAlμ x)
+  crush x = minOn costAlμ (List-map crushForkAlμ x)
 
-  crushAlμ (spn x) = BASE.spn (S-map crushAtμ⋆ (λ ()) x)
-  crushAlμ (ins C spμ) = BASE.ins C (crushCtx⋆ spμ)
-  crushAlμ (del C spμ) = BASE.del C (crushCtx⋆ spμ)
+  crushForkAlμ (spn x) = spn (S-map crushForkAtμ (λ ()) x)
+  crushForkAlμ (ins C spμ) = ins C (crushForkCtx spμ)
+  crushForkAlμ (del C spμ) = del C (crushForkCtx spμ)
 
-  crushCtx⋆ (here spμ atμs) = BASE.here (crushAlμ⋆ spμ) atμs
-  crushCtx⋆ (there atμ ctx) = BASE.there atμ (crushCtx⋆ ctx)
+  crushForkCtx (here spμ atμs) = here (crush spμ) atμs
+  crushForkCtx (there atμ ctx) = there atμ (crushForkCtx ctx)
