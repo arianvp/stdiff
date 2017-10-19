@@ -139,6 +139,9 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
       = here (diffForkAlμ x₁ x₂) ats₂
       ∷ there x₂ <$> diffCtx x₁ ats₂
 
+  diffFork : Fix μσ → Fix μσ → List ForkAlμ
+  diffFork x y
+    = diffForkAlμ x y ++ diffForkAlμInsDel x y
   
   --
   -- Translating a ForkAlμ to a Alμ is easy,

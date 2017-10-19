@@ -105,8 +105,30 @@ module Regular.Lab.SExp where
   apply-commute-2 : applyAlμ (p-tmp p13) k2 ≡ just k4
   apply-commute-2 = refl
 
-  open import Regular.BetterEnum SExpF as BE
+  open import Regular.Internal.ForkEnum.FunctorFix SExpF as BE
     using ()
 
   p13* : Alμ
-  p13* = BE.crushAlμ⋆ (BE.diffAlμ⋆ k1 k3)
+  p13* = BE.crush (BE.diffForkAlμ k1 k3)
+
+  q1 q2 : SExp
+
+  q1 = Def "func" #
+      (N "import" ▹ (N "flag1" ▹ N "trash1" ▹ N "trash2" ▹ #)
+                  ▹ (N "flag2" ▹ N "keep1" ▹ N "keep2" ▹ #)
+                  ▹ (N "flag3" ▹ N "trash3" ▹ #)
+                  ▹ (N "flag4" ▹ N "keep4" ▹ #)
+                  ▹ (N "flag5" ▹ N "keep5" ▹ #)
+                  ▹ #)
+
+  q2 = Def "func" #
+      (N "import" ▹ (N "flag2" ▹ N "keep1" ▹ N "keep2" ▹ N "new" ▹ #)
+                  ▹ (N "flag4" ▹ N "keep4" ▹ #)
+                  ▹ (N "flag5" ▹ N "keep5" ▹ #)
+                  ▹ #)
+  
+  q12* : Alμ
+  q12* = BE.crush (BE.diffFork q1 q2)
+
+  q12*-cost : ℕ
+  q12*-cost = costAlμ q12*
