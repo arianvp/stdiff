@@ -103,12 +103,14 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
     diffForkAlμ : Fix μσ → Fix μσ → List ForkAlμ
     diffForkAlμ ⟨ x ⟩ ⟨ y ⟩ 
       with x ≟S y
-    ...| yes _ = spn Scp ∷ []
+    ...| yes _ 
+       = spn Scp ∷ []
     ...| no  _
       with sop x | sop y
     ...| tag cx dx | tag cy dy
       with cx ≟F cy
-    ...| yes refl = spn (Scns cx (All-map (λ axy → diffForkAtμ axy) (zipd dx dy))) ∷ []
+    ...| yes refl = spn (Scns cx (All-map (λ axy → diffForkAtμ axy) (zipd dx dy))) 
+                  ∷ diffForkAlμInsDel ⟨ x ⟩ ⟨ y ⟩
     ...| no  _    = diffForkAlμInsDel ⟨ x ⟩ ⟨ y ⟩
 
     diffForkAtμ : ∀{α} → ⟦ α ⟧A (Fix μσ) × ⟦ α ⟧A (Fix μσ) → ForkAtμ α
@@ -138,10 +140,6 @@ module Regular.Internal.ForkEnum.FunctorFix (μσ : Sum) where
     diffCtx {I ∷ _} x₁ (x₂ ∷ ats₂) 
       = here (diffForkAlμ x₁ x₂) ats₂
       ∷ there x₂ <$> diffCtx x₁ ats₂
-
-  diffFork : Fix μσ → Fix μσ → List ForkAlμ
-  diffFork x y
-    = diffForkAlμ x y ++ diffForkAlμInsDel x y
   
   --
   -- Translating a ForkAlμ to a Alμ is easy,

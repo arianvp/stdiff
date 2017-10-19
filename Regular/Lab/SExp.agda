@@ -115,20 +115,92 @@ module Regular.Lab.SExp where
 
   q1 = Def "func" #
       (N "import" ▹ (N "flag1" ▹ N "trash1" ▹ N "trash2" ▹ #)
-                  ▹ (N "flag2" ▹ N "keep1" ▹ N "keep2" ▹ #)
+                  ▹ (N "flag2" ▹ N "keep1" ▹ #)
                   ▹ (N "flag3" ▹ N "trash3" ▹ #)
                   ▹ (N "flag4" ▹ N "keep4" ▹ #)
                   ▹ (N "flag5" ▹ N "keep5" ▹ #)
                   ▹ #)
 
   q2 = Def "func" #
-      (N "import" ▹ (N "flag2" ▹ N "keep1" ▹ N "keep2" ▹ N "new" ▹ #)
+      (N "import" ▹ (N "flag2" ▹ N "keep1" ▹ N "new" ▹ #)
                   ▹ (N "flag4" ▹ N "keep4" ▹ #)
                   ▹ (N "flag5" ▹ N "keep5" ▹ #)
                   ▹ #)
+
+  q12-exp : Alμ
+  q12-exp = spn (Scns %def 
+                (set ("func" , "func") 
+                ∷ fix (spn Scp) 
+                ∷ fix (spn (Scns %cons 
+                      (fix (spn (Scns %name (set ("import" , "import") ∷ []))) 
+                      ∷ fix (del %cons (there (N "flag1" ▹ N "trash1" ▹ N "trash2" ▹ #)
+                                       (here (spn (Scns %cons 
+                        (fix (spn (Scns %cons 
+                          (fix (spn Scp) 
+                          ∷ fix (spn (Scns %cons 
+                              (fix (spn Scp) 
+                              ∷ fix (ins %cons (there (N "new") (here (spn Scp) []))) 
+                              ∷ []))) 
+                          ∷ []))) 
+                        ∷ fix (del %cons (there (N "flag3" ▹ N "trash3" ▹ #) 
+                                         (here (spn Scp) []))) 
+                        ∷ []))) []))) 
+                      ∷ []))) 
+                ∷ []))
+
+  q12-exp-correct : applyAlμ q12-exp q1 ≡ just q2
+  q12-exp-correct = refl
+  
+  q12-exp-cost : ℕ
+  q12-exp-cost = costAlμ q12-exp
   
   q12* : Alμ
-  q12* = BE.crush (BE.diffFork q1 q2)
+  q12* = BE.crush (BE.diffForkAlμ q1 q2)
 
   q12*-cost : ℕ
   q12*-cost = costAlμ q12*
+
+  s1 s2 : SExp
+
+  s1 = Def "func" #
+      (N "import" ▹ (N "trash1" ▹ #)
+                  ▹ (N "keep" ▹ #)
+                  ▹ (N "trash2" ▹ #)
+                  ▹ N "keep"
+                  ▹ #)
+
+  s2 = Def "func" #
+       (N "import" ▹ (N "keep" ▹ N "new" ▹ #)
+                  ▹ N "keep"
+                  ▹ #)
+
+  s12-exp : Alμ
+  s12-exp = spn (Scns %def 
+                (set ("func" , "func") 
+                ∷ fix (spn Scp) 
+                ∷ fix (spn (Scns %cons 
+                  (fix (spn Scp) 
+                  ∷ fix (del %cons (there (N "trash1" ▹ #) 
+                                   (here 
+                    (spn (Scns %cons 
+                         (fix (spn (Scns %cons 
+                              (fix (spn Scp) 
+                               ∷ fix (ins %cons (there (N "new") (here (spn Scp) []))) 
+                               ∷ []))) 
+                         ∷ fix (del %cons (there (N "trash2" ▹ #) 
+                                          (here (spn Scp) []))) 
+                         ∷ []))) []))) 
+                  ∷ [])))
+                ∷ []))
+
+  s12-exp-correct : applyAlμ s12-exp s1 ≡ just s2
+  s12-exp-correct = refl
+  
+  s12-exp-cost : ℕ
+  s12-exp-cost = costAlμ s12-exp
+  
+  s12* : List BE.ForkAlμ 
+  s12* =  (BE.diffForkAlμ s1 s2)
+
+  s12*-cost : ℕ
+  s12*-cost = costAlμ (BE.crush s12*)
