@@ -74,6 +74,7 @@ module DecEq {n : ℕ}(Rec : Setⁿ n)(_≟Rec_ : ∀{v}(x y : Rec v) → Dec (x
 Constr : {n : ℕ} → Sum n → Set
 Constr σ = Fin (length σ)
 
+
 typeOf : {n : ℕ}(σ : Sum n) → Constr σ → Prod n
 typeOf [] ()
 typeOf (π ∷ σ) zero = π
@@ -104,11 +105,26 @@ match C x with sop x
 Fam : ℕ → Set
 Fam n = Vec (Sum n) n
 
+⟦_⟧F : {n : ℕ} → Fam n → Fin n → Sum n
+⟦ φ ⟧F ν = Vec-lookup ν φ 
+
+-- * Easier to type Constr and typeOf
+
+Constr' : {n : ℕ} → Fam n → Fin n → Set
+Constr' φ ν = Constr (⟦ φ ⟧F ν)
+
+typeOf' : {n : ℕ}(φ : Fam n)(ν : Fin n) → Constr' φ ν → Prod n
+typeOf' φ ν C = typeOf (⟦ φ ⟧F ν) C
+
 data Fix {n : ℕ}(φ : Fam n) : Fin n → Set where
-  ⟨_⟩ : ∀{i} → ⟦ Vec-lookup i φ ⟧S (Fix φ) → Fix φ i
+  ⟨_⟩ : ∀{ν} → ⟦ ⟦ φ ⟧F ν ⟧S (Fix φ) → Fix φ ν
+
+unfix : ∀{n ν}{φ : Fam n} → Fix φ ν → ⟦ ⟦ φ ⟧F ν ⟧S (Fix φ)
+unfix ⟨ x ⟩ = x
 
 {-# TERMINATING #-}
 _≟Fix_ : ∀{n i}{φ : Fam n} → (x y : Fix φ i) → Dec (x ≡ y)
 _≟Fix_ {φ = φ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix φ) _≟Fix_ sx sy
 ... | yes refl = yes refl
 ... | no ¬p = no (λ { refl → ¬p refl })
+
