@@ -86,6 +86,7 @@ open import Data.Fin.Properties
 
 open import Data.Nat 
   renaming (_≟_ to _≟N_)
+  hiding (_⊓_)
   public
 
 open import Data.List

@@ -60,6 +60,12 @@ module Regular.ES.Fixpoint (σμ : Sum) where
   ⟦_⟧A* : List Atom → Set
   ⟦_⟧A* = All (λ α → ⟦ α ⟧A (Fix σμ))
 
+  -- Some 'sop' functionality to ease our life:
+  sop' : {α : Atom} → ⟦ α ⟧A (Fix σμ) → Σ (cof α) (⟦_⟧A* ∘ tyof α)
+  sop' {K κ} k   = k , []
+  sop' {I} ⟨ x ⟩ with sop x
+  ...| tag cx dx = cx , dx
+
   split-all : ∀{a}{A : Set a}{P : A → Set}(l l' : List A)
             → All P (l ++ l') → All P l × All P l'
   split-all []       l' xs = [] , xs
@@ -93,5 +99,21 @@ module Regular.ES.Fixpoint (σμ : Sum) where
   --
   --   We can translate ES a-la Lemsink to our
   --   patch datatype
+  --
+  --   The way to do so is to traverse the source and
+  --   destination trees together with their edit-script.
+  -- 
+  --   We start by defining the cost semantics and 
+  --   the '⊓' operation
+  --
+  
+  cost : ∀{txs tys} → ES txs tys → ℕ
+  cost nil        = 0
+  cost (ins c es) = 1 + cost es
+  cost (del c es) = 1 + cost es
+  cost (cpy c es) = 1 + cost es
 
-   
+  _⊓_ : ∀{txs tys} → ES txs tys → ES txs tys → ES txs tys
+  d₁ ⊓ d₂ with cost d₁ ≤? cost d₂
+  ...| yes _ = d₁
+  ...| no  _ = d₂

@@ -100,3 +100,10 @@ module Regular.Lab.2-3-Tree where
           (there ⟨ there (here (2 ∷ ⟨ here [] ⟩ ∷ ⟨ here [] ⟩ ∷ [])) ⟩
           (here (spn Scp) []))))
 
+
+  open import Regular.ES.Fixpoint 2-3-treeF
+  open import Regular.ES.MemoEnum 2-3-treeF
+
+  es23 : ES (I ∷ []) (I ∷ [])
+  es23 = getDiff (diffT (t₂ ∷ []) (t₃ ∷ []))
+  
