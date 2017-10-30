@@ -142,3 +142,26 @@ module Regular.Lab.SExp where
 
   j12-patch : Alμ
   j12-patch = AnnEnum.diffAlμ (extr j1ₐ) (extr j2ₐ)
+
+  j3 j4 : SExp
+  j3 = Def "lala" # (N "foo"
+     ▹  Def "lele" # (N "bar" ▹ N "baz"))
+
+  j4 = Def "lala" # (N "foo" ▹ (N "bar" ▹ N "baz"))
+
+  es34 : ES (I ∷ []) (I ∷ [])
+  es34 = cpy %def (cpy "lala" (cpy %nil 
+        (cpy %cons (cpy %name (cpy "foo" 
+        (del %def (del "lele" (del %nil 
+        (cpy %cons (cpy %name (cpy "bar" 
+        (cpy %name (cpy "baz" nil))))))))))))) 
+
+  j3ₐ j4ₐ : ⟦ I ∷ [] ⟧Aₐ*
+  j3ₐ = ann-source (j3 ∷ []) es34 (indeed (j4 ∷ []))
+  j4ₐ = ann-dest (j4 ∷ []) es34 (indeed (j3 ∷ []))
+
+  j34-patch : Alμ
+  j34-patch = AnnEnum.diffAlμ (extr j3ₐ) (extr j4ₐ)
+
+  test : applyAlμ j34-patch j3 ≡ just j4
+  test = refl
