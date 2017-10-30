@@ -25,6 +25,16 @@ module Regular.Internal.Functor
            (al : Al (typeOf σ C₁) (typeOf σ C₂)) →
            S At Al σ
 
+  S-map : {σ : Sum}
+           {At₁ At₂ : Atom → Set}
+           {Al₁ Al₂ : Rel Prod _}
+        → (At₁ ⊆ At₂)
+        → (∀{π₁ π₂} → Al₁ π₁ π₂ → Al₂ π₁ π₂)
+        → S At₁ Al₁ σ → S At₂ Al₂ σ
+  S-map f g Scp                 = Scp
+  S-map f g (Scns C ps)         = Scns C (All-map f ps)
+  S-map f g (Schg C₁ C₂ {q} al) = Schg C₁ C₂ {q} (g al)
+
 -- *** Spine application
 
   open import Data.Maybe using (monadPlus)
@@ -76,6 +86,15 @@ module Regular.Internal.Functor
     Adel : ∀ {α π₁ π₂} → ⟦ α ⟧A Rec → Al At π₁ π₂ → Al At (α ∷ π₁) π₂
     Ains : ∀ {α π₁ π₂} → ⟦ α ⟧A Rec → Al At π₁ π₂ → Al At π₁ (α ∷ π₂)
     AX : ∀{α π₁ π₂} → At α → Al At π₁ π₂ → Al At (α ∷ π₁) (α ∷ π₂)
+
+  al-map : ∀{π₁ π₂}
+            {At₁ At₂ : Atom → Set}
+          → (At₁ ⊆ At₂) 
+          → Al At₁ π₁ π₂ → Al At₂ π₁ π₂
+  al-map f A0 = A0
+  al-map f (Adel at al) = Adel at (al-map f al)
+  al-map f (Ains at al) = Ains at (al-map f al)
+  al-map f (AX at al) = AX (f at) (al-map f al)
 
 -- *** Alignment application
 

@@ -1,5 +1,6 @@
 open import Prelude
 open import Generic.Regular
+open import Generic.RegularAnn
 
 module Regular.Lab.SExp where
 
@@ -104,3 +105,40 @@ module Regular.Lab.SExp where
 
   apply-commute-2 : applyAlμ (p-tmp p13) k2 ≡ just k4
   apply-commute-2 = refl
+
+  open import Regular.ES.Fixpoint SExpF
+  open import Regular.ES.MemoEnum SExpF
+    as MemoEnum
+    using ()
+  open import Regular.ES.AnnEnum SExpF
+    as AnnEnum
+    using ()
+
+  
+  j1 j2 : SExp
+  
+  j1 = N "keep" ▹ (N "old" ▹ N "keep")
+
+  j2 = (N "keep" ▹ (N "new" ▹ N "keep")) 
+     ▹ (N "new" ▹ N "new")
+
+  es12 : ES (I ∷ []) (I ∷ [])
+  es12 = ins %cons 
+         (cpy %cons (cpy %name (cpy "keep" 
+         (cpy %cons (cpy %name (del "old" (ins "new" 
+         (cpy %name (cpy "keep" 
+         (ins %cons (ins %name (ins "new" 
+                    (ins %name (ins "new" nil))))))))))))))
+
+  j12-prf : applyES es12 (j1 ∷ []) ≡ just (j2 ∷ [])
+  j12-prf = refl 
+
+  j1ₐ j2ₐ : ⟦ I ∷ [] ⟧Aₐ*
+  j1ₐ = ann-source (j1 ∷ []) es12 (indeed (j2 ∷ []))
+  j2ₐ = ann-dest (j2 ∷ []) es12 (indeed (j1 ∷ []))
+
+  extr : ⟦ I ∷ [] ⟧Aₐ* → Fixₐ SExpF
+  extr (x ∷ []) = x
+
+  j12-patch : Alμ
+  j12-patch = AnnEnum.diffAlμ (extr j1ₐ) (extr j2ₐ)

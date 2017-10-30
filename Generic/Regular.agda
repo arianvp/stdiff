@@ -26,6 +26,20 @@ Sum = List Prod
 ⟦_⟧S : Sum → Set → Set
 ⟦ σ ⟧S X = Any (λ π → ⟦ π ⟧P X) σ
 
+-- ** Functoriality
+
+fmapA : ∀{α X Y}(f : X → Y) → ⟦ α ⟧A X → ⟦ α ⟧A Y
+fmapA {I}   f x = f x
+fmapA {K κ} f k = k
+
+fmapP : ∀{π X Y}(f : X → Y) → ⟦ π ⟧P X → ⟦ π ⟧P Y
+fmapP {[]}     _ _        = []
+fmapP {α ∷ πs} f (x ∷ xs) = fmapA {α} f x ∷ fmapP f xs
+
+fmapS : ∀{σ X Y}(f : X → Y) → ⟦ σ ⟧S X → ⟦ σ ⟧S Y
+fmapS f (here  px) = here  (fmapP f px)
+fmapS f (there px) = there (fmapS f px)
+
 -- ** Decidable equality
 
 module DecEq (Rec : Set)(_≟Rec_ : (x y : Rec) → Dec (x ≡ y)) where

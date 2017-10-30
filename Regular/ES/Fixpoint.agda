@@ -150,7 +150,7 @@ module Regular.ES.Fixpoint (σμ : Sum) where
   ann-source {tx ∷ txs} (x ∷ xs) (del c p) hip 
     with match' {tx} c x
   ...| nothing = ⊥-elim (IsJust-magic hip)
-  ...| just dx = insₐ* c D (ann-source (++-all (tyof tx c) txs dx xs) p hip)
+  ...| just dx = insₐ* c M (ann-source (++-all (tyof tx c) txs dx xs) p hip)
   ann-source {tx ∷ txs} (x ∷ xs) (cpy c p) hip 
     with match' {tx} c x
   ...| nothing = ⊥-elim (IsJust-magic hip)
@@ -164,7 +164,7 @@ module Regular.ES.Fixpoint (σμ : Sum) where
   ann-dest {_} {ty ∷ tys} (y ∷ ys) (ins c p) hip 
     with match' {ty} c y 
   ...| nothing = ⊥-elim (IsJust-magic hip)
-  ...| just dy = insₐ* c I (ann-dest (++-all (tyof ty c) tys dy ys) p hip)
+  ...| just dy = insₐ* c M (ann-dest (++-all (tyof ty c) tys dy ys) p hip)
   ann-dest {_} {ty ∷ tys} (y ∷ ys) (cpy c p) hip 
     with match' {ty} c y 
   ...| nothing = ⊥-elim (IsJust-magic hip)
