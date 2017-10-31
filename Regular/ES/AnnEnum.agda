@@ -25,6 +25,23 @@ module Regular.ES.AnnEnum (μσ : Sum) where
 
   extractAnn : ⟦ I ⟧A (Fixₐ μσ) → Ann
   extractAnn ⟨ a , _ ⟩ = a
+
+  hasCopy : ⟦ I ⟧A (Fixₐ μσ) → Bool
+  hasCopy = cataₐ gene
+    where
+      consumeP : ∀{π} → ⟦ π ⟧P Bool → Bool
+      consumeP [] = false
+      consumeP {K _ ∷ _} (x ∷ xs) = consumeP xs
+      consumeP {I   ∷ _} (true  ∷ xs) = true
+      consumeP {I   ∷ _} (false ∷ xs) = consumeP xs
+ 
+      consumeS : ∀{σ} → ⟦ σ ⟧S Bool → Bool
+      consumeS (there x) = consumeS x
+      consumeS (here x)  = consumeP x
+
+      gene : ∀{σ} → ⟦ σ ⟧Sₐ Bool → Bool
+      gene (C , x) = true
+      gene (M , x) = consumeS x
   
   align : ∀{π₁ π₂} → ⟦ π₁ ⟧P (Fixₐ μσ) → ⟦ π₂ ⟧P (Fixₐ μσ) 
         → Al TrivialAₐ π₁ π₂

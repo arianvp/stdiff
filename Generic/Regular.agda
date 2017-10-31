@@ -128,3 +128,7 @@ _≟Fix_ : {σ : Sum} → (x y : Fix σ) → Dec (x ≡ y)
 _≟Fix_ {σ = σ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix σ) _≟Fix_ sx sy
 ... | yes refl = yes refl
 ... | no ¬p    = no (λ { refl → ¬p refl })
+
+{-# TERMINATING #-}
+cata : ∀{σ A}(f : ⟦ σ ⟧S A → A) → Fix σ → A
+cata f  = (f ∘ fmapS (cata f)) ∘ unfix

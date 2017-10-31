@@ -17,6 +17,9 @@ data Ann : Set where
 ⟦_⟧Sₐ : Sum → Set → Set
 ⟦ σ ⟧Sₐ X = Ann × ⟦ σ ⟧S X
 
+fmapSₐ : ∀{σ X Y} → (X → Y) → ⟦ σ ⟧Sₐ X → ⟦ σ ⟧Sₐ Y
+fmapSₐ f (ann , x) = ann , fmapS f x
+
 data Fixₐ (σ : Sum) : Set where
   ⟨_⟩ : ⟦ σ ⟧Sₐ (Fixₐ σ) → Fixₐ σ 
 
@@ -24,10 +27,9 @@ data Fixₐ (σ : Sum) : Set where
 𝓤 : ∀{σ} → Fixₐ σ → Fix σ
 𝓤 ⟨ _ , x ⟩ = ⟨ fmapS 𝓤 x ⟩
 
-{-
-unfixₐ : {σ : Sum} → Fixₐ σ → ⟦ σ ⟧S (Fixₐ σ)
-unfixₐ ⟨ _ , x ⟩ = x
+unfixₐ : {σ : Sum} → Fixₐ σ → ⟦ σ ⟧Sₐ (Fixₐ σ)
+unfixₐ ⟨ ann , x ⟩ = ann , x
 
-fixₐ-unfixₐ-lemma : {σ : Sum}(x : Fixₐ σ) → ⟨ unfixₐ x ⟩ ≡ x
-fixₐ-unfixₐ-lemma ⟨ x ⟩ = refl
--}
+{-# TERMINATING #-}
+cataₐ : ∀{σ A} → (⟦ σ ⟧Sₐ A → A) → Fixₐ σ → A
+cataₐ f = f ∘ fmapSₐ (cataₐ f) ∘ unfixₐ
