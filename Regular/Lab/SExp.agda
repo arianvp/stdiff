@@ -107,6 +107,7 @@ module Regular.Lab.SExp where
   apply-commute-2 = refl
 
   open import Regular.ES.Fixpoint SExpF
+  open import Regular.ES.Annotate SExpF
   open import Regular.ES.MemoEnum SExpF
     as MemoEnum
     using ()
