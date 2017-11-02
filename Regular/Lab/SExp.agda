@@ -123,20 +123,32 @@ module Regular.Lab.SExp where
   j2 = (N "keep" ▹ (N "new" ▹ N "keep")) 
      ▹ (N "new" ▹ N "new")
 
-  es12 : ES (I ∷ []) (I ∷ [])
+  es12 es12' : ES (I ∷ []) (I ∷ [])
   es12 = ins %cons 
          (cpy %cons (cpy %name (cpy "keep" 
          (cpy %cons (cpy %name (del "old" (ins "new" 
          (cpy %name (cpy "keep" 
          (ins %cons (ins %name (ins "new" 
                     (ins %name (ins "new" nil))))))))))))))
+  
+  es12' = ins %cons 
+         (ins %cons (ins %name (ins "keep" 
+         (ins %cons (ins %name (ins "new" 
+         (ins %name (ins "keep" 
+         (ins %cons (ins %name (ins "new" 
+                    (ins %name (ins "new" 
+         (del %cons (del %name (del "keep" 
+         (del %cons (del %name (del "old" 
+                    (del %name (del "keep" nil)))))))))))))))))))))
+  
 
-  j12-prf : applyES es12 (j1 ∷ []) ≡ just (j2 ∷ [])
+
+  j12-prf : applyES es12' (j1 ∷ []) ≡ just (j2 ∷ [])
   j12-prf = refl 
 
   j1ₐ j2ₐ : ⟦ I ∷ [] ⟧Aₐ*
-  j1ₐ = ann-source (j1 ∷ []) es12 (indeed (j2 ∷ []))
-  j2ₐ = ann-dest (j2 ∷ []) es12 (indeed (j1 ∷ []))
+  j1ₐ = ann-source (j1 ∷ []) es12' (indeed (j2 ∷ []))
+  j2ₐ = ann-dest (j2 ∷ []) es12' (indeed (j1 ∷ []))
 
   extr : ⟦ I ∷ [] ⟧Aₐ* → Fixₐ SExpF
   extr (x ∷ []) = x
