@@ -62,7 +62,7 @@ module Regular.ES.Fixpoint (σμ : Sum) where
   cost nil        = 0
   cost (ins c es) = 1 + cost es
   cost (del c es) = 1 + cost es
-  cost (cpy c es) = 1 + cost es
+  cost (cpy c es) = cost es
 
   _⊓_ : ∀{txs tys} → ES txs tys → ES txs tys → ES txs tys
   d₁ ⊓ d₂ with cost d₁ ≤? cost d₂
