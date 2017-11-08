@@ -8,20 +8,18 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   open import Regular.Internal.Fixpoint μσ
   open DecEq (Fix μσ) _≟Fix_
 
+  -- * Datatypes Adapted to receive the annotated fixpoint.
+
   TrivialAₐ : Atom → Set
   TrivialAₐ α = ⟦ α ⟧A (Fixₐ μσ) × ⟦ α ⟧A (Fixₐ μσ)
 
   TrivialPₐ : Rel Prod _
   TrivialPₐ π₁ π₂ = ⟦ π₁ ⟧P (Fixₐ μσ) × ⟦ π₂ ⟧P (Fixₐ μσ)
 
-  spine : ∀ {σ} → ⟦ σ ⟧S (Fixₐ μσ) → ⟦ σ ⟧S (Fixₐ μσ) 
-        → S TrivialAₐ TrivialPₐ σ
-  spine s₁ s₂ with fmapS 𝓤 s₁ ≟S fmapS 𝓤 s₂
-  ...| yes _ = Scp
-  ...| no ¬p  with sop s₁ | sop s₂
-  ...| tag C₁ p₁ | tag C₂ p₂ with C₁ ≟F C₂
-  ...| yes refl = Scns C₁ (zipd p₁ p₂)
-  ...| no ¬q = Schg C₁ C₂ {¬q} (p₁ , p₂)
+  -- * Manipulating annotations and retrieving data from them;
+  --
+  --   We are mainly interested in retrieving how many copies and
+  --   how many moves we have per subtree.
 
   extractAnn : ⟦ I ⟧A (Fixₐ μσ) → Ann
   extractAnn ⟨ a , _ ⟩ = a
@@ -42,7 +40,18 @@ module Regular.ES.AnnEnum (μσ : Sum) where
       gene : ∀{σ} → ⟦ σ ⟧Sₐ Bool → Bool
       gene (C , x) = true
       gene (M , x) = consumeS x
-  
+
+  -- * Converting two annotated fixpoints into a patch
+ 
+  spine : ∀ {σ} → ⟦ σ ⟧S (Fixₐ μσ) → ⟦ σ ⟧S (Fixₐ μσ) 
+        → S TrivialAₐ TrivialPₐ σ
+  spine s₁ s₂ with fmapS 𝓤 s₁ ≟S fmapS 𝓤 s₂
+  ...| yes _ = Scp
+  ...| no ¬p  with sop s₁ | sop s₂
+  ...| tag C₁ p₁ | tag C₂ p₂ with C₁ ≟F C₂
+  ...| yes refl = Scns C₁ (zipd p₁ p₂)
+  ...| no ¬q = Schg C₁ C₂ {¬q} (p₁ , p₂)
+ 
   align : ∀{π₁ π₂} → ⟦ π₁ ⟧P (Fixₐ μσ) → ⟦ π₂ ⟧P (Fixₐ μσ) 
         → Al TrivialAₐ π₁ π₂
   align  [] [] = A0

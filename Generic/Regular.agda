@@ -40,6 +40,32 @@ fmapS : ∀{σ X Y}(f : X → Y) → ⟦ σ ⟧S X → ⟦ σ ⟧S Y
 fmapS f (here  px) = here  (fmapP f px)
 fmapS f (there px) = there (fmapS f px)
 
+-- ** Consuming the recursive positions under a monoid.
+--    WARNING: We are ignoring the constant types here!
+--
+module RegularConsume (𝕄 : Monoid lz lz) where
+
+  M : Set
+  M = Monoid.Carrier 𝕄
+
+  ε : M
+  ε = Monoid.ε 𝕄
+
+  _∙_ : M → M → M
+  _∙_ = Monoid._∙_ 𝕄
+
+  consumeA : ∀{α} → ⟦ α ⟧A M → M
+  consumeA {K _} _ = ε
+  consumeA {I}   x = x
+
+  consumeP : ∀{π} → ⟦ π ⟧P M → M
+  consumeP {[]}    []       = ε
+  consumeP {α ∷ π} (a ∷ ps) = consumeA {α} a ∙ consumeP ps
+
+  consumeS : ∀{σ} → ⟦ σ ⟧S M → M
+  consumeS (here p)  = consumeP p
+  consumeS (there s) = consumeS s
+
 -- ** Decidable equality
 
 module DecEq (Rec : Set)(_≟Rec_ : (x y : Rec) → Dec (x ≡ y)) where

@@ -9,6 +9,14 @@ open import Function
   hiding (_⟨_⟩_)
   public
 
+open import Algebra
+  using ( Semigroup; CommutativeMonoid; Monoid)
+  public
+
+open import Algebra.Structures
+  using ( IsSemigroup; IsCommutativeMonoid; IsMonoid)
+  public
+
 open import Category.Monad
   public
 
@@ -128,7 +136,6 @@ all-foldr : {A : Set}{P : A → Set}{X : List A → Set}
           → All P l → X l
 all-foldr f g [] = g
 all-foldr {A} {P} {X} f g (x ∷ xs) = f x (all-foldr {A} {P} {X} f g xs)
-
 
 zipd : {A : Set}{P Q : A → Set}{xs : List A} 
      → All P xs → All Q xs → All (λ x → P x × Q x) xs
