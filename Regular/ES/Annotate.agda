@@ -65,10 +65,3 @@ module Regular.ES.Annotate (σμ : Sum) where
     with match' {ty} c y 
   ...| nothing = ⊥-elim (IsJust-magic hip)
   ...| just dy = insₐ* c C (ann-dest (++-all (tyof ty c) tys dy ys) p (IsJust-unmap hip))
-
-
-  -- ** We say a source and a destination are linked
-  --    by an edit script if applying this edit script
-  --    to the source gives the destination; When this is
-  --    the case the number of copies on both annotations
-  --    is the same!

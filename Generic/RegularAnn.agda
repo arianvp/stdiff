@@ -34,6 +34,10 @@ unfixₐ ⟨ ann , x ⟩ = ann , x
 cataₐ : ∀{σ A} → (⟦ σ ⟧Sₐ A → A) → Fixₐ σ → A
 cataₐ f = f ∘ fmapSₐ (cataₐ f) ∘ unfixₐ
 
+-- Handy projection
+extractAnn : ∀{σ} → ⟦ I ⟧A (Fixₐ σ) → Ann
+extractAnn ⟨ a , _ ⟩ = a
+
 -- ** Annotation Counter
 --
 --    Ideally, we'd keep this data with the annotations themselves,

@@ -16,31 +16,6 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   TrivialPₐ : Rel Prod _
   TrivialPₐ π₁ π₂ = ⟦ π₁ ⟧P (Fixₐ μσ) × ⟦ π₂ ⟧P (Fixₐ μσ)
 
-  -- * Manipulating annotations and retrieving data from them;
-  --
-  --   We are mainly interested in retrieving how many copies and
-  --   how many moves we have per subtree.
-
-  extractAnn : ⟦ I ⟧A (Fixₐ μσ) → Ann
-  extractAnn ⟨ a , _ ⟩ = a
-
-  hasCopy : ⟦ I ⟧A (Fixₐ μσ) → Bool
-  hasCopy = cataₐ gene
-    where
-      consumeP : ∀{π} → ⟦ π ⟧P Bool → Bool
-      consumeP [] = false
-      consumeP {K _ ∷ _} (x ∷ xs) = consumeP xs
-      consumeP {I   ∷ _} (true  ∷ xs) = true
-      consumeP {I   ∷ _} (false ∷ xs) = consumeP xs
- 
-      consumeS : ∀{σ} → ⟦ σ ⟧S Bool → Bool
-      consumeS (there x) = consumeS x
-      consumeS (here x)  = consumeP x
-
-      gene : ∀{σ} → ⟦ σ ⟧Sₐ Bool → Bool
-      gene (C , x) = true
-      gene (M , x) = consumeS x
-
   -- * Converting two annotated fixpoints into a patch
  
   spine : ∀ {σ} → ⟦ σ ⟧S (Fixₐ μσ) → ⟦ σ ⟧S (Fixₐ μσ) 
@@ -99,9 +74,17 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   diff-ins : Fixₐ μσ → ⟦ μσ ⟧S (Fixₐ μσ) → Alμ
   diff-mod : ⟦ μσ ⟧S (Fixₐ μσ) → ⟦ μσ ⟧S (Fixₐ μσ) → Alμ
 
-  diffAlμ ⟨ M , x ⟩ ⟨ ay , y ⟩ = diff-del x ⟨ ay , y ⟩
-  diffAlμ ⟨ C , x ⟩ ⟨ M  , y ⟩ = diff-ins ⟨ C , x ⟩ y
-  diffAlμ ⟨ C , x ⟩ ⟨ C , y ⟩  = diff-mod x y
+{-
+  diffAlμ ⟨ M , x ⟩ ⟨ M , y ⟩ 
+    with count x | count y 
+  ...| Cx , Mx | Cy , My = {!!}
+  diffAlμ ⟨ M , x ⟩ ⟨ C , y ⟩ = diff-del x ⟨ C , y ⟩
+  diffAlμ ⟨ C , x ⟩ ⟨ M , y ⟩ = diff-ins ⟨ C , x ⟩ y
+  diffAlμ ⟨ C , x ⟩ ⟨ C , y ⟩ = diff-mod x y
+-}
+
+  diffAlμ x y with count x | count y
+  ...| Cx , Mx | Cy , My = {!!}
 
   diff-del s₁ x₂ with sop s₁
   ...| tag C₁ p₁ = del C₁ (diffCtx x₂ p₁)
@@ -112,4 +95,3 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   diff-mod s₁ s₂ 
     = spn (S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align) 
           (spine s₁ s₂))
-
