@@ -16,6 +16,33 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   TrivialPₐ : Rel Prod _
   TrivialPₐ π₁ π₂ = ⟦ π₁ ⟧P (Fixₐ μσ) × ⟦ π₂ ⟧P (Fixₐ μσ)
 
+  -- * If a given subtree has no more copies, we can only resort
+  --   to Schg to produce a patch; We call this the stiff patch.
+  --
+  --   One option would be to fall back to the diff algorithm that enumerates
+  --   all possibilities and choose the one with the least cost.
+  
+  {-# TERMINATING #-}
+  stiff : Fix μσ → Fix μσ → Alμ 
+  stiff ⟨ x ⟩ ⟨ y ⟩ = spn (stiffS x y)
+    where 
+      mutual
+        stiffAt : ∀{α}(x y : ⟦ α ⟧A (Fix μσ)) → Atμ α
+        stiffAt {K _} x y = set (x , y)
+        stiffAt {I}   x y = fix (stiff x y)
+
+        stiffS : ∀{σ}(x y : ⟦ σ ⟧S (Fix μσ)) → S Atμ (Al Atμ) σ
+        stiffS x y with sop x | sop y
+        ...| tag Cx Dx | tag Cy Dy with Cx ≟F Cy
+        ...| yes refl = Scns Cx (All-map (uncurry stiffAt) (zipd Dx Dy)) 
+        ...| no  prf  = Schg Cx Cy {prf} (stiffAl Dx Dy)
+
+        stiffAl : ∀{π₁ π₂} → ⟦ π₁ ⟧P (Fix μσ) → ⟦ π₂ ⟧P (Fix μσ) → Al Atμ π₁ π₂
+        stiffAl []       []       = A0
+        stiffAl (p ∷ ps) []       = Adel p (stiffAl ps [])
+        stiffAl []       (q ∷ qs) = Ains q (stiffAl [] qs)
+        stiffAl (p ∷ ps) (q ∷ qs) = Ains q (Adel p (stiffAl ps qs))
+
   -- * Converting two annotated fixpoints into a patch
  
   spine : ∀ {σ} → ⟦ σ ⟧S (Fixₐ μσ) → ⟦ σ ⟧S (Fixₐ μσ) 
@@ -83,8 +110,7 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   diffAlμ ⟨ C , x ⟩ ⟨ C , y ⟩ = diff-mod x y
 -}
 
-  diffAlμ x y with count x | count y
-  ...| Cx , Mx | Cy , My = {!!}
+  diffAlμ x y = {!!}
 
   diff-del s₁ x₂ with sop s₁
   ...| tag C₁ p₁ = del C₁ (diffCtx x₂ p₁)

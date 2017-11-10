@@ -48,7 +48,7 @@ extractAnn ⟨ a , _ ⟩ = a
 --    
 --    Moreover, here we can focus on the method.
 
-
+{-
 record AnnCounter : Set where
   constructor _,_
   field
@@ -125,3 +125,4 @@ sumₐ (x ∷ xs) = x +ₐ sumₐ xs
 count*-lemma : ∀{σ}(ann : Ann)(x : ⟦ σ ⟧S (Fixₐ σ))
              → count ⟨ ann , x ⟩ ≡ count1 ann +ₐ sumₐ (count* x)
 count*-lemma ann x = theMagic
+-}
