@@ -32,11 +32,61 @@ unfixₐ ⟨ ann , x ⟩ = ann , x
 
 {-# TERMINATING #-}
 cataₐ : ∀{σ A} → (⟦ σ ⟧Sₐ A → A) → Fixₐ σ → A
-cataₐ f = f ∘ fmapSₐ (cataₐ f) ∘ unfixₐ
+cataₐ f ⟨ ann , x ⟩ = f (ann , fmapS (cataₐ f) x)
 
 -- Handy projection
 extractAnn : ∀{σ} → ⟦ I ⟧A (Fixₐ σ) → Ann
 extractAnn ⟨ a , _ ⟩ = a
+
+
+module AnnCounter where
+
+  open import Data.Nat.Properties using (+-0-monoid)
+  open RegularConsume +-0-monoid
+
+  count-Ann : Ann → ℕ
+  count-Ann C = 1
+  count-Ann M = 0
+
+  count-C : ∀{σ} → Fixₐ σ → ℕ
+  count-C = cataₐ (λ { (ann , s) → count-Ann ann + consumeS s })
+  
+  count-CS : ∀{σ₁ σ₂} → ⟦ σ₁ ⟧S (Fixₐ σ₂) → ℕ
+  count-CS = consumeS ∘ fmapS count-C
+
+  count-CA : ∀{σ α} → ⟦ α ⟧A (Fixₐ σ) → ℕ
+  count-CA {σ} {α} = consumeA {α} ∘ fmapA {α} count-C
+{-
+  count-CA {_} {K _} _ = 0
+  count-CA {_} {I}   x = count-C x
+-}
+{-
+  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) 
+           → All (λ α → Σ (⟦ α ⟧A (Fixₐ σ) × ℕ) 
+                          (λ { (a , an) → count-CA {α = α} a ≡ an } )) π
+  count-C*             []       = []
+  count-C* {σ} {α ∷ π} (a ∷ ps) 
+    = let an = count-CA {σ} {α} a
+       in ((a , an) , refl) ∷ count-C* ps
+-}
+  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → All (λ _ → ℕ) π
+  count-C* {σ} = All-map (λ {α} → count-CA {σ} {α})
+
+  count-C*-sum : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → ℕ
+  count-C*-sum = all-foldr _+_ 0 ∘ count-C*
+
+  count-CS≡C*-lemma
+    : ∀{σ₁ σ₂}(C : Constr σ₁)(p : ⟦ typeOf σ₁ C ⟧P (Fixₐ σ₂))
+    → count-CS {σ₁} {σ₂} (inj C p) ≡ count-C*-sum p
+  count-CS≡C*-lemma {[]} () p
+  count-CS≡C*-lemma {σ ∷ σs} (suc c) p = count-CS≡C*-lemma {σs} c p
+  count-CS≡C*-lemma {σ ∷ σs} zero p    
+    = auxP p
+    where
+      auxP : ∀{σ π}(p : ⟦ π ⟧P (Fixₐ σ))
+           → consumeP (fmapP count-C p) ≡ count-C*-sum p
+      auxP []       = refl
+      auxP (px ∷ p) rewrite auxP p = refl
 
 -- ** Annotation Counter
 --

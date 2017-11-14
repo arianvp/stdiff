@@ -41,7 +41,10 @@ module Regular.ES.AnnEnum (μσ : Sum) where
         stiffAl []       []       = A0
         stiffAl (p ∷ ps) []       = Adel p (stiffAl ps [])
         stiffAl []       (q ∷ qs) = Ains q (stiffAl [] qs)
-        stiffAl (p ∷ ps) (q ∷ qs) = Ains q (Adel p (stiffAl ps qs))
+        stiffAl {α₁ ∷ π₁} {α₂ ∷ π₂} (p ∷ ps) (q ∷ qs)
+          with α₁ ≟Atom α₂
+        ...| no _     = Ains q (Adel p (stiffAl ps qs))
+        ...| yes refl = AX (stiffAt p q) (stiffAl ps qs)
 
   -- * Converting two annotated fixpoints into a patch
  
@@ -79,44 +82,59 @@ module Regular.ES.AnnEnum (μσ : Sum) where
   ...| C | M = Ains (fmapA {I} 𝓤 at₂) (align (at₁ ∷ ats₁) ats₂) 
   ...| C | C = AX (at₁ , at₂) (align ats₁ ats₂)
 
+  open AnnCounter
+
   {-# TERMINATING #-}
-  diffCtx : ∀ {π} → Fixₐ μσ → ⟦ π ⟧P (Fixₐ μσ) → Ctx π
+  diffCtx : ∀ {π} → Fixₐ μσ → (z : ⟦ π ⟧P (Fixₐ μσ)) → 1 ≤ count-C*-sum z → Ctx π
   diffAlμ : Fixₐ μσ → Fixₐ μσ → Alμ
 
   diffAtμ : ∀{α} → ⟦ α ⟧A (Fixₐ μσ) → ⟦ α ⟧A (Fixₐ μσ) → Atμ α
   diffAtμ {K κ} x y = set (x , y)
   diffAtμ {I}   x y = fix (diffAlμ x y)
 
-  diffCtx x₁ [] 
+  diffCtx x₁ [] hip
     = magic
     where postulate magic : Ctx []
-  diffCtx {K _ ∷ _} x₁ (k₂ ∷ ats₂) 
-    = there k₂ (diffCtx x₁ ats₂) 
-  diffCtx {I ∷ _}   x₁ (x₂ ∷ ats₂) 
+  diffCtx {K _ ∷ _} x₁ (k₂ ∷ ats₂) hip
+    = there k₂ (diffCtx x₁ ats₂ {!!}) 
+  diffCtx {I ∷ _}   x₁ (x₂ ∷ ats₂) hip
     with extractAnn x₂ 
-  ...| M = there (fmapA {I} 𝓤 x₂) (diffCtx x₁ ats₂) 
+  ...| M = there (fmapA {I} 𝓤 x₂) (diffCtx x₁ ats₂ {!!}) 
   ...| C = here (diffAlμ x₁ x₂) (All-map (λ {α} → fmapA {α} 𝓤) ats₂)
 
-  diff-del : ⟦ μσ ⟧S (Fixₐ μσ) → Fixₐ μσ → Alμ
-  diff-ins : Fixₐ μσ → ⟦ μσ ⟧S (Fixₐ μσ) → Alμ
+  diff-del : (z : ⟦ μσ ⟧S (Fixₐ μσ)) → Fixₐ μσ → 1 ≤ count-CS z → Alμ
+  diff-ins : Fixₐ μσ → (z : ⟦ μσ ⟧S (Fixₐ μσ)) → 1 ≤ count-CS z → Alμ
   diff-mod : ⟦ μσ ⟧S (Fixₐ μσ) → ⟦ μσ ⟧S (Fixₐ μσ) → Alμ
 
-{-
-  diffAlμ ⟨ M , x ⟩ ⟨ M , y ⟩ 
-    with count x | count y 
-  ...| Cx , Mx | Cy , My = {!!}
-  diffAlμ ⟨ M , x ⟩ ⟨ C , y ⟩ = diff-del x ⟨ C , y ⟩
-  diffAlμ ⟨ C , x ⟩ ⟨ M , y ⟩ = diff-ins ⟨ C , x ⟩ y
-  diffAlμ ⟨ C , x ⟩ ⟨ C , y ⟩ = diff-mod x y
--}
+  -- Runs a given computation if a tree has some copy annotations;
+  -- keeps a proof of that handy.
+  if-has-copies 
+    : ∀{a}{A : Set a}(z : ⟦ μσ ⟧S (Fixₐ μσ))
+    → (1 ≤ count-CS z → A)
+    → (0 ≡ count-CS z → A)
+    → A
+  if-has-copies z th el with count-CS z | inspect count-CS z
+  ...| zero   | [ CZ ] = el refl
+  ...| suc cz | [ CZ ] = th (s≤s z≤n)
 
-  diffAlμ x y = {!!}
+  diffAlμ ⟨ M , x ⟩ ⟨ ay , y ⟩ 
+    = if-has-copies x 
+         (diff-del x ⟨ ay , y ⟩) 
+         (λ prf → stiff ⟨ fmapS 𝓤 x ⟩ ⟨ fmapS 𝓤 y ⟩)
+  diffAlμ ⟨ C , x ⟩ ⟨ M  , y ⟩ 
+    = if-has-copies y 
+         (diff-ins ⟨ C , x ⟩ y) 
+         (λ prf → stiff ⟨ fmapS 𝓤 x ⟩ ⟨ fmapS 𝓤 y ⟩)
+  diffAlμ ⟨ C , x ⟩ ⟨ C  , y ⟩ 
+    = diff-mod x y
 
-  diff-del s₁ x₂ with sop s₁
-  ...| tag C₁ p₁ = del C₁ (diffCtx x₂ p₁)
+  diff-del s₁ x₂ hip with sop s₁
+  ...| tag C₁ p₁ 
+     = del C₁ (diffCtx x₂ p₁ (subst (λ P → 1 ≤ P) (count-CS≡C*-lemma {μσ} C₁ p₁) hip))
 
-  diff-ins x₁ s₂ with sop s₂
-  ...| tag C₂ p₂ = ins C₂ (diffCtx x₁ p₂) 
+  diff-ins x₁ s₂ hip with sop s₂
+  ...| tag C₂ p₂ 
+     = ins C₂ (diffCtx x₁ p₂ (subst (λ P → 1 ≤ P) (count-CS≡C*-lemma {μσ} C₂ p₂) hip)) 
 
   diff-mod s₁ s₂ 
     = spn (S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align) 
