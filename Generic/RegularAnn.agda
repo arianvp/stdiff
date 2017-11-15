@@ -56,24 +56,13 @@ module AnnCounter where
 
   count-CA : ∀{σ α} → ⟦ α ⟧A (Fixₐ σ) → ℕ
   count-CA {σ} {α} = consumeA {α} ∘ fmapA {α} count-C
-{-
-  count-CA {_} {K _} _ = 0
-  count-CA {_} {I}   x = count-C x
--}
-{-
-  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) 
-           → All (λ α → Σ (⟦ α ⟧A (Fixₐ σ) × ℕ) 
-                          (λ { (a , an) → count-CA {α = α} a ≡ an } )) π
-  count-C*             []       = []
-  count-C* {σ} {α ∷ π} (a ∷ ps) 
-    = let an = count-CA {σ} {α} a
-       in ((a , an) , refl) ∷ count-C* ps
--}
-  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → All (λ _ → ℕ) π
-  count-C* {σ} = All-map (λ {α} → count-CA {σ} {α})
+
+  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → Vec ℕ (length π)
+  count-C* {σ}         []       = []
+  count-C* {σ} {α ∷ π} (a ∷ ps) = count-CA {σ} {α} a ∷ count-C* ps
 
   count-C*-sum : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → ℕ
-  count-C*-sum = all-foldr _+_ 0 ∘ count-C*
+  count-C*-sum = vec-foldr _+_ 0 ∘ count-C*
 
   count-CS≡C*-lemma
     : ∀{σ₁ σ₂}(C : Constr σ₁)(p : ⟦ typeOf σ₁ C ⟧P (Fixₐ σ₂))
@@ -88,91 +77,22 @@ module AnnCounter where
       auxP []       = refl
       auxP (px ∷ p) rewrite auxP p = refl
 
--- ** Annotation Counter
---
---    Ideally, we'd keep this data with the annotations themselves,
---    as we don't want to keep recalculating things.
---    For modelling, however, we have the burden of proof;
---    it's easier to recalculate these monsters and produce proofs
---    then to keep carrying proofs around.
---    
---    Moreover, here we can focus on the method.
+  count-C*-sum-base-lemma
+    : ∀{σ α}(p : ⟦ α ⟧A (Fixₐ σ))
+    → count-C*-sum {σ} {α ∷ []} (p ∷ []) ≡ count-CA {σ} {α} p
+  count-C*-sum-base-lemma p 
+    = theMagic
+    where postulate theMagic : ∀{a}{A : Set a} → A
 
-{-
-record AnnCounter : Set where
-  constructor _,_
-  field
-    count-C : ℕ
-    count-M : ℕ
-
-open AnnCounter
-
-0ₐ : AnnCounter
-0ₐ = 0 , 0
-
-count1 : Ann → AnnCounter
-count1 C = 1 , 0
-count1 M = 0 , 1
-
-infixr 6 _+ₐ_
-_+ₐ_ : AnnCounter → AnnCounter → AnnCounter 
-(c₁ , m₁) +ₐ (c₂ , m₂) = (c₁ + c₂ , m₁ + m₂)
-
--- * Monoidal structure
-
-postulate
-  theMagic : ∀{a}{A : Set a} → A
-
-+ₐ-isSemigroup : IsSemigroup _≡_ _+ₐ_
-+ₐ-isSemigroup = record
-  { isEquivalence = isEquivalence
-  ; assoc         = theMagic
-  ; ∙-cong        = cong₂ _+ₐ_
-  }
-
-+ₐ-semigroup : Semigroup _ _
-+ₐ-semigroup = record { isSemigroup = +ₐ-isSemigroup }
-
-+ₐ-0ₐ-isCommutativeMonoid : IsCommutativeMonoid _≡_ _+ₐ_ 0ₐ
-+ₐ-0ₐ-isCommutativeMonoid = record
-  { isSemigroup = +ₐ-isSemigroup
-  ; identityˡ   = theMagic
-  ; comm        = theMagic
-  }
-
-+ₐ-0ₐ-monoid : Monoid _ _
-+ₐ-0ₐ-monoid = record { isMonoid = IsCommutativeMonoid.isMonoid +ₐ-0ₐ-isCommutativeMonoid }
-
-+ₐ-0ₐ-commutativeMonoid : CommutativeMonoid _ _
-+ₐ-0ₐ-commutativeMonoid = record { isCommutativeMonoid = +ₐ-0ₐ-isCommutativeMonoid }
-
--- * Computing Annotation Counters from generic trees.
-
-open RegularConsume +ₐ-0ₐ-monoid
-
--- We can count all the M's and C's in a tree
-count : ∀{σ} → Fixₐ σ → AnnCounter
-count = cataₐ gene
-  where
-    gene : ∀{σ} → ⟦ σ ⟧Sₐ AnnCounter → AnnCounter
-    gene (ann , s) = count1 ann +ₐ consumeS s
-
--- Or we can count all the M's and C's in the underlying trees.
-count* : ∀{σ} → ⟦ σ ⟧S (Fixₐ σ) → List AnnCounter
-count* {σ} x with sop x
-...| tag Cx Dx = all-foldr (λ {α} a xs → gene {σ} {α} a ∷ xs) [] Dx
-  where
-    gene : ∀{σ α} → ⟦ α ⟧A (Fixₐ σ) → AnnCounter
-    gene {_} {K _} a = 0ₐ
-    gene {_} {I}   x = count x
-
--- The relation between both is obvious;
-
-sumₐ : List AnnCounter → AnnCounter
-sumₐ []       = 0ₐ
-sumₐ (x ∷ xs) = x +ₐ sumₐ xs
-
-count*-lemma : ∀{σ}(ann : Ann)(x : ⟦ σ ⟧S (Fixₐ σ))
-             → count ⟨ ann , x ⟩ ≡ count1 ann +ₐ sumₐ (count* x)
-count*-lemma ann x = theMagic
--}
+  count-maxCS-CA-lemma
+    : ∀{σ π α}(p : ⟦ α ⟧A (Fixₐ σ))(ps : ⟦ π ⟧P (Fixₐ σ))
+    → 1 ≤ count-C*-sum {σ} {α ∷ π} (p ∷ ps)
+    → let α₀ , a₀ = all-lookup (vec-max (count-C* {σ} {α ∷ π} (p ∷ ps))) 
+                               (_∷_ {x = α} p ps)
+       in 1 ≤ count-CA {σ} {α₀} a₀
+  count-maxCS-CA-lemma {σ} {_} {α} p [] hip 
+    rewrite count-C*-sum-base-lemma {σ} {α} p = hip
+  count-maxCS-CA-lemma {σ} {α₁ ∷ π} {α₂} p (px ∷ ps) hip 
+    with vec-max (count-CA {σ} {α₁} px ∷ count-C* ps)
+  ...| mi = theMagic
+    where postulate theMagic : ∀{a}{A : Set a} → A

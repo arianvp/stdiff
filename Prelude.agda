@@ -84,7 +84,7 @@ open import Data.Bool
   public
 
 open import Data.Fin 
-  using (Fin ; suc ; zero)
+  using (Fin ; suc ; zero; inject₁)
   public
 
 open import Data.Fin.Properties 
@@ -121,6 +121,19 @@ open import Data.Vec
   renaming (map to Vec-map ; lookup to Vec-lookup)
   public
 
+vec-foldr : ∀{a b}{A : Set a}{B : Set b}{n : ℕ}
+          → (A → B → B) → B → Vec A n → B
+vec-foldr f g []       = g
+vec-foldr f g (x ∷ xs) = f x (vec-foldr f g xs)
+
+vec-max : ∀{n} → Vec ℕ (suc n) → Fin (suc n)
+vec-max (x ∷ [])     = zero
+vec-max {suc n} (x ∷ y ∷ ys) with vec-max (y ∷ ys)
+...| my with x ≤? Vec-lookup my (y ∷ ys) 
+...| yes _ = suc my
+...| no _  = inject₁ my
+
+
 -- * Misc. Library functions
 
 _≟Str_ : (x y : String) → Dec (x ≡ y)
@@ -136,6 +149,12 @@ all-foldr : {A : Set}{P : A → Set}{X : List A → Set}
           → All P l → X l
 all-foldr f g [] = g
 all-foldr {A} {P} {X} f g (x ∷ xs) = f x (all-foldr {A} {P} {X} f g xs)
+
+all-lookup : {A : Set}{P : A → Set}{l : List A}
+           → Fin (length l) → All P l → ∃ (λ a → P a)
+all-lookup () []
+all-lookup {l = l ∷ ls} zero      (px ∷ a) = l , px
+all-lookup {l = l ∷ ls} (suc idx) (px ∷ a) = all-lookup idx a
 
 zipd : {A : Set}{P Q : A → Set}{xs : List A} 
      → All P xs → All Q xs → All (λ x → P x × Q x) xs
