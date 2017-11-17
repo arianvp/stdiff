@@ -2,7 +2,7 @@ open import Prelude
 open import Generic.Regular
 open import Generic.RegularAnn
 
-module Regular.ES.AnnEnum (μσ : Sum) where
+module Regular.ES.Annotate.Enum (μσ : Sum) where
 
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Internal.Fixpoint μσ
