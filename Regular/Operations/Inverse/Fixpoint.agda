@@ -14,6 +14,7 @@ module Regular.Operations.Inverse.Fixpoint (μσ : Sum) where
   invCtx (there at  δ)    = there at (invCtx δ)
 
   open import Regular.Operations.Inverse.Functor (Fix μσ) _≟Fix_ Alμ invAlμ
+    public
   
   invAlμ (spn s)   = spn (invS s)
   invAlμ (ins C δ) = del C (invCtx δ)
