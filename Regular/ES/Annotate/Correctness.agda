@@ -28,6 +28,12 @@ module Regular.ES.Annotate.Correctness (μσ : Sum) where
     → IsJust (⟪ getCtx δ ⟫μ x)
   IsJust-ins⇒getCtx C₁ δ x hip = {!!}
 
+  IsJust-del⇒getCtx
+    : (C₁ : Constr μσ)(δ : Ctx (typeOf μσ C₁))(x : Fix μσ)
+    → IsJust (⟪ invAlμ (del C₁ δ) ⟫μ x)
+    → IsJust (⟪ invAlμ (getCtx δ) ⟫μ x)
+  IsJust-del⇒getCtx = {!!}
+
   -- * First we use a patch between a value x and y
   --   to generate annotated versions of x and y;
   --   After, we prove that extracting a patch
@@ -148,7 +154,7 @@ module Regular.ES.Annotate.Correctness (μσ : Sum) where
 
   -- ** Annotating Products with Contexts
   annP-dst : ∀{π}(x : ⟦ π ⟧P (Fix μσ))(δ : Ctx π)
-           → (hip : IsJust {!!})
+           → (hip : IsJust (matchCtx (invCtx δ) x))
            → ⟦ π ⟧P (Fixₐ μσ)
   annP-dst {I ∷ π} (x ∷ xs) (here spμ atμs) hip 
     = annAlμ-dst x spμ {!!} ∷ All-map (λ {α} → annAt-all {α} M) xs
@@ -158,14 +164,9 @@ module Regular.ES.Annotate.Correctness (μσ : Sum) where
   -- ** Actual definition, closing the mutual recursion.
   annAlμ-dst ⟨ x ⟩ (spn sp) hip     
     = ⟨ C , annS-dst x sp (IsJust-unmap hip) ⟩
-  annAlμ-dst ⟨ x ⟩ (ins C₁ spμ) hip = {!!}
-{-
-    = annAlμ-dst ⟨ x ⟩ (getCtx spμ) (IsJust-ins⇒getCtx C₁ spμ ⟨ x ⟩ hip)
--}
-  annAlμ-dst ⟨ x ⟩ (del C₁ spμ) hip  = {!!}
-{-
-with sop x
-  ...| tag Cₓ Pₓ with C₁ ≟F Cₓ 
-  ...| no  abs  = ⊥-elim (IsJust-magic hip)
+  annAlμ-dst ⟨ x ⟩ (ins C₁ spμ) hip with sop x
+  ...| tag Cₓ Pₓ with C₁ ≟F Cₓ
+  ...| no _     = ⊥-elim (IsJust-magic hip)
   ...| yes refl = ⟨ M , inj Cₓ (annP-dst Pₓ spμ hip) ⟩
--}  
+  annAlμ-dst ⟨ x ⟩ (del C₁ spμ) hip 
+    = annAlμ-dst ⟨ x ⟩ (getCtx spμ) (IsJust-del⇒getCtx C₁ spμ ⟨ x ⟩ hip)
