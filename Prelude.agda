@@ -47,6 +47,7 @@ dec-refl _≟_ x with x ≟ x
 ...| yes refl = refl
 
 open import Data.Product
+  renaming (map to _><_)
   public
 
 open import Data.Sum

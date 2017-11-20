@@ -138,11 +138,11 @@ module Regular.Internal.Functor
 
 -- * Mixing Everything
 
-  applySAlAt : ∀{PatchRec}{σ : Sum}(applyR : PatchRec → Rec → Maybe Rec) 
+  applyPatch : ∀{PatchRec}{σ : Sum}(applyR : PatchRec → Rec → Maybe Rec) 
              → S (At PatchRec) (Al (At PatchRec)) σ
              → ⟦ σ ⟧S Rec
              → Maybe (⟦ σ ⟧S Rec)
-  applySAlAt applyR = applyS (applyAt applyR) (applyAl (applyAt applyR))
+  applyPatch applyR = applyS (applyAt applyR) (applyAl (applyAt applyR))
 
 -- * Some renamings
 
