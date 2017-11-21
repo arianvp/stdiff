@@ -2,7 +2,7 @@ open import Prelude
 open import Generic.Regular
 open import Generic.RegularAnn
 
-module Regular.ES.Annotate.Correctness (μσ : Sum) where
+module Regular.ES.Annotate.FromPatch (μσ : Sum) where
 
   open import Regular.Functor (Fix μσ) _≟Fix_
   open import Regular.Fixpoint μσ
