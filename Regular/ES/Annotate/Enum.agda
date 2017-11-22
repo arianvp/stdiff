@@ -141,9 +141,12 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
        in diffCtxMax cid x₁ (at₂ ∷ ats₂) (vec-max cs) 
                      (count-maxCS-CA-lemma {μσ} {π} {α} at₂ ats₂ hip)
 
+  diffS : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S (Fixₐ μσ)) → Patch Alμ σ
+  diffS s₁ s₂ = S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align)
+                      (spine s₁ s₂)
+
   diff-del : (z : ⟦ μσ ⟧S (Fixₐ μσ)) → Fixₐ μσ → 1 ≤ count-CS z → Alμ
   diff-ins : Fixₐ μσ → (z : ⟦ μσ ⟧S (Fixₐ μσ)) → 1 ≤ count-CS z → Alμ
-  diff-mod : ⟦ μσ ⟧S (Fixₐ μσ) → ⟦ μσ ⟧S (Fixₐ μσ) → Alμ
 
   -- Runs a given computation if a tree has some copy annotations;
   -- keeps a proof of that handy.
@@ -156,16 +159,20 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   ...| zero   | [ CZ ] = el refl
   ...| suc cz | [ CZ ] = th (s≤s z≤n)
 
-  diffAlμ ⟨ M , x ⟩ ⟨ ay , y ⟩ 
+  diffAlμ ⟨ M , x ⟩ ⟨ M , y ⟩ 
     = if-has-copies x 
-         (diff-del x ⟨ ay , y ⟩) 
+         (diff-del x ⟨ M , y ⟩) 
+         (λ prf → stiff ⟨ fmapS 𝓤 x ⟩ ⟨ fmapS 𝓤 y ⟩)
+  diffAlμ ⟨ M , x ⟩ ⟨ C , y ⟩ 
+    = if-has-copies x 
+         (diff-del x ⟨ C , y ⟩) 
          (λ prf → stiff ⟨ fmapS 𝓤 x ⟩ ⟨ fmapS 𝓤 y ⟩)
   diffAlμ ⟨ C , x ⟩ ⟨ M  , y ⟩ 
     = if-has-copies y 
          (diff-ins ⟨ C , x ⟩ y) 
          (λ prf → stiff ⟨ fmapS 𝓤 x ⟩ ⟨ fmapS 𝓤 y ⟩)
   diffAlμ ⟨ C , x ⟩ ⟨ C  , y ⟩ 
-    = diff-mod x y
+    = spn (diffS x y)
 
   diff-del s₁ x₂ hip with sop s₁
   ...| tag C₁ p₁ 
@@ -176,7 +183,3 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   ...| tag C₂ p₂ 
      = ins C₂ (diffCtx CtxIns x₁ p₂ 
                 (subst (λ P → 1 ≤ P) (count-CS≡C*-lemma {μσ} C₂ p₂) hip)) 
-
-  diff-mod s₁ s₂ 
-    = spn (S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align) 
-          (spine s₁ s₂))

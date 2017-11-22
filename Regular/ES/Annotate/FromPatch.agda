@@ -7,6 +7,7 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
   open import Regular.Functor (Fix μσ) _≟Fix_
   open import Regular.Fixpoint μσ
   open import Regular.Operations.Inverse.Fixpoint μσ
+  open import Regular.Operations.Inverse.Correctness.Fixpoint μσ
 
   open DecEq (Fix μσ) _≟Fix_
   open FixpointApplication
@@ -223,3 +224,19 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
   ...| yes refl = ⟨ M , inj Cₓ (annP-dst Pₓ spμ hip) ⟩
   annAlμ-dst ⟨ x ⟩ (del C₁ spμ) hip 
     = annAlμ-dst ⟨ x ⟩ (getCtx spμ) (IsJust-del⇒getCtx C₁ spμ ⟨ x ⟩ hip)
+
+  -- * Annotating both source and destination together
+
+  annAlμ : (x y : Fix μσ)(p : Alμ)(hip : ⟪ p ⟫μ x ≡ just y)
+         → Fixₐ μσ × Fixₐ μσ
+  annAlμ x y p hip 
+    = annAlμ-src x p (IsJust-from≡ hip)
+    , annAlμ-dst y p (IsJust-from≡ (invAlμ-correct x y p hip))
+
+  annS : ∀{σ}(x y : ⟦ σ ⟧S (Fix μσ))(p : Patch Alμ σ)
+       → (hip : ⟪ p ⟫S x ≡ just y)
+       → ⟦ σ ⟧S (Fixₐ μσ) × ⟦ σ ⟧S (Fixₐ μσ) 
+  annS x y p hip 
+    = annS-src x p (IsJust-from≡ hip)
+    , annS-dst y p (IsJust-from≡ (invS-correct x y p hip))
+    

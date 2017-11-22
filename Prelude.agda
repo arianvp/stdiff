@@ -79,6 +79,18 @@ IsJust-magic ()
 IsJust-ext : ∀{a}{A : Set a}{x : Maybe A} → IsJust x → ∃ (λ k → x ≡ just k)
 IsJust-ext (indeed x) = x , refl
 
+IsJust-from≡ : ∀{a}{A : Set a}{x : Maybe A}{y : A}
+             → x ≡ just y → IsJust x
+IsJust-from≡ {y = y} refl = indeed y
+
+just-inj : ∀{a}{A : Set a}{x y : A} 
+         → _≡_ {A = Maybe A} (just x) (just y) → x ≡ y
+just-inj refl = refl
+
+Maybe-⊥-elim : ∀{a b}{A : Set a}{B : Set b}{x : A} 
+             → _≡_ {A = Maybe A} nothing (just x) → B
+Maybe-⊥-elim () 
+
 open import Data.Bool
   using (Bool ; true ; false) 
   renaming (_≟_ to _≟B_)
@@ -107,6 +119,12 @@ open import Data.List.All
   using (All ; _∷_ ; []) 
   renaming (map to All-map)
   public
+
+All-∷-inj 
+  : ∀{a}{A : Set a}{P : A → Set}{x : A}{xs : List A}
+  → {px py : P x}{pxs pys : All P xs}
+  → _≡_ {A = All P (x ∷ xs)} (px ∷ pxs) (py ∷ pys) → px ≡ py × pxs ≡ pys
+All-∷-inj refl = refl , refl
 
 open import Data.List.Any
   hiding (map)
