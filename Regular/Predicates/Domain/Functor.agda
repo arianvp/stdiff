@@ -26,7 +26,7 @@ module Regular.Predicates.Domain.Functor
 
   []       ∈domAl A0          = Unit
   p        ∈domAl (Ains x al) = p  ∈domAl al
-  (p ∷ ps) ∈domAl (Adel x al) = ps ∈domAl al
+  (p ∷ ps) ∈domAl (Adel x al) = p ≡ x × ps ∈domAl al
   (p ∷ ps) ∈domAl (AX at  al) = p ∈domAt at × ps ∈domAl al 
 
   a ∈domAt set (k₁ , k₂) 

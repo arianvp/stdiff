@@ -9,6 +9,8 @@ module Regular.Predicates.Domain.Correctness.Fixpoint (μσ : Sum) where
   open import Regular.Predicates.Domain.Correctness.Functor 
     (Fix μσ) _≟Fix_ Alμ applyAlμ _∈domAlμ_
 
+  open DecEq (Fix μσ) _≟Fix_
+
   {-# TERMINATING #-}
   domAlμ-ok : (x : Fix μσ)(alμ : Alμ)(hip : x ∈domAlμ alμ)
             → IsJust (applyAlμ alμ x)
@@ -19,10 +21,12 @@ module Regular.Predicates.Domain.Correctness.Fixpoint (μσ : Sum) where
   domInCtx-ok x (there _ ctx)   hip = IsJust-map (domInCtx-ok x ctx hip)
 
   domMatchCtx-ok : ∀{π}(x : ⟦ π ⟧P (Fix μσ))(ctx : Ctx π)
-                   (hip : (selectP x ctx ∈domAlμ (getCtx ctx))) 
+                   (hip : x ∈domCtx ctx) 
                  → IsJust (matchCtx ctx x)
-  domMatchCtx-ok (x ∷ _)  (here spμ _)  hip = domAlμ-ok x spμ hip
-  domMatchCtx-ok (_ ∷ xs) (there _ ctx) hip = domMatchCtx-ok xs ctx hip
+  domMatchCtx-ok (x ∷ xs)  (here spμ .xs) (h₀ , refl) 
+    rewrite dec-refl _≟P_ xs = domAlμ-ok x spμ h₀
+  domMatchCtx-ok (x ∷ xs) (there {α} .x ctx) (refl , h₁)
+    rewrite dec-refl (_≟A_ {α}) x = domMatchCtx-ok xs ctx h₁
 
   domAlμ-ok ⟨ x ⟩ (spn sp) hip    
     = IsJust-map (domS-ok domAlμ-ok x sp hip)

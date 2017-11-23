@@ -11,6 +11,8 @@ module Regular.Predicates.Domain.Correctness.Functor
     where
 
   open import Regular.Internal.Functor Rec _≟Rec_
+  open DecEq Rec _≟Rec_
+
   open import Regular.Predicates.Domain.Functor Rec _≟Rec_ PatchRec applyRec _∈domRec_
 
 
@@ -50,7 +52,8 @@ module Regular.Predicates.Domain.Correctness.Functor
   domAl-ok []       A0           hip = indeed []
   domAl-ok []       (Ains a' al) hip = IsJust-map (domAl-ok [] al hip)
   domAl-ok (a ∷ as) (Ains a' al) hip = IsJust-map (domAl-ok (a ∷ as) al hip)
-  domAl-ok (a ∷ as) (Adel a' al) hip = domAl-ok as al hip
+  domAl-ok (a ∷ as) (Adel {α} a' al) (refl , hip) 
+    rewrite dec-refl (_≟A_ {α}) a = domAl-ok as al hip
   domAl-ok (a ∷ as) (AX   at al) (hipAt , hipAl) 
     with IsJust-ext (domAt-ok a at hipAt) 
        | IsJust-ext (domAl-ok as al hipAl)
