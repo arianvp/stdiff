@@ -87,9 +87,8 @@ module Regular.Internal.Functor
     = (a' ∷_) <$> applyAl applyAt al p
   applyAl applyAt (AX at al)   (a ∷ as) 
     = _∷_ <$> applyAt at a ⊛ applyAl applyAt al as
-  -- XXX: should we check whether a' == a or ignore this?
-  applyAl applyAt (Adel a' al) (a ∷ as) 
-    = applyAl applyAt al as
+  applyAl applyAt (Adel {α} a' al) (a ∷ as) 
+    = Dec-to-Maybe (_≟A_ {α} a' a) >> applyAl applyAt al as
 
   costAl : ∀{π₁ π₂ At} 
           → (costAt : ∀ {α} → At α → ℕ) 

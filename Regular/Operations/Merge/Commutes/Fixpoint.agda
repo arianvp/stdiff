@@ -11,6 +11,8 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
   open import Regular.Predicates.Identity.Fixpoint μσ
   open import Regular.Predicates.Disjoint.Fixpoint μσ
   open import Regular.Operations.Merge.Fixpoint μσ
+
+  open DecEq (Fix μσ) _≟Fix_
   
   -- * Symmetry of disjAlμ
   open DisjSymmetry
@@ -120,7 +122,7 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
                (applyAlμ alμ' x)
                (mergeAlμ-commute alμ alμ' hip x)
     with applyAlμ alμ' x
-  ...| nothing = refl
+  ...| nothing = refl 
   ...| just x' 
     rewrite makeidAllAt-uni rest rest
     with ⟪ mergeAlμ alμ' alμ (disjAlμ-sym alμ alμ' hip) ⟫μ x'
@@ -157,27 +159,63 @@ module Regular.Operations.Merge.Commutes.Fixpoint (μσ : Sum) where
     → ∀ x → (matchCtx (mergeAtCtx atμs ctx hip) ∙ ⟪ atμs ⟫SP) x
           ≡ (⟪ mergeCtxAt ctx atμs (disjAtCtx-sym atμs ctx hip) ⟫μ ∙ matchCtx ctx) x
   mergeAtCtx-commute (fix atμ ∷ atμs) (here sμ rest) (h , hip) (x ∷ xs)
+    with rest ≟P xs | inspect (_≟P_ rest) xs
+  ...| no _ | [ rest≢xs ]
     rewrite mergeAlμ-commute sμ atμ (disjAlμ-sym atμ sμ h) x
     with applyAlμ atμ x
   ...| nothing = refl
   ...| just x' 
     rewrite disjAlμ-sym-inv atμ sμ h
           | identityAllAtμ-uni atμs hip xs
+          | rest≢xs 
           = refl
+  mergeAtCtx-commute (fix atμ ∷ atμs) (here sμ rest) (h , hip) (x ∷ xs)
+    | yes _ | [ rest≡xs ]
+    rewrite mergeAlμ-commute sμ atμ (disjAlμ-sym atμ sμ h) x
+    with applyAlμ atμ x
+  ...| nothing = refl
+  ...| just x' 
+    rewrite disjAlμ-sym-inv atμ sμ h
+          | identityAllAtμ-uni atμs hip xs
+          | rest≡xs 
+          = refl
+
   mergeAtCtx-commute (set (k , _) ∷ atμs) (there a ctx)  (refl , hip) (x ∷ xs)
+    with a ≟K x | inspect (_≟K_ a) x
+  ...| no _ | [ a≢x ]
     with k ≟K k
   ...| no abs   = ⊥-elim (abs refl)
   ...| yes refl 
     rewrite sym (mergeAtCtx-commute atμs ctx hip xs) 
     with ⟪ atμs ⟫SP xs
   ...| nothing  = refl
-  ...| just xs' = refl
+  ...| just xs' rewrite a≢x = refl 
+  mergeAtCtx-commute (set (k , _) ∷ atμs) (there a ctx)  (refl , hip) (x ∷ xs)
+     | yes _ | [ a≡x ]
+     with k ≟K k
+  ...| no abs   = ⊥-elim (abs refl)
+  ...| yes refl 
+    rewrite sym (mergeAtCtx-commute atμs ctx hip xs) 
+    with ⟪ atμs ⟫SP xs
+  ...| nothing  = refl
+  ...| just xs' rewrite a≡x = refl
+   
   mergeAtCtx-commute (fix alμ ∷ atμs) (there a ctx)  (h , hip) (x ∷ xs)
+    with a ≟Fix x | inspect (_≟Fix_ a) x
+  ...| no _ | [ a≢x ]
+    rewrite identityAlμ-correct alμ h x 
+          | sym (mergeAtCtx-commute atμs ctx hip xs) 
+    with ⟪ atμs ⟫SP xs
+  ...| nothing  = refl 
+  ...| just xs' rewrite a≢x = refl
+  mergeAtCtx-commute (fix alμ ∷ atμs) (there a ctx)  (h , hip) (x ∷ xs)
+    | yes _ | [ a≡x ]
     rewrite identityAlμ-correct alμ h x 
           | sym (mergeAtCtx-commute atμs ctx hip xs) 
     with ⟪ atμs ⟫SP xs
   ...| nothing  = refl
-  ...| just xs' = refl
+  ...| just xs' rewrite a≡x = refl
+
 
   mergeCtxAt-commute
     : ∀{π}(ctx : Ctx π)(atμs : All Atμ π)

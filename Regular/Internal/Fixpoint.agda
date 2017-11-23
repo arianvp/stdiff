@@ -57,8 +57,10 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
   inCtx (here spμ atμs) x = Maybe-map (λ x → x ∷ atμs) (applyAlμ spμ x)
   inCtx (there atμ al) x = Maybe-map (λ ats → atμ ∷ ats) (inCtx al x)
 
-  matchCtx (here spμ atμs) (x ∷ p) = applyAlμ spμ x 
-  matchCtx (there {α} atμ al) (at ∷ p) = matchCtx al p
+  matchCtx (here spμ atμs) (x ∷ p) 
+    = Dec-to-Maybe (atμs ≟P p) >> applyAlμ spμ x 
+  matchCtx (there {α} atμ al) (at ∷ p) 
+    = Dec-to-Maybe (_≟A_ {α} atμ at) >> matchCtx al p
   
   applyAtμ = applyAt applyAlμ 
 
