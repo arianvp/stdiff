@@ -22,6 +22,7 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
   --   trees, we'll get that same patch back
   --   when diffing the two annotated trees. 
   
+  {-# TERMINATING #-}
   sound : (x y : Fix μσ)(p : Alμ)(hip : ⟪ p ⟫μ x ≡ just y)
         → let x' , y' = annAlμ x y p hip
            in diffAlμ x' y' ≡ p
@@ -41,6 +42,7 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
   ...| yes refl = {!!}
   ...| no  ¬q   = {!!}
 
-  sound ⟨ x ⟩ ⟨ y ⟩ (spn s) hip = cong spn {!!}
+  sound ⟨ x ⟩ ⟨ y ⟩ (spn s) hip 
+    = cong spn {!!}
   sound ⟨ x ⟩ ⟨ y ⟩ (ins C₁ δ) hip = {!!}
-  sound x y (del C₁ δ) hip = {!!}
+  sound ⟨ x ⟩ ⟨ y ⟩ (del C₁ δ) hip = {!!}

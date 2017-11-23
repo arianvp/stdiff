@@ -91,6 +91,21 @@ Maybe-⊥-elim : ∀{a b}{A : Set a}{B : Set b}{x : A}
              → _≡_ {A = Maybe A} nothing (just x) → B
 Maybe-⊥-elim () 
 
+Maybe-map-def : ∀{a b}{A : Set a}{B : Set b}{f : A → B}
+              → (x : Maybe A){y : A}
+              → x ≡ just y
+              → Maybe-map f x ≡ just (f y)
+Maybe-map-def nothing ()
+Maybe-map-def (just y) refl = refl 
+
+Maybe-unmap-def : ∀{a b}{A : Set a}{B : Set b}{f : A → B}
+                → (f-inj : ∀{m n} → f m ≡ f n → m ≡ n)
+                → (x : Maybe A){y : A}
+                → Maybe-map f x ≡ just (f y)
+                → x ≡ just y
+Maybe-unmap-def f-inj nothing ()
+Maybe-unmap-def f-inj (just y) hip = cong just (f-inj (just-inj hip)) 
+
 open import Data.Bool
   using (Bool ; true ; false) 
   renaming (_≟_ to _≟B_)
@@ -129,6 +144,13 @@ All-∷-inj refl = refl , refl
 open import Data.List.Any
   hiding (map)
   public
+
+Any-there-inj
+  : ∀{a}{A : Set a}{P : A → Set}{x : A}{xs : List A}
+  → {px py : Any P xs}
+  → _≡_ {A = Any P (x ∷ xs)} (there px) (there py)
+  → px ≡ py
+Any-there-inj refl = refl
 
 open import Data.String
   using (String ; primStringEquality)
