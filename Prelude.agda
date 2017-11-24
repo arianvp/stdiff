@@ -59,6 +59,10 @@ open import Data.Maybe
   renaming (map to Maybe-map)
   public
 
+Dec-to-Maybe : ∀{a}{A : Set a} → Dec A → Maybe A
+Dec-to-Maybe (no _)  = nothing
+Dec-to-Maybe (yes a) = just a
+
 data IsJust {α}{A : Set α} : Maybe A → Set where
   indeed : (x : A) → IsJust (just x)
 

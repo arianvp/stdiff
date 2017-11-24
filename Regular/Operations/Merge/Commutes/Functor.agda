@@ -24,6 +24,8 @@ module Regular.Operations.Merge.Commutes.Functor
   open import Regular.Operations.Merge.Functor
                 Rec _≟Rec_ PatchRec makeidR identityR disjRec mergeRec
 
+  open DecEq Rec _≟Rec_
+
   -- * Disjointness is symmetric
   open DisjSymmetry disjRecSym disjRecSymInv
 
@@ -283,17 +285,27 @@ module Regular.Operations.Merge.Commutes.Functor
             | merge-Al-At-commute al (a ∷ as) hip (x ∷ xs)
             | identityAt-correct {α} (makeidAt at) (makeidAt-correct {α} at) at 
       with ⟪ a ⟫A x
-    ...| nothing = refl
+    ...| nothing = refl 
     ...| just x' 
       with ⟪ as ⟫SP xs
     ...| nothing  = refl
     ...| just xs' = refl 
-    merge-Al-At-commute (Adel at al) (a ∷ as) (h0 , h1) (x ∷ xs) 
+    merge-Al-At-commute (Adel {α} at al) (a ∷ as) (h0 , h1) (x ∷ xs)
+      with _≟A_ {α} at x | inspect (_≟A_ {α} at) x
+    ...| no  _ | [ AT≢X ]
       rewrite identityAt-correct a h0 x
             | merge-Al-At-commute al as h1 xs
       with ⟪ as ⟫SP xs
-    ...| nothing = refl
-    ...| just xs' = refl
+    ...| nothing  = refl
+    ...| just xs' rewrite AT≢X = refl
+    merge-Al-At-commute (Adel {α} at al) (a ∷ as) (h0 , h1) (x ∷ xs)
+       | yes _ | [ AT≡X ] 
+      rewrite identityAt-correct a h0 x
+            | merge-Al-At-commute al as h1 xs
+      with ⟪ as ⟫SP xs
+    ...| nothing  = refl
+    ...| just xs' rewrite AT≡X = refl
+
     merge-Al-At-commute {α ∷ π₁} {π₂} (AX {α = α'} {π₂ = π₂'} at al) (a ∷ as) (h0 , h1) (x ∷ xs) 
       rewrite distr {l = α} {α'} {α'}
                     ⟪ at ⟫A ⟪ al ⟫P
