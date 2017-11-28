@@ -24,7 +24,11 @@ module Regular.Predicates.Applies.Functor
              → At PatchRec α 
              → Set 
       where
-    AppSet : ∀{κ}(k₁ k₂ : ⟦ κ ⟧K) → AppAt k₁ k₂ (set (k₁ , k₂))
+    AppSet : ∀{κ}(k₁ k₂ : ⟦ κ ⟧K)(q : k₁ ≢ k₂) 
+           → AppAt k₁ k₂ (set (k₁ , k₂))
+  
+    AppSetId : ∀{κ}(k a : ⟦ κ ⟧K)
+             → AppAt a a (set (k , k))
 
     AppFix : (r₁ r₂ : Rec)(p : PatchRec)
            → AppRec r₁ r₂ p
@@ -51,11 +55,11 @@ module Regular.Predicates.Applies.Functor
             → AppAl xs ys al
             → AppAl xs (y ∷ ys) (Ains {α = α} y al)
 
-    AppAdel : ∀{α π₁ π₂}(x : ⟦ α ⟧A Rec)
+    AppAdel : ∀{α π₁ π₂}(x x' : ⟦ α ⟧A Rec)
             → (xs : ⟦ π₁ ⟧P Rec)(ys : ⟦ π₂ ⟧P Rec)
             → (al : Al (At PatchRec) π₁ π₂)
             → AppAl xs ys al
-            → AppAl (x ∷ xs) ys (Adel {α = α} x al)
+            → AppAl (x ∷ xs) ys (Adel {α = α} x' al)
 
   data AppS : {σ : Sum} 
             → ⟦ σ ⟧S Rec → ⟦ σ ⟧S Rec 
