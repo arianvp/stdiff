@@ -46,6 +46,25 @@ i)  Linear patches are easy to compute and hard to merge
 ii) Tree-structured patches are hard to compute but easy to merge;
 iii) Computing a linear patch and translating to a tree-structured patch
      might just be the solution.
+     
+### Sub-branches
+
+  1) The 'master' of this development.
+  
+  2) Tried to mimick the annotation structure of 
+     the linear patches: one annotation function for the source and
+     another for the dest, carying a proof that those elements
+     were applicable to the patch (and it's inverse).
+     Did not really work and required a lot of work
+     on the inverse of a Patch, which is something we don't really
+     want to porsue.
+     
+  3) Will look into making a relation that lets pattern matching
+     be easier; The relation should be:
+     
+     ```
+     Applies x p y <==> apply p x == just y
+     ```
 
 ## identity-postulate-removal
 
