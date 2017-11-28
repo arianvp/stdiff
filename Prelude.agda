@@ -28,6 +28,7 @@ open import Relation.Unary
   public
 
 open import Relation.Binary.PropositionalEquality
+  renaming (proof-irrelevance to ≡-pi)
   public
 
 open import Relation.Binary
@@ -39,6 +40,7 @@ open import Data.Unit.NonEta
 
 open import Data.Empty
   public
+
 
 dec-refl : ∀{a}{A : Set a}(_≟_ : (a₁ a₂ : A) → Dec (a₁ ≡ a₂))(x : A)
          → (x ≟ x) ≡ yes refl
@@ -87,6 +89,11 @@ IsJust-from≡ : ∀{a}{A : Set a}{x : Maybe A}{y : A}
              → x ≡ just y → IsJust x
 IsJust-from≡ {y = y} refl = indeed y
 
+IsJust-pi : ∀{a}{A : Set a}{x : Maybe A}
+          → (p q : IsJust x) → p ≡ q
+IsJust-pi {x = nothing} () ()
+IsJust-pi {x = just x} (indeed .x) (indeed .x) = refl
+
 just-inj : ∀{a}{A : Set a}{x y : A} 
          → _≡_ {A = Maybe A} (just x) (just y) → x ≡ y
 just-inj refl = refl
@@ -133,6 +140,11 @@ open import Data.List
   using (List ; _∷_ ; [] ; length)
   renaming (map to List-map ; zip to List-zip)
   public
+
+open import Data.List.Properties
+  using ()
+  renaming (∷-injective to ∷-inj)
+  public 
 
 open import Data.List.All
   using (All ; _∷_ ; []) 

@@ -42,7 +42,24 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
   ...| yes refl = {!!}
   ...| no  ¬q   = {!!}
 
-  sound ⟨ x ⟩ ⟨ y ⟩ (spn s) hip 
-    = cong spn {!!}
-  sound ⟨ x ⟩ ⟨ y ⟩ (ins C₁ δ) hip = {!!}
+  sound ⟨ x ⟩ ⟨ y ⟩ (spn s) hip
+    with Maybe-unmap-def ⟨⟩-inj (⟪ s ⟫S x) hip
+  ...| h = cong spn (subst₂ (λ P Q → diffS (annS-src x s P) (annS-dst y s Q) ≡ s)
+                    (IsJust-pi (IsJust-from≡ h) (IsJust-unmap (IsJust-from≡ hip))) 
+                    (IsJust-pi (IsJust-from≡ (invS-correct x y s h)) 
+                               (IsJust-unmap (IsJust-from≡ 
+                                 (invAlμ-correct ⟨ x ⟩ ⟨ y ⟩ (spn s) hip)))) 
+                    (sound-S x y s h))
+{-
+    with Maybe-unmap-def ⟨⟩-inj (⟪ s ⟫S x) hip
+  ...| h = {!!}
+-}
+{-
+    rewrite sound-S x y s (Maybe-unmap-def {f = ⟨_⟩} ⟨⟩-inj (⟪ s ⟫S x) hip)
+      = {!!}
+-}
+  sound ⟨ x ⟩ ⟨ y ⟩ (ins C₁ δ) hip with sop y
+  ...| tag Cy Py with C₁ ≟F Cy
+  ...| no _ = {!!}
+  ...| yes refl = {!cong (ins Cy)!}
   sound ⟨ x ⟩ ⟨ y ⟩ (del C₁ δ) hip = {!!}

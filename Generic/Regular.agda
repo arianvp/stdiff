@@ -144,6 +144,14 @@ inj-inj {π ∷ σ} {C₁ = suc c1} {suc c2} hip
   with inj-inj {σ} {C₁ = c1} {c2} (Any-there-inj hip) 
 ...| refl , p1≡p2 = refl , p1≡p2
 
+-- * A simpler homogeneous variant
+inj-injₕ  : {σ : Sum}{X : Set}{C : Constr σ}
+          → {P₁ P₂ : ⟦ typeOf σ C ⟧P X}
+          → _≡_ {A = ⟦ σ ⟧S X} (inj C P₁) (inj C P₂)
+          → P₁ ≡ P₂
+inj-injₕ hip with inj-inj hip
+...| refl , p1≡p2 = p1≡p2
+
 match : {σ : Sum}{X : Set}(C : Constr σ)
       → ⟦ σ ⟧S X → Maybe (⟦ typeOf σ C ⟧P X)
 match C x with sop x

@@ -117,8 +117,10 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
   annAl-src x A0                 hip = []
   annAl-src xs       (Ains at p) hip 
     = annAl-src xs p (IsJust-unmap hip)
-  annAl-src (x ∷ xs) (Adel {α} at p) hip 
-    = annAt-all {α} M x ∷ annAl-src xs p hip 
+  annAl-src (x ∷ xs) (Adel {α} at p) hip
+    with _≟A_ {α} at x
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = annAt-all {α} M x ∷ annAl-src xs p hip 
   annAl-src (x ∷ xs) (AX   ax p) hip
     = let h₀ , h₁ = IsJust-AX-elim x xs ax p hip 
        in annAt-src x ax h₀ ∷ annAl-src xs p h₁ 
@@ -142,9 +144,13 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
            → (hip : IsJust (matchCtx δ x))
            → ⟦ π ⟧P (Fixₐ μσ)
   annP-src {I ∷ π} (x ∷ xs) (here spμ atμs) hip 
-    = annAlμ-src x spμ hip ∷ All-map (λ {α} → annAt-all {α} M) xs
+    with atμs ≟P xs
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = annAlμ-src x spμ hip ∷ All-map (λ {α} → annAt-all {α} M) xs
   annP-src {α ∷ π} (x ∷ xs) (there atμ δ) hip 
-    = annAt-all {α} M x ∷ annP-src xs δ hip 
+    with _≟A_ {α} atμ x
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = annAt-all {α} M x ∷ annP-src xs δ hip 
 
   -- ** Actual definition, closing the mutual recursion.
   annAlμ-src ⟨ x ⟩ (spn sp) hip     
@@ -187,7 +193,9 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
   annAl-dst xs       (Adel at p) hip 
     = annAl-dst xs p (IsJust-unmap hip)
   annAl-dst (x ∷ xs) (Ains {α} at p) hip 
-    = annAt-all {α} M x ∷ annAl-dst xs p hip
+    with _≟A_ {α} at x
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = annAt-all {α} M x ∷ annAl-dst xs p hip
   annAl-dst (x ∷ xs) (AX   ax p) hip 
     = let h₀ , h₁ = IsJust-AX-elim x xs (invAt ax) (invAl p) hip
        in annAt-dst x ax h₀ ∷ annAl-dst xs p h₁
@@ -211,9 +219,13 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
            → (hip : IsJust (matchCtx (invCtx δ) x))
            → ⟦ π ⟧P (Fixₐ μσ)
   annP-dst {I ∷ π} (x ∷ xs) (here spμ atμs) hip 
-    = annAlμ-dst x spμ hip ∷ All-map (λ {α} → annAt-all {α} M) xs
+    with atμs ≟P xs
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = annAlμ-dst x spμ hip ∷ All-map (λ {α} → annAt-all {α} M) xs
   annP-dst {α ∷ π} (x ∷ xs) (there atμ δ) hip 
-    = annAt-all {α} M x ∷ annP-dst xs δ hip 
+    with _≟A_ {α} atμ x
+  ...| no  _    = ⊥-elim (IsJust-magic hip)
+  ...| yes refl = annAt-all {α} M x ∷ annP-dst xs δ hip 
 
   -- ** Actual definition, closing the mutual recursion.
   annAlμ-dst ⟨ x ⟩ (spn sp) hip     
