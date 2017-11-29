@@ -20,7 +20,6 @@ module Regular.Predicates.Applies.Fixpoint (μσ : Sum) where
       where
     AppDelHere : ∀{π}(x y : Fix μσ)(spμ : Alμ)
                → (pxs pxs' : ⟦ π ⟧P (Fix μσ))
-               → (δ : Ctx π)
                → AppAlμ x y spμ
                → AppCtxDel (x ∷ pxs) y (here spμ pxs')
 

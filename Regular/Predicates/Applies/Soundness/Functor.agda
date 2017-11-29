@@ -39,20 +39,69 @@ module Regular.Predicates.Applies.Soundness.Functor
     = AppA0
   AppAl-sound (x ∷ xs) ys       (Adel x' al) hip 
     = AppAdel x x' xs ys al (AppAl-sound xs ys al hip)
-  AppAl-sound (x ∷ xs) (y ∷ ys) (AX at al) hip 
-    = {!!}
   AppAl-sound xs       (y ∷ ys) (Ains y' al) hip 
-    = {!!}
+    with ⟪ al ⟫P xs | inspect ⟪ al ⟫P xs
+  ...| nothing  | _      = Maybe-⊥-elim hip
+  ...| just xs' | [ XS ] 
+    rewrite proj₁ (All-∷-inj (just-inj hip))
+          | proj₂ (All-∷-inj (just-inj hip))
+          = AppAins y xs ys al (AppAl-sound xs ys al XS)
+  AppAl-sound (x ∷ xs) (y ∷ ys) (AX at al) hip 
+    with ⟪ at ⟫A x | inspect ⟪ at ⟫A x
+  ...| nothing  | _ = Maybe-⊥-elim hip
+  ...| just x'  | [ AT ] 
+    with ⟪ al ⟫P xs | inspect ⟪ al ⟫P xs
+  ...| nothing  | _ = Maybe-⊥-elim hip
+  ...| just xs' | [ AL ]
+    rewrite proj₁ (All-∷-inj (just-inj hip))
+          | proj₂ (All-∷-inj (just-inj hip))
+          = AppAX x y xs ys at al 
+                 (AppAt-sound x y at AT) 
+                 (AppAl-sound xs ys al AL)
 
 
   AppSP-sound : ∀{π}(p₁ p₂ : ⟦ π ⟧P Rec)
                 → (ps : All (At PatchRec) π)
                 → ⟪ ps ⟫SP p₁ ≡ just p₂
                 → All-zip3-set AppAt p₁ p₂ ps
-  AppSP-sound hip = {!!}
+  AppSP-sound [] [] [] hip = unit
+  AppSP-sound (x ∷ xs) (y ∷ ys) (p ∷ ps) hip 
+    with ⟪ p ⟫A x | inspect ⟪ p ⟫A x
+  ...| nothing | _ = Maybe-⊥-elim hip
+  ...| just x' | [ X ] 
+    with ⟪ ps ⟫SP xs | inspect ⟪ ps ⟫SP xs
+  ...| nothing  | _ = Maybe-⊥-elim hip
+  ...| just xs' | [ XS ] 
+     rewrite proj₁ (All-∷-inj (just-inj hip))
+           | proj₂ (All-∷-inj (just-inj hip))
+           = AppAt-sound x y p X 
+           , AppSP-sound xs ys ps XS
 
-  
   AppS-sound : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S Rec)(p : Patch PatchRec σ)
-               → ⟪ p ⟫S s₁ ≡ just s₂
-               → AppS s₁ s₂ p
-  AppS-sound hip = {!!}
+             → ⟪ p ⟫S s₁ ≡ just s₂
+             → AppS s₁ s₂ p
+  AppS-sound x y Scp hip 
+    rewrite just-inj hip = AppScp y
+  AppS-sound x y (Scns C ats) hip 
+    with sop x | sop y
+  ...| tag Cx Px | tag Cy Py 
+    with C ≟F Cx
+  ...| no _     = Maybe-⊥-elim hip
+  ...| yes refl 
+    with ⟪ ats ⟫SP Px | inspect ⟪ ats ⟫SP Px
+  ...| nothing  | _      = Maybe-⊥-elim hip
+  ...| just Px' | [ PX ] with inj-inj (just-inj hip)
+  ...| refl , refl 
+     = AppScns Cx Px Py ats (AppSP-sound Px Py ats PX)
+  AppS-sound x y (Schg C₁ C₂ {q} al) hip
+    with sop x | sop y
+  ...| tag Cx Px | tag Cy Py 
+    with C₁ ≟F Cx
+  ...| no _     = Maybe-⊥-elim hip
+  ...| yes refl 
+    with ⟪ al ⟫P Px | inspect ⟪ al ⟫P Px
+  ...| nothing  | _      = Maybe-⊥-elim hip
+  ...| just Px' | [ PX ] with inj-inj (just-inj hip)
+  ...| refl , refl 
+     = AppSchg Cx C₂ q Px Px' al 
+               (AppAl-sound Px Px' al PX)
