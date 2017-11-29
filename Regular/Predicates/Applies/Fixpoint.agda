@@ -46,6 +46,20 @@ module Regular.Predicates.Applies.Fixpoint (μσ : Sum) where
                 → AppCtxIns x pys δ
                 → AppCtxIns x (y ∷ pys) (there {α} y δ)
 
+  AppCtxDel⇒AppAlμ
+    : ∀{π}{x : ⟦ π ⟧P (Fix μσ)}{y : Fix μσ}{δ : Ctx π}
+    → AppCtxDel x y δ
+    → ∃ (λ z → AppAlμ z y (getCtx δ))
+  AppCtxDel⇒AppAlμ (AppDelHere x y spμ pxs pxs' h) = x , h
+  AppCtxDel⇒AppAlμ (AppDelThere x x' y pys δ hip) = AppCtxDel⇒AppAlμ hip
+
+  AppCtxIns⇒AppAlμ
+    : ∀{π}{x : Fix μσ}{y : ⟦ π ⟧P (Fix μσ)}{δ : Ctx π}
+    → AppCtxIns x y δ
+    → ∃ (λ z → AppAlμ x z (getCtx δ))
+  AppCtxIns⇒AppAlμ (AppInsHere x y spμ pys h) = y , h
+  AppCtxIns⇒AppAlμ (AppInsThere x y pys δ hip) = AppCtxIns⇒AppAlμ hip
+
   data AppAlμ where
     AppSpn : (x y : ⟦ μσ ⟧S (Fix μσ))(s : Patch Alμ μσ)
            → AppS x y s
