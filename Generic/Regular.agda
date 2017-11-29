@@ -131,6 +131,19 @@ sop-inj-lemma {x ∷ σ} zero    p = refl
 sop-inj-lemma {x ∷ σ} (suc C) p 
   rewrite sop-inj-lemma {σ} C p = refl
 
+-- * inj is an injection
+inj-inj : {σ : Sum}{X : Set}{C₁ C₂ : Constr σ}
+        → {P₁ : ⟦ typeOf σ C₁ ⟧P X}{P₂ : ⟦ typeOf σ C₂ ⟧P X}
+        → _≡_ {A = ⟦ σ ⟧S X} (inj C₁ P₁) (inj C₂ P₂)
+        → Σ (C₁ ≡ C₂) (λ { refl → P₁ ≡ P₂ })
+inj-inj {[]}    {C₁ = ()}     {c2} hip
+inj-inj {π ∷ σ} {C₁ = zero}   {zero} refl = refl , refl
+inj-inj {π ∷ σ} {C₁ = zero}   {suc _} ()
+inj-inj {π ∷ σ} {C₁ = suc c1} {zero}  ()
+inj-inj {π ∷ σ} {C₁ = suc c1} {suc c2} hip 
+  with inj-inj {σ} {C₁ = c1} {c2} (Any-there-inj hip) 
+...| refl , p1≡p2 = refl , p1≡p2
+
 match : {σ : Sum}{X : Set}(C : Constr σ)
       → ⟦ σ ⟧S X → Maybe (⟦ typeOf σ C ⟧P X)
 match C x with sop x
@@ -142,6 +155,10 @@ match C x with sop x
 
 data Fix (σ : Sum) : Set where
   ⟨_⟩ : ⟦ σ ⟧S (Fix σ) → Fix σ 
+
+⟨⟩-inj : {σ : Sum}{x y : ⟦ σ ⟧S (Fix σ)}
+       → ⟨ x ⟩ ≡ ⟨ y ⟩ → x ≡ y
+⟨⟩-inj refl = refl
 
 unfix : {σ : Sum} → Fix σ → ⟦ σ ⟧S (Fix σ)
 unfix ⟨ x ⟩ = x
