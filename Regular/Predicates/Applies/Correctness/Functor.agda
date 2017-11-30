@@ -7,7 +7,7 @@ module Regular.Predicates.Applies.Correctness.Functor
        (PatchRec  : Set)
        (AppRec    : Rec → Rec → PatchRec → Set)
        (applyRec  : PatchRec → Rec → Maybe Rec)
-       (AppRec-ok : (x y : Rec)(p : PatchRec)
+       (AppRec-ok : {x y : Rec}{p : PatchRec}
                   → AppRec x y p
                   → applyRec p x ≡ just y)
     where
@@ -27,7 +27,7 @@ module Regular.Predicates.Applies.Correctness.Functor
   AppAt-correct (AppSetId k a) 
     rewrite dec-refl _≟K_ k = refl
   AppAt-correct (AppFix r₁ r₂ p x) 
-    = AppRec-ok r₁ r₂ p x
+    = AppRec-ok x
 
   AppAl-correct : ∀{π₁ π₂}{p₁ : ⟦ π₁ ⟧P Rec}{p₂ : ⟦ π₂ ⟧P Rec}
                 → {al : Al (At PatchRec) π₁ π₂}
