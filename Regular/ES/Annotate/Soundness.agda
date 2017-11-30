@@ -23,6 +23,12 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
 
   sound (AppSpn x y s hip) = cong spn {!!}
 
+  -- Here, we'll need to look at the patch;
+  -- if it has no copies, it really is the 'stiff-diff' of
+  -- x and y, if it has a copy, the proof goes by induction.
+  --
+  -- Now, obviously, everything happen modulo 'normal' patch.
+  -- We could use some insight on that.
   sound (AppIns x C₁ Pys δ hip) 
     with AppCtxIns⇒AppAlμ hip
   ...| ⟨ z ⟩ , k = cong id {!!}
