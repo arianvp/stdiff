@@ -41,7 +41,18 @@ extractAnn ⟨ a , _ ⟩ = a
 
 module AnnCounter where
 
-  open import Data.Nat.Properties using (+-0-monoid)
+  postulate magic : IsMonoid _≡_ _+_ 0 
+
+  +-0-monoid : Monoid _ _
+  +-0-monoid = record 
+    { Carrier = ℕ 
+    ; _≈_ = _≡_ 
+    ; _∙_ = _+_
+    ; ε = 0 
+    ; isMonoid = magic
+    }
+
+  -- open import Data.Nat.Properties using (+-0-monoid)
   open RegularConsume +-0-monoid
 
   count-Ann : Ann → ℕ

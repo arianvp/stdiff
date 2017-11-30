@@ -20,23 +20,52 @@ module Regular.Predicates.Applies.Correctness.Functor
   AppAt-correct : ∀{α}{a₁ a₂ : ⟦ α ⟧A Rec}{p : At PatchRec α}
                 → AppAt a₁ a₂ p
                 → ⟪ p ⟫A a₁ ≡ just a₂
-  AppAt-correct hip = {!!}
+  AppAt-correct (AppSet k₁ k₂ q)
+    with k₁ ≟K k₂
+  ...| yes abs = ⊥-elim (q abs)
+  ...| no  _ rewrite dec-refl _≟K_ k₁ = refl
+  AppAt-correct (AppSetId k a) 
+    rewrite dec-refl _≟K_ k = refl
+  AppAt-correct (AppFix r₁ r₂ p x) 
+    = AppRec-ok r₁ r₂ p x
 
   AppAl-correct : ∀{π₁ π₂}{p₁ : ⟦ π₁ ⟧P Rec}{p₂ : ⟦ π₂ ⟧P Rec}
                 → {al : Al (At PatchRec) π₁ π₂}
                 → AppAl p₁ p₂ al
                 → ⟪ al ⟫P p₁ ≡ just p₂
-  AppAl-correct hip = {!!}
-
+  AppAl-correct AppA0 = refl
+  AppAl-correct (AppAX x y xs ys px pxs h hip) 
+    rewrite AppAt-correct h
+          | AppAl-correct hip 
+          = refl
+  AppAl-correct (AppAins y xs ys al hip) 
+    rewrite AppAl-correct hip
+          = refl       
+  AppAl-correct (AppAdel x x' xs ys al hip)
+    rewrite AppAl-correct hip
+          = refl
 
   AppSP-correct : ∀{π}{p₁ p₂ : ⟦ π ⟧P Rec}
                 → {ps : All (At PatchRec) π}
                 → All-zip3-set AppAt p₁ p₂ ps
                 → ⟪ ps ⟫SP p₁ ≡ just p₂
-  AppSP-correct hip = {!!}
-
+  AppSP-correct {_} {[]} {[]} {[]} hip = refl
+  AppSP-correct {_} {x ∷ xs} {y ∷ ys} {p ∷ ps} (h , hip) 
+    rewrite AppAt-correct h
+          | AppSP-correct hip
+          = refl
   
   AppS-correct : ∀{σ}{s₁ s₂ : ⟦ σ ⟧S Rec}{p : Patch PatchRec σ}
                → AppS s₁ s₂ p
                → ⟪ p ⟫S s₁ ≡ just s₂
-  AppS-correct hip = {!!}
+  AppS-correct (AppScp x) = refl
+  AppS-correct (AppScns {σ} C Pxs Pys pxy hip) 
+    rewrite sop-inj-lemma {σ} C Pxs 
+          | dec-refl _≟F_ C
+          | AppSP-correct hip 
+          = refl
+  AppS-correct (AppSchg {σ} C₁ C₂ q Pxs Pys al hip) 
+    rewrite sop-inj-lemma {σ} C₁ Pxs
+          | dec-refl _≟F_ C₁
+          | AppAl-correct hip
+          = refl
