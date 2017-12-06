@@ -24,27 +24,27 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   
   {-# TERMINATING #-}
   stiff : Fix μσ → Fix μσ → Alμ 
+
+  stiffAt : ∀{α}(x y : ⟦ α ⟧A (Fix μσ)) → Atμ α
+  stiffAt {K _} x y = set (x , y)
+  stiffAt {I}   x y = fix (stiff x y)
+
+  stiffAl : ∀{π₁ π₂} → ⟦ π₁ ⟧P (Fix μσ) → ⟦ π₂ ⟧P (Fix μσ) → Al Atμ π₁ π₂
+  stiffAl []       []       = A0
+  stiffAl (p ∷ ps) []       = Adel p (stiffAl ps [])
+  stiffAl []       (q ∷ qs) = Ains q (stiffAl [] qs)
+  stiffAl {α₁ ∷ π₁} {α₂ ∷ π₂} (p ∷ ps) (q ∷ qs)
+    with α₁ ≟Atom α₂
+  ...| no _     = Ains q (Adel p (stiffAl ps qs))
+  ...| yes refl = AX (stiffAt p q) (stiffAl ps qs)
+
+  stiffS : ∀{σ}(x y : ⟦ σ ⟧S (Fix μσ)) → S Atμ (Al Atμ) σ
+  stiffS x y with sop x | sop y
+  ...| tag Cx Dx | tag Cy Dy with Cx ≟F Cy
+  ...| yes refl = Scns Cx (All-map (uncurry stiffAt) (zipd Dx Dy)) 
+  ...| no  prf  = Schg Cx Cy {prf} (stiffAl Dx Dy)
+
   stiff ⟨ x ⟩ ⟨ y ⟩ = spn (stiffS x y)
-    where 
-      mutual
-        stiffAt : ∀{α}(x y : ⟦ α ⟧A (Fix μσ)) → Atμ α
-        stiffAt {K _} x y = set (x , y)
-        stiffAt {I}   x y = fix (stiff x y)
-
-        stiffS : ∀{σ}(x y : ⟦ σ ⟧S (Fix μσ)) → S Atμ (Al Atμ) σ
-        stiffS x y with sop x | sop y
-        ...| tag Cx Dx | tag Cy Dy with Cx ≟F Cy
-        ...| yes refl = Scns Cx (All-map (uncurry stiffAt) (zipd Dx Dy)) 
-        ...| no  prf  = Schg Cx Cy {prf} (stiffAl Dx Dy)
-
-        stiffAl : ∀{π₁ π₂} → ⟦ π₁ ⟧P (Fix μσ) → ⟦ π₂ ⟧P (Fix μσ) → Al Atμ π₁ π₂
-        stiffAl []       []       = A0
-        stiffAl (p ∷ ps) []       = Adel p (stiffAl ps [])
-        stiffAl []       (q ∷ qs) = Ains q (stiffAl [] qs)
-        stiffAl {α₁ ∷ π₁} {α₂ ∷ π₂} (p ∷ ps) (q ∷ qs)
-          with α₁ ≟Atom α₂
-        ...| no _     = Ains q (Adel p (stiffAl ps qs))
-        ...| yes refl = AX (stiffAt p q) (stiffAl ps qs)
 
   -- * Converting two annotated fixpoints into a patch
 
