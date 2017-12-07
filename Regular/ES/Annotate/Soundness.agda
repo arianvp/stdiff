@@ -48,7 +48,29 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
     → (1≤ca : let α₀ , a₀ = all-lookup δᵢ δ'
                in 1 ≤ count-CA {μσ} {α₀} a₀ )
     → AppCtxDel Pxs y (diffCtxMax CtxDel z δ' δᵢ 1≤ca)
-  sound-CtxDelMax = {!!}
+  sound-CtxDelMax {K _} z (at ∷ ats) zero ()
+  sound-CtxDelMax {I}  {Pxs = px ∷ pxs} {y} z (at ∷ ats) zero 1≤ca 
+     = AppDelHere px y {!!} pxs (All-map (λ {α} → fmapA {α} 𝓤) ats) (sound {!!})
+  sound-CtxDelMax {α} z δ' δᵢ 1≤ca = {!!}
+
+  sound-CtxDel-Here-lemma
+    : ∀{π}{x y : Fix μσ}{spμ : Alμ}{pxs pxs' : ⟦ π ⟧P (Fix μσ)}
+    → (hip : AppAlμ x y spμ)
+    → vec-max (count-C* (annP-src (AppDelHere x y spμ pxs pxs' hip))) 
+    ≡ zero
+  sound-CtxDel-Here-lemma = {!!}
+
+  sound-CtxDelMaxHere
+    : ∀{π}{x y : Fix μσ}{z : Fixₐ μσ}{spμ : Alμ}{xs xs' : ⟦ π ⟧P (Fix μσ)}
+    → (hip  : AppAlμ x y spμ)
+    -- → (1≤ca : 1 ≤ count-CA {μσ} {I} (annAlμ-src hip))
+    → diffCtx CtxDel z (annP-src (AppDelHere x y spμ xs xs' hip)) {!!}
+    ≡ here {!!} xs
+{-
+    → AppCtxDel (x ∷ xs) y 
+                (diffCtxMax CtxDel z (annP-src (AppDelHere x y spμ xs xs' hip)) zero 1≤ca)
+-}
+  sound-CtxDelMaxHere = {!!}
 
   sound-CtxDel
     : ∀{π}{Pxs : ⟦ π ⟧P (Fix μσ)}{y : Fix μσ}{z : Fixₐ μσ}{δ : Ctx π}
@@ -57,8 +79,28 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
     → (1≤cx : 1 ≤ count-C*-sum (annP-src hip))
     → AppCtxDel Pxs y (diffCtx CtxDel z (annP-src hip) 1≤cx)
   sound-CtxDel {[]}    ()
-  sound-CtxDel {α ∷ π} {px ∷ pxs} hip hipz 1≤cx 
+  sound-CtxDel {α ∷ π} {z} (AppDelHere x y spμ pxs pxs' hip) hipz 1≤cx
     = {!!}
+
+{-
+    rewrite sound-CtxDelMaxHere {x = x} {y} {z} {spμ} {pxs} {pxs'} hip
+    = {! sound-CtxDelMaxHere !}
+-}
+{-
+    rewrite sound-CtxDel-Here-lemma {π = π} {x = x} {y} {pxs = pxs} {pxs'} hip 
+          = {!!}
+-}
+  sound-CtxDel {α ∷ π} {z} (AppDelThere x x' y pxs δ hip) hipz 1≤cx 
+    = {!!}
+{-
+    with annP-src hip | inspect annP-src hip
+  ...| r ∷ rs | [ R ] 
+     -- Annotating anything with the ctx δ, will give 0 copies everywhere
+     -- but in the 'here' constructor of the context.
+     = sound-CtxDelMax {!!} (r ∷ rs) 
+         (vec-max (count-C* {π = α ∷ π} (r ∷ rs))) 
+         (count-maxCS-CA-lemma {μσ} {π} {α} r rs 1≤cx)
+-}
 {-
   sound-CtxDel (AppDelHere x y spμ pxs pxs' hip) hipz 1≤cx 
     = {!AppDelHere!}
