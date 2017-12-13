@@ -125,6 +125,9 @@ open import Data.Nat
   hiding (_⊓_)
   public
 
+open import Data.Nat.Properties.Simple
+  public
+
 open import Data.List
   using (List ; _∷_ ; [] ; length)
   renaming (map to List-map ; zip to List-zip)
@@ -208,3 +211,11 @@ All-set : {A : Set}{P : A → Set}{xs : List A}
         → Set
 All-set f [] = Unit
 All-set f (x ∷ xs) = f x × All-set f xs
+
+All-head : {A : Set}{P : A → Set}{x : A}{xs : List A}
+         → All P (x ∷ xs) → P x
+All-head (px ∷ _) = px
+
+All-tail : {A : Set}{P : A → Set}{x : A}{xs : List A}
+         → All P (x ∷ xs) → All P xs
+All-tail (_ ∷ pxs) = pxs

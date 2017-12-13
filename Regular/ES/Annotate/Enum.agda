@@ -132,14 +132,28 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
     = there (fmapA {α} 𝓤 at₂) (diffCtxMax cid x₁ ats₂ f hip)
 
 
+  count-C*-CA-lemma
+    : ∀{α π}(ats : ⟦ α ∷ π ⟧P (Fixₐ μσ))
+    → 1 ≤ count-C*-sum ats
+    → let α₀ , a₀ = all-lookup (vec-max (count-C* ats)) ats
+       in 1 ≤ count-CA {μσ} {α₀} a₀
+  count-C*-CA-lemma {α} (at ∷ []) hip 
+    rewrite +-comm (count-CA {μσ} {α} at) 0 = hip
+  count-C*-CA-lemma {α} {α' ∷ π} (at ∷ at' ∷ ats) hip
+    with count-CA {μσ} {α} at 
+      ≤? Vec-lookup (vec-max (count-C* (_∷_ {x = α'} at' ats))) 
+                             (count-C* (_∷_ {x = α'} at' ats))
+  ...| yes _ = count-C*-CA-lemma (at' ∷ ats) {!hip!}
+  ...| no _  = {!!}
+
   -- And we simply call the 'diffCtxMax' from here; noting that
   -- if the whole product has at least one copy, the tree with the
   -- most copies inside the product also has at least one!
   diffCtx cid x₁ [] ()
-  diffCtx {α ∷ π} cid x₁ (at₂ ∷ ats₂) hip 
-    = let cs = count-C* {π = α ∷ π} (at₂ ∷ ats₂)
-       in diffCtxMax cid x₁ (at₂ ∷ ats₂) (vec-max cs) 
-                     (count-maxCS-CA-lemma {μσ} {π} {α} at₂ ats₂ hip)
+  diffCtx {α ∷ π} cid x₁ ats hip 
+    = let cs = count-C* {π = α ∷ π} ats
+       in diffCtxMax cid x₁ ats (vec-max cs)
+                     (count-C*-CA-lemma ats hip)
 
   diffS : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S (Fixₐ μσ)) → Patch Alμ σ
   diffS s₁ s₂ = S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align)
