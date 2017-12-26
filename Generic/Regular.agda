@@ -43,16 +43,17 @@ fmapS f (there px) = there (fmapS f px)
 -- ** Consuming the recursive positions under a monoid.
 --    WARNING: We are ignoring the constant types here!
 --
-module RegularConsume (𝕄 : Monoid lz lz) where
+-- TODO: Generalize to arbitrary monoids.
+module RegularConsume where -- (𝕄 : Monoid lz lz) where
 
   M : Set
-  M = Monoid.Carrier 𝕄
+  M = ℕ -- Monoid.Carrier 𝕄
 
   ε : M
-  ε = Monoid.ε 𝕄
+  ε = 0 -- Monoid.ε 𝕄
 
   _∙_ : M → M → M
-  _∙_ = Monoid._∙_ 𝕄
+  _∙_ = _+_ -- Monoid._∙_ 𝕄
 
   consumeA : ∀{α} → ⟦ α ⟧A M → M
   consumeA {K _} _ = ε

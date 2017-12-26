@@ -40,30 +40,6 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
         → (hip : AppAlμ x y p)
         → AppAlμ x y (diffAlμ (annAlμ-src hip) (annAlμ-dst hip))
 
-  sound-CtxDelMax
-    : ∀{α π}{Pxs : ⟦ α ∷ π ⟧P (Fix μσ)}{y : Fix μσ}
-    → {δ : Ctx (α ∷ π)}
-    → (hip : AppCtxDel Pxs y δ)
-    → (δᵢ  : Fin (length (α ∷ π)))
-    → (1≤ca : let α₀ , a₀ = all-lookup δᵢ (annP-src hip)
-               in 1 ≤ count-CA {μσ} {α₀} a₀ )
-    → AppCtxDel Pxs y 
-        (diffCtxMax CtxDel (annAlμ-dst (proj₂ (AppCtxDel⇒AppAlμ hip))) (annP-src hip) δᵢ 1≤ca)
-  sound-CtxDelMax {K _} hip zero ()
-  sound-CtxDelMax {I}  
-       (AppDelHere x y spμ pxs pxs' h)  zero 1≤ca 
-    = AppDelHere x y {!!} pxs 
-                  (All-map (λ {α} → fmapA {α} 𝓤) {!!}) 
-                  (sound {!!})
-  sound-CtxDelMax {α} hip δᵢ 1≤ca = {!!}
-
-  sound-CtxDel-Here-lemma
-    : ∀{π}{x y : Fix μσ}{spμ : Alμ}{pxs pxs' : ⟦ π ⟧P (Fix μσ)}
-    → (hip : AppAlμ x y spμ)
-    → vec-max (count-C* (annP-src (AppDelHere x y spμ pxs pxs' hip))) 
-    ≡ zero
-  sound-CtxDel-Here-lemma = {!!}
-
   sound-CtxDelMaxHere
     : ∀{π}{x y : Fix μσ}{z : Fixₐ μσ}{spμ : Alμ}{xs xs' : ⟦ π ⟧P (Fix μσ)}
     → (hip  : AppAlμ x y spμ)
@@ -82,14 +58,10 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
   getHere-Del (AppDelHere _ _ _ _ _ _)  = zero
   getHere-Del (AppDelThere _ _ _ _ _ h) = suc (getHere-Del h)
 
-  lemma1
-    : ∀{α π}{Pxs : ⟦ α ∷ π ⟧P (Fix μσ)}{y : Fix μσ}{δ : Ctx (α ∷ π)}
-    → (hip : AppCtxDel Pxs y δ)
-    → (r   : ⟦ α ⟧A (Fixₐ μσ))
-    → (rs  : ⟦ π ⟧P (Fixₐ μσ))
-    → (h   : annP-src hip ≡ r ∷ rs)
-    → vec-max (count-CA {μσ} {α} r ∷ count-C* rs) ≡ getHere-Del hip
-  lemma1 = {!!}
+{-
+  annP-src-here-nz-lemma
+    : ∀{π}{Pxs : ⟦ π ⟧P (Fix μσ)}{y : Fix μσ}{δ : Ctx π}
+-}  
 
   sound-CtxDel
     : ∀{π}{Pxs : ⟦ π ⟧P (Fix μσ)}{y : Fix μσ}{δ : Ctx π}
@@ -100,9 +72,20 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
                         (annP-src hip) 
                         1≤cx)
   sound-CtxDel {[]}    ()
-  sound-CtxDel {α ∷ π} {Pxs} hip 1≤cx
+  sound-CtxDel {K _ ∷ []} {δ = there _ ()} hip 1≤cx
+  sound-CtxDel {I ∷ []} (AppDelThere _ _ _ _ () _) 1≤cx
+  sound-CtxDel {I ∷ []} (AppDelHere x y alμ [] [] f) 1≤cx
+    = AppDelHere x y (diffAlμ (annAlμ-src f) (annAlμ-dst f)) [] [] (sound f)
+  sound-CtxDel {I ∷ α' ∷ π} (AppDelHere x y alμ (x' ∷ xs) (y' ∷ ys) h) 1≤cx
+    with count-CA {μσ} {I} (annAlμ-src h) ≤? count-CA {μσ} {α'} (annAt-all {α'} M x')
+  ...| no  _   = {!!}
+  ...| yes abs = {!!}
+  sound-CtxDel {α ∷ α' ∷ π} (AppDelThere x y c d e h) 1≤cx
+    = {!!}
+{-
      with annP-src hip | inspect annP-src hip
   ...| r ∷ rs | [ R ] rewrite lemma1 hip r rs R = {!!}
+-}
 {-
          (vec-max (count-C* {π = α ∷ π} ?)) 
          (count-maxCS-CA-lemma {μσ} {π} {α} ? ? ?) -- 1≤cx)

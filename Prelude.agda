@@ -125,6 +125,10 @@ open import Data.Nat
   hiding (_⊓_)
   public
 
+NonZero : ℕ → Set
+NonZero zero    = ⊥
+NonZero (suc _) = Unit
+
 open import Data.Nat.Properties.Simple
   public
 
@@ -177,7 +181,6 @@ vec-max {suc n} (x ∷ y ∷ ys) with vec-max (y ∷ ys)
 ...| yes _ = suc my
 ...| no _  = inject₁ my
 
-
 -- * Misc. Library functions
 
 _≟Str_ : (x y : String) → Dec (x ≡ y)
@@ -193,6 +196,15 @@ all-foldr : {A : Set}{P : A → Set}{X : List A → Set}
           → All P l → X l
 all-foldr f g [] = g
 all-foldr {A} {P} {X} f g (x ∷ xs) = f x (all-foldr {A} {P} {X} f g xs)
+
+all-max : {A : Set}{P : A → Set}{l : A}{ls : List A}
+        → (measure : ∀{a} → P a → ℕ)
+        → All P (l ∷ ls) → ∃ P
+all-max mes (pa ∷ [])          = _ , pa
+all-max mes (pa ∷ (pa' ∷ pas)) 
+  with mes pa ≤? mes pa'
+...| yes _ = all-max mes (pa' ∷ pas)
+...| no  _ = all-max mes (pa ∷ pas)
 
 all-lookup : {A : Set}{P : A → Set}{l : List A}
            → Fin (length l) → All P l → ∃ (λ a → P a)

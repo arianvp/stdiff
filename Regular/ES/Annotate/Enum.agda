@@ -114,46 +114,50 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   diffAtμ {K κ} x y = set (x , y)
   diffAtμ {I}   x y = fix (diffAlμ x y)
 
-  -- This is an auxiliar function that chooses the tree indexed
-  -- by zᵢ as long as it has at least one copy.
-  diffCtxMax : ∀ {α π} → CtxInsDel → Fixₐ μσ 
-             → (z : ⟦ α ∷ π ⟧P (Fixₐ μσ)) 
-             → (zᵢ : Fin (length (α ∷ π)))
-             → (let α₀ , a₀ = all-lookup zᵢ z
-                 in 1 ≤ count-CA {μσ} {α₀} a₀)
-             → Ctx (α ∷ π)
-  diffCtxMax {K _}    cid    x₁ (at₂ ∷ ats₂) zero ()
-  diffCtxMax {I}  {π} CtxIns x₁ (at₂ ∷ ats₂) zero hip
-    = here (diffAlμ x₁ at₂) (All-map (λ {α} → fmapA {α} 𝓤) ats₂)
-  diffCtxMax {I}  {π} CtxDel x₁ (at₂ ∷ ats₂) zero hip
-    = here (diffAlμ at₂ x₁) (All-map (λ {α} → fmapA {α} 𝓤) ats₂)
-  diffCtxMax {α} {[]}     cid x₁ (at₂ ∷ ats₂) (suc ()) hip 
-  diffCtxMax {α} {π ∷ πs} cid x₁ (at₂ ∷ ats₂) (suc f) hip 
-    = there (fmapA {α} 𝓤 at₂) (diffCtxMax cid x₁ ats₂ f hip)
+  non-zero-sum-trans : ∀{m n} → 1 ≤ m + n → m ≤ n → 1 ≤ n
+  non-zero-sum-trans 1≤m+n z≤n       = 1≤m+n
+  non-zero-sum-trans 1≤m+n (s≤s m≤n) = s≤s z≤n
 
+  ≤-monotone-r : ∀{m n o} → m ≤ n → m ≤ n + o
+  ≤-monotone-r z≤n     = z≤n
+  ≤-monotone-r (s≤s r) = s≤s (≤-monotone-r r)
 
-  count-C*-CA-lemma
-    : ∀{α π}(ats : ⟦ α ∷ π ⟧P (Fixₐ μσ))
-    → 1 ≤ count-C*-sum ats
-    → let α₀ , a₀ = all-lookup (vec-max (count-C* ats)) ats
-       in 1 ≤ count-CA {μσ} {α₀} a₀
-  count-C*-CA-lemma {α} (at ∷ []) hip 
-    rewrite +-comm (count-CA {μσ} {α} at) 0 = hip
-  count-C*-CA-lemma {α} {α' ∷ π} (at ∷ at' ∷ ats) hip
-    with count-CA {μσ} {α} at 
-      ≤? Vec-lookup (vec-max (count-C* (_∷_ {x = α'} at' ats))) 
-                             (count-C* (_∷_ {x = α'} at' ats))
-  ...| yes _ = count-C*-CA-lemma (at' ∷ ats) {!hip!}
-  ...| no _  = {!!}
+  aux-lemma-1 : ∀{m n o} → 1 ≤ m + (n + o) → ¬ (m ≤ n) → 1 ≤ m + o
+  aux-lemma-1 {zero} hipa hipb = ⊥-elim (hipb z≤n)
+  aux-lemma-1 {suc m} hipa hipb = s≤s z≤n
+  
+
+  Ctx-swap : ∀{α α' π} → Ctx (α' ∷ α ∷ π) → Ctx (α ∷ α' ∷ π)
+  Ctx-swap (here spμ (a ∷ p))     = there a (here spμ p)
+  Ctx-swap (there a (there a' δ)) = there a' (there a δ)
+  Ctx-swap (there a (here spμ r)) = here spμ (a ∷ r)
 
   -- And we simply call the 'diffCtxMax' from here; noting that
   -- if the whole product has at least one copy, the tree with the
   -- most copies inside the product also has at least one!
-  diffCtx cid x₁ [] ()
-  diffCtx {α ∷ π} cid x₁ ats hip 
-    = let cs = count-C* {π = α ∷ π} ats
-       in diffCtxMax cid x₁ ats (vec-max cs)
-                     (count-C*-CA-lemma ats hip)
+  diffCtx            cid x₁ [] ()
+  diffCtx {K _ ∷ []} cid x₁ (at ∷ []) ()
+  diffCtx {I   ∷ []} CtxDel x₁ (at ∷ []) hip 
+    = here (diffAlμ at x₁) []
+  diffCtx {I   ∷ []} CtxIns x₁ (at ∷ []) hip 
+    = here (diffAlμ x₁ at) []
+  diffCtx {α ∷ α' ∷ π}  cid x₁ (at ∷ (at' ∷ ats)) hip 
+    with count-CA {μσ} {α} at ≤? count-CA {μσ} {α'} at'
+  ...| yes at≤at' 
+     = there (fmapA {α} 𝓤 at) 
+             (diffCtx cid x₁ (at' ∷ ats) 
+                   (non-zero-sum-trans 
+                       {count-CA {μσ} {α} at} 
+                       {count-CA {μσ} {α'} at' + count-C*-sum ats}
+                       hip (≤-monotone-r at≤at')))
+  ...| no  at≰at' 
+     = Ctx-swap (there 
+             (fmapA {α'} 𝓤 at') 
+             (diffCtx cid x₁ (at ∷ ats) 
+                  (aux-lemma-1 
+                     {m = count-CA {μσ} {α} at} 
+                     {n = count-CA {μσ} {α'} at'} 
+                     hip at≰at') ))
 
   diffS : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S (Fixₐ μσ)) → Patch Alμ σ
   diffS s₁ s₂ = S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align)

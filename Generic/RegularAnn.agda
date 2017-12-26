@@ -40,7 +40,7 @@ extractAnn ⟨ a , _ ⟩ = a
 
 
 module AnnCounter where
-
+{-
   postulate magic : IsMonoid _≡_ _+_ 0 
 
   +-0-monoid : Monoid _ _
@@ -54,6 +54,8 @@ module AnnCounter where
 
   -- open import Data.Nat.Properties using (+-0-monoid)
   open RegularConsume +-0-monoid
+-}
+  open RegularConsume
 
   count-Ann : Ann → ℕ
   count-Ann C = 1
@@ -61,19 +63,19 @@ module AnnCounter where
 
   count-C : ∀{σ} → Fixₐ σ → ℕ
   count-C = cataₐ (λ { (ann , s) → count-Ann ann + consumeS s })
-  
+
   count-CS : ∀{σ₁ σ₂} → ⟦ σ₁ ⟧S (Fixₐ σ₂) → ℕ
   count-CS = consumeS ∘ fmapS count-C
 
   count-CA : ∀{σ α} → ⟦ α ⟧A (Fixₐ σ) → ℕ
   count-CA {σ} {α} = consumeA {α} ∘ fmapA {α} count-C
 
-  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → Vec ℕ (length π)
+  count-C* : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → All (λ _ → ℕ) π
   count-C* {σ}         []       = []
   count-C* {σ} {α ∷ π} (a ∷ ps) = count-CA {σ} {α} a ∷ count-C* ps
 
   count-C*-sum : ∀{σ π} → ⟦ π ⟧P (Fixₐ σ) → ℕ
-  count-C*-sum = vec-foldr _+_ 0 ∘ count-C*
+  count-C*-sum = all-foldr _+_ 0 ∘ count-C*
 
   count-CS≡C*-lemma
     : ∀{σ₁ σ₂}(C : Constr σ₁)(p : ⟦ typeOf σ₁ C ⟧P (Fixₐ σ₂))
@@ -94,11 +96,12 @@ module AnnCounter where
   count-C*-sum-base-lemma p 
     = theMagic
     where postulate theMagic : ∀{a}{A : Set a} → A
-
+{-
   count-maxCS-CA-lemma
     : ∀{σ π α}(p : ⟦ α ⟧A (Fixₐ σ))(ps : ⟦ π ⟧P (Fixₐ σ))
     → 1 ≤ count-C*-sum {σ} {α ∷ π} (p ∷ ps)
-    → let α₀ , a₀ = all-lookup (vec-max (count-C* {σ} {α ∷ π} (p ∷ ps))) 
+    → let α₀ , a₀ = all-max count-CA 
+all-lookup (vec-max (count-C* {σ} {α ∷ π} (p ∷ ps))) 
                                (_∷_ {x = α} p ps)
        in 1 ≤ count-CA {σ} {α₀} a₀
   count-maxCS-CA-lemma {σ} {_} {α} p [] hip 
@@ -107,3 +110,4 @@ module AnnCounter where
     with vec-max (count-CA {σ} {α₁} px ∷ count-C* ps)
   ...| mi = theMagic
     where postulate theMagic : ∀{a}{A : Set a} → A
+-}
