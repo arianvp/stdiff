@@ -80,7 +80,7 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
     with count-CA {μσ} {I} (annAlμ-src h) ≤? count-CA {μσ} {α'} (annAt-all {α'} M x')
   ...| no  _   = {!!}
   ...| yes abs = {!!}
-  sound-CtxDel {α ∷ α' ∷ π} (AppDelThere x y c d e h) 1≤cx
+  sound-CtxDel {α ∷ α' ∷ π} (AppDelThere a₁ a₂ x y δ h) 1≤cx
     = {!!}
 {-
      with annP-src hip | inspect annP-src hip
