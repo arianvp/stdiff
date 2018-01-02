@@ -30,6 +30,11 @@ open import Relation.Unary
 open import Relation.Binary.PropositionalEquality
   public
 
+postulate
+  fun-ext : ∀{a b}{A : Set a}{B : Set b}{f g : A → B}
+          → (∀ x → f x ≡ g x)
+          → f ≡ g
+
 open import Relation.Binary
   using (_⇒_; Rel)
   public

@@ -168,9 +168,13 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   --    These make life simpler when reasoning about it.
   open import Regular.ES.Annotate.FromPatch μσ
 
+  postulate 
+    count-C-zero-lemma : (x : Fix μσ) → count-C (ann-all M x) ≡ 0
+
   count-CA-zero-lemma
     : ∀{α}(a : ⟦ α ⟧A (Fix μσ)) → count-CA {μσ} {α} (annAt-all {α} M a) ≡ 0
-  count-CA-zero-lemma a = {!!}
+  count-CA-zero-lemma {K _} a = refl
+  count-CA-zero-lemma {I  } a = count-C-zero-lemma a
 
   count-C*-sum-zero-lemma
     : ∀{π}(xs : ⟦ π ⟧P (Fix μσ))
@@ -188,9 +192,12 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
           | +-comm (count-CA {μσ} {I} x) 0
           = hip
 
-  𝓤-correctA
-    : ∀{α}{ann : Ann}(x : ⟦ α ⟧A (Fix μσ)) → fmapA {α} 𝓤 (annAt-all {α} ann x) ≡ x
-  𝓤-correctA x = {!!}
+  postulate
+    𝓤-correctA
+      : ∀{α}{ann : Ann}(x : ⟦ α ⟧A (Fix μσ)) → fmapA {α} 𝓤 (annAt-all {α} ann x) ≡ x
+
+    abs-lemma-1 : ∀{m n} → 1 ≤ m → m ≤ n → n ≡ 0 → ⊥
+  
 
   diffCtx≡here
     : ∀{π}{cid : CtxInsDel}(x y : Fixₐ μσ)(xs : ⟦ π ⟧P (Fix μσ))
@@ -202,14 +209,13 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   diffCtx≡here         x y []        hip = refl
   diffCtx≡here {α ∷ π} {cid} x y (x' ∷ xs) hip 
     with count-CA {μσ} {I} x ≤? count-CA {μσ} {α} (annAt-all {α} M x') 
-  ...| yes abs = {!!}
-  ...| no  _   
+  ...| yes abs = ⊥-elim (abs-lemma-1 hip abs (count-CA-zero-lemma {α} x'))
+  ...| no  ¬p   
     rewrite 𝓤-correctA {α} {M} x' 
-          | subst (λ P → diffCtx cid y (x ∷ All-map (λ {α} → annAt-all {α} M) xs) P ≡ here (diffAlμDI cid y x) xs)
-                  (≤-pi _ (count-C*-sum-annAt-M-lemma x xs hip))
-                  (diffCtx≡here x y xs hip) 
-          = {!!}
-
+          | ≤-pi (aux-lemma-1 (count-C*-sum-annAt-M-lemma {α ∷ π} x (x' ∷ xs) hip) ¬p)
+                 (count-C*-sum-annAt-M-lemma x xs hip)
+          | diffCtx≡here {π} {cid}  x y xs hip
+          = refl
 
   diffS : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S (Fixₐ μσ)) → Patch Alμ σ
   diffS s₁ s₂ = S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align)

@@ -38,6 +38,15 @@ cataₐ f ⟨ ann , x ⟩ = f (ann , fmapS (cataₐ f) x)
 extractAnn : ∀{σ} → ⟦ I ⟧A (Fixₐ σ) → Ann
 extractAnn ⟨ a , _ ⟩ = a
 
+{-# TERMINATING #-}
+cataₐ-uni : ∀{σ A}(f : ⟦ σ ⟧Sₐ A → A)(h : Fixₐ σ → A) 
+          → (∀ x → h x ≡ f (fmapSₐ h (unfixₐ x)))
+          → (x : Fixₐ σ)
+          → cataₐ f x ≡ h x
+cataₐ-uni f h hip ⟨ ann , x ⟩ 
+  rewrite hip ⟨ ann , x ⟩ 
+        = cong (λ P → f (ann , fmapS P x)) (fun-ext (cataₐ-uni f h hip))
+
 
 module AnnCounter where
 {-
