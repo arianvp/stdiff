@@ -118,9 +118,23 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   non-zero-sum-trans 1≤m+n z≤n       = 1≤m+n
   non-zero-sum-trans 1≤m+n (s≤s m≤n) = s≤s z≤n
 
+  ≤-monotone-l : ∀{m n o} → m ≤ n → m ≤ o + n
+  ≤-monotone-l                      z≤n    = z≤n
+  ≤-monotone-l {suc m} {suc n} {o} (s≤s r) 
+    rewrite +-suc o n = s≤s (≤-monotone-l {o = o} r)
+
   ≤-monotone-r : ∀{m n o} → m ≤ n → m ≤ n + o
   ≤-monotone-r z≤n     = z≤n
   ≤-monotone-r (s≤s r) = s≤s (≤-monotone-r r)
+
+  ≤-refl : ∀{m} → m ≤ m
+  ≤-refl {zero}  = z≤n
+  ≤-refl {suc m} = s≤s ≤-refl
+
+  ≤-antisym : ∀{m n} → ¬ (m ≤ n) → n ≤ m
+  ≤-antisym {zero}  abs = ⊥-elim (abs z≤n)
+  ≤-antisym {suc m} {zero}  abs = z≤n
+  ≤-antisym {suc m} {suc n} abs = s≤s (≤-antisym (abs ∘ s≤s)) 
 
   aux-lemma-1 : ∀{m n o} → 1 ≤ m + (n + o) → ¬ (m ≤ n) → 1 ≤ m + o
   aux-lemma-1 {zero} hipa hipb = ⊥-elim (hipb z≤n)

@@ -62,6 +62,8 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
   annP-src-here-nz-lemma
     : ∀{π}{Pxs : ⟦ π ⟧P (Fix μσ)}{y : Fix μσ}{δ : Ctx π}
 -}  
+  postulate 
+    aux-lemma-2 : ∀{m n o} → 1 ≤ m + (n + o) → n ≡ 0 → o ≡ 0 → 1 ≤ m
 
   sound-CtxDel
     : ∀{π}{Pxs : ⟦ π ⟧P (Fix μσ)}{y : Fix μσ}{δ : Ctx π}
@@ -78,7 +80,16 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
     = AppDelHere x y (diffAlμ (annAlμ-src f) (annAlμ-dst f)) [] [] (sound f)
   sound-CtxDel {I ∷ α' ∷ π} (AppDelHere x y alμ (x' ∷ xs) (y' ∷ ys) h) 1≤cx
     with count-CA {μσ} {I} (annAlμ-src h) ≤? count-CA {μσ} {α'} (annAt-all {α'} M x')
-  ...| no  _   = {!!}
+  ...| no  ¬p
+       rewrite ≤-pi (aux-lemma-1 1≤cx ¬p)
+                    (count-C*-sum-annAt-M-lemma (annAlμ-src h) xs 
+                       (aux-lemma-2 1≤cx (count-CA-zero-lemma {α'} x') 
+                                         (count-C*-sum-zero-lemma {π} xs)))
+             | diffCtx≡here {cid = CtxDel} (annAlμ-src h) (annAlμ-dst h) xs 
+                       (aux-lemma-2 1≤cx (count-CA-zero-lemma {α'} x') 
+                                         (count-C*-sum-zero-lemma {π} xs))
+             = AppDelHere x y (diffAlμ (annAlμ-src h) (annAlμ-dst h)) 
+                               (x' ∷ xs) _ (sound h)
   ...| yes abs = {!!}
   sound-CtxDel {α ∷ α' ∷ π} (AppDelThere a₁ a₂ x y δ h) 1≤cx
     = {!!}
