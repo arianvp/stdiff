@@ -90,9 +90,18 @@ module Regular.ES.Annotate.Soundness (μσ : Sum) where
                                          (count-C*-sum-zero-lemma {π} xs))
              = AppDelHere x y (diffAlμ (annAlμ-src h) (annAlμ-dst h)) 
                                (x' ∷ xs) _ (sound h)
-  ...| yes abs = {!!}
-  sound-CtxDel {α ∷ α' ∷ π} (AppDelThere a₁ a₂ x y δ h) 1≤cx
-    = {!!}
+  ...| yes abs = let aux = aux-lemma-2 1≤cx (count-CA-zero-lemma {α'} x')
+                                            (count-C*-sum-zero-lemma {π} xs)
+                  in ⊥-elim (abs-lemma-1 aux abs (count-CA-zero-lemma {α'} x'))
+  sound-CtxDel {α ∷ α' ∷ π} (AppDelThere a₁ a₂ x y δ (AppDelThere b₁ b₂ x' _ δ' h)) 1≤cx
+    with count-CA {μσ} {α} (annAt-all {α} M a₁) ≤? count-CA {μσ} {α'} (annAt-all {α'} M b₁)
+  ...| no  abs = ⊥-elim (abs (subst₂ _≤_ (sym (count-CA-zero-lemma {α} a₁)) 
+                                         (sym (count-CA-zero-lemma {α'} b₁)) 
+                                         z≤n))
+  ...| yes a₁≤b₁ = {!AppDelThere !}
+  sound-CtxDel {α ∷ α' ∷ π} (AppDelThere a₁ a₂ x y δ (AppDelHere _ _ alμ xs ys h)) 1≤cx
+    = {!!} 
+
 {-
      with annP-src hip | inspect annP-src hip
   ...| r ∷ rs | [ R ] rewrite lemma1 hip r rs R = {!!}

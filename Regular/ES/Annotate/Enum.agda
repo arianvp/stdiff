@@ -153,6 +153,8 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   ≤-pi z≤n     z≤n     = refl
   ≤-pi (s≤s p) (s≤s q) = cong s≤s (≤-pi p q)
 
+  open import Regular.ES.Annotate.FromPatch μσ
+
   -- And we simply call the 'diffCtxMax' from here; noting that
   -- if the whole product has at least one copy, the tree with the
   -- most copies inside the product also has at least one!
@@ -160,7 +162,7 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   diffCtx {K _ ∷ []} cid x₁ (at ∷ []) ()
   diffCtx {I   ∷ []} cid x₁ (at ∷ []) hip 
     = here (diffAlμDI cid x₁ at) []
-  diffCtx {α ∷ α' ∷ π}  cid x₁ (at ∷ (at' ∷ ats)) hip 
+  diffCtx {α ∷ α' ∷ π}  cid x₁ (at ∷ at' ∷ ats) hip 
     with count-CA {μσ} {α} at ≤? count-CA {μσ} {α'} at'
   ...| yes at≤at' 
      = there (fmapA {α} 𝓤 at) 
@@ -180,7 +182,6 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
 
   -- ** Simpler properties about diffCtx,
   --    These make life simpler when reasoning about it.
-  open import Regular.ES.Annotate.FromPatch μσ
 
   postulate 
     count-C-zero-lemma : (x : Fix μσ) → count-C (ann-all M x) ≡ 0
@@ -230,6 +231,22 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
                  (count-C*-sum-annAt-M-lemma x xs hip)
           | diffCtx≡here {π} {cid}  x y xs hip
           = refl
+
+  postulate
+    diffCtx≡there
+      : ∀{α α' π}{cid : CtxInsDel}(x : ⟦ α ⟧A (Fixₐ μσ))
+      → (x' : ⟦ α' ⟧A (Fixₐ μσ))(xs : ⟦ π ⟧P (Fixₐ μσ))(y : Fixₐ μσ)
+      → (hip₀ : 1 ≤ count-C*-sum {μσ} {α ∷ α' ∷ π} (x ∷ x' ∷ xs))
+      → (hip₁  : 1 ≤ count-C*-sum {μσ} {α' ∷ π} (x' ∷ xs))
+      → (x≤x' : count-CA {_} {α} x ≤ count-CA {_} {α'} x')
+      → diffCtx {α ∷ α' ∷ π} cid y (x ∷ x' ∷ xs) hip₀
+      ≡ there (fmapA {α} 𝓤 x) (diffCtx cid y (x' ∷ xs) hip₁)
+{-
+  diffCtx≡there {α} {α'} {π} {cid} x x' xs y hips hip x≤x'
+    with count-CA {μσ} {α'} x' ≤? count-CA {μσ} {α} x
+  ...| no  abs = {!!} -- ⊥-elim (abs x≤x') 
+  ...| yes _  = {!!} -- cong₂ there ? ?
+-}
 
   diffS : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S (Fixₐ μσ)) → Patch Alμ σ
   diffS s₁ s₂ = S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align)
