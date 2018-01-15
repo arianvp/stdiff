@@ -107,12 +107,12 @@ module Regular.Lab.SExp where
   apply-commute-2 = refl
 
   open import Regular.ES.Fixpoint SExpF
-  open import Regular.ES.Annotate SExpF
+  open import Regular.Operations.Annotate.Oracle.ES SExpF
   open import Regular.ES.MemoEnum SExpF
     as MemoEnum
     using ()
-  open import Regular.ES.AnnEnum SExpF
-    as AnnEnum
+  open import Regular.Operations.Annotate.Translate SExpF
+    as Translate
     using ()
 
   
@@ -154,7 +154,7 @@ module Regular.Lab.SExp where
   extr (x ∷ []) = x
 
   j12-patch : Alμ
-  j12-patch = AnnEnum.diffAlμ (extr j1ₐ) (extr j2ₐ)
+  j12-patch = Translate.diffAlμ (extr j1ₐ) (extr j2ₐ)
 
   j3 j4 : SExp
   j3 = Def "lala" # (N "foo"
@@ -174,7 +174,7 @@ module Regular.Lab.SExp where
   j4ₐ = ann-dest (j4 ∷ []) es34 (indeed (j3 ∷ []))
 
   j34-patch : Alμ
-  j34-patch = AnnEnum.diffAlμ (extr j3ₐ) (extr j4ₐ)
+  j34-patch = Translate.diffAlμ (extr j3ₐ) (extr j4ₐ)
 
   test : applyAlμ j34-patch j3 ≡ just j4
   test = refl

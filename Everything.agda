@@ -6,6 +6,7 @@ open import Prelude
 -- * Generic Programming
 open import Generic.Opaque
 open import Generic.Regular
+open import Generic.RegularAnn
 open import Generic.Multirec
 
 -- * Regular patches
@@ -26,6 +27,16 @@ open import Regular.Functor
 open import Regular.Predicates.Identity.Functor
 open import Regular.Predicates.Identity.Fixpoint
 
+-- *** Application Relation
+open import Regular.Predicates.Applies.Functor
+open import Regular.Predicates.Applies.Fixpoint
+
+-- **** And their correctness/soundness
+open import Regular.Predicates.Applies.Correctness.Functor
+open import Regular.Predicates.Applies.Correctness.Fixpoint
+open import Regular.Predicates.Applies.Soundness.Functor
+open import Regular.Predicates.Applies.Soundness.Fixpoint
+
 -- *** Domain of a patch;
 open import Regular.Predicates.Domain.Functor
 open import Regular.Predicates.Domain.Fixpoint
@@ -45,6 +56,11 @@ open import Regular.Operations.Merge.Fixpoint
 -- *** And the commuation proof
 open import Regular.Operations.Merge.Commutes.Functor
 open import Regular.Operations.Merge.Commutes.Fixpoint
+
+-- ** Annotating and Translating Patches
+open import Regular.Operations.Annotate.Translate
+open import Regular.Operations.Annotate.Oracle.ES
+open import Regular.Operations.Annotate.Oracle.Patch
 
 -- ** Laboratories
 open import Regular.Lab.2-3-Tree
