@@ -56,6 +56,20 @@ annAt-all : ∀{α σ} → Ann → ⟦ α ⟧A (Fix σ) → ⟦ α ⟧A (Fixₐ 
 annAt-all {K _} _   x = x
 annAt-all {I}   ann x = ann-all ann x
 
+{-# TERMINATING #-}
+ann-all-correct : ∀{σ}(a : Ann)(x : Fix σ)
+                → 𝓤 (ann-all a x) ≡ x
+ann-all-correct a ⟨ x ⟩ 
+  = cong ⟨_⟩ (trans (fmapS-∘ 𝓤 (ann-all a) x) 
+             (trans (cong (λ P → fmapS P x) 
+                          (fun-ext {g = id} (ann-all-correct a))) 
+                    (fmapS-id x)))
+
+annAt-all-correct : ∀{α σ}(a : Ann)(x : ⟦ α ⟧A (Fix σ))
+                  → fmapA {α} 𝓤 (annAt-all {α} a x) ≡ x
+annAt-all-correct {K _} a x = refl
+annAt-all-correct {I}   a x = ann-all-correct a x
+
 module AnnCounter where
 {-
   postulate magic : IsMonoid _≡_ _+_ 0 
@@ -110,21 +124,5 @@ module AnnCounter where
   count-C*-sum-base-lemma
     : ∀{σ α}(p : ⟦ α ⟧A (Fixₐ σ))
     → count-C*-sum {σ} {α ∷ []} (p ∷ []) ≡ count-CA {σ} {α} p
-  count-C*-sum-base-lemma p 
-    = theMagic
-    where postulate theMagic : ∀{a}{A : Set a} → A
-{-
-  count-maxCS-CA-lemma
-    : ∀{σ π α}(p : ⟦ α ⟧A (Fixₐ σ))(ps : ⟦ π ⟧P (Fixₐ σ))
-    → 1 ≤ count-C*-sum {σ} {α ∷ π} (p ∷ ps)
-    → let α₀ , a₀ = all-max count-CA 
-all-lookup (vec-max (count-C* {σ} {α ∷ π} (p ∷ ps))) 
-                               (_∷_ {x = α} p ps)
-       in 1 ≤ count-CA {σ} {α₀} a₀
-  count-maxCS-CA-lemma {σ} {_} {α} p [] hip 
-    rewrite count-C*-sum-base-lemma {σ} {α} p = hip
-  count-maxCS-CA-lemma {σ} {α₁ ∷ π} {α₂} p (px ∷ ps) hip 
-    with vec-max (count-CA {σ} {α₁} px ∷ count-C* ps)
-  ...| mi = theMagic
-    where postulate theMagic : ∀{a}{A : Set a} → A
--}
+  count-C*-sum-base-lemma {σ} {α} p 
+    = +-comm (count-CA {σ} {α} p) 0

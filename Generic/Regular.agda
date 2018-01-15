@@ -40,6 +40,36 @@ fmapS : ∀{σ X Y}(f : X → Y) → ⟦ σ ⟧S X → ⟦ σ ⟧S Y
 fmapS f (here  px) = here  (fmapP f px)
 fmapS f (there px) = there (fmapS f px)
 
+-- *** And their proofs
+
+fmapA-∘ : ∀{α X Y Z}(g : Y → Z)(f : X → Y)(a : ⟦ α ⟧A X)
+        → fmapA {α} g (fmapA {α} f a) ≡ fmapA {α} (g ∘ f) a
+fmapA-∘ {I}   g f a = refl 
+fmapA-∘ {K κ} g f a = refl 
+
+fmapP-∘ : ∀{π X Y Z}(g : Y → Z)(f : X → Y)(p : ⟦ π ⟧P X)
+        → fmapP {π} g (fmapP {π} f p) ≡ fmapP {π} (g ∘ f) p
+fmapP-∘ {[]}     g f []       = refl
+fmapP-∘ {α ∷ πs} g f (x ∷ xs) = cong₂ _∷_ (fmapA-∘ {α} g f x) 
+                                          (fmapP-∘ g f xs)
+
+fmapS-∘ : ∀{σ X Y Z}(g : Y → Z)(f : X → Y)(s : ⟦ σ ⟧S X)
+        → fmapS {σ} g (fmapS {σ} f s) ≡ fmapS {σ} (g ∘ f) s
+fmapS-∘ g f (here px)  = cong here  (fmapP-∘ g f px)
+fmapS-∘ g f (there px) = cong there (fmapS-∘ g f px)
+
+fmapA-id : ∀{α X}(a : ⟦ α ⟧A X) → fmapA {α} id a ≡ a
+fmapA-id {I}   a = refl
+fmapA-id {K _} a = refl
+
+fmapP-id : ∀{π X}(p : ⟦ π ⟧P X) → fmapP id p ≡ p
+fmapP-id {[]} []           = refl
+fmapP-id {α ∷ πs} (x ∷ xs) = cong₂ _∷_ (fmapA-id {α} x) (fmapP-id xs)
+
+fmapS-id : ∀{σ X}(s : ⟦ σ ⟧S X) → fmapS id s ≡ s
+fmapS-id (here px)  = cong here  (fmapP-id px)
+fmapS-id (there px) = cong there (fmapS-id px)
+
 -- ** Consuming the recursive positions under a monoid.
 --    WARNING: We are ignoring the constant types here!
 --
@@ -175,4 +205,13 @@ _≟Fix_ {σ = σ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix σ) _≟Fix_ sx 
 
 {-# TERMINATING #-}
 cata : ∀{σ A}(f : ⟦ σ ⟧S A → A) → Fix σ → A
-cata f  = (f ∘ fmapS (cata f)) ∘ unfix
+cata f ⟨ x ⟩ = f (fmapS (cata f) x) 
+
+{-# TERMINATING #-}
+cata-uni : ∀{σ A}(f : ⟦ σ ⟧S A → A)(h : Fix σ → A) 
+         → (∀ x → h x ≡ f (fmapS h (unfix x)))
+         → (x : Fix σ)
+         → cata f x ≡ h x
+cata-uni f h hip ⟨ x ⟩ 
+  rewrite hip ⟨ x ⟩ 
+        = cong (λ P → f (fmapS P x)) (fun-ext (cata-uni f h hip))
