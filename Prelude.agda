@@ -9,6 +9,14 @@ open import Function
   hiding (_⟨_⟩_)
   public
 
+open import Algebra
+  using ( Semigroup; CommutativeMonoid; Monoid)
+  public
+
+open import Algebra.Structures
+  using ( IsSemigroup; IsCommutativeMonoid; IsMonoid)
+  public
+
 open import Category.Monad
   public
 
@@ -21,6 +29,11 @@ open import Relation.Unary
 
 open import Relation.Binary.PropositionalEquality
   public
+
+postulate
+  fun-ext : ∀{a b}{A : Set a}{B : Set b}{f g : A → B}
+          → (∀ x → f x ≡ g x)
+          → f ≡ g
 
 open import Relation.Binary
   using (_⇒_; Rel)
@@ -39,6 +52,7 @@ dec-refl _≟_ x with x ≟ x
 ...| yes refl = refl
 
 open import Data.Product
+  renaming (map to _><_)
   public
 
 open import Data.Sum
@@ -70,13 +84,40 @@ IsJust-magic ()
 IsJust-ext : ∀{a}{A : Set a}{x : Maybe A} → IsJust x → ∃ (λ k → x ≡ just k)
 IsJust-ext (indeed x) = x , refl
 
+IsJust-from≡ : ∀{a}{A : Set a}{x : Maybe A}{y : A}
+             → x ≡ just y → IsJust x
+IsJust-from≡ {y = y} refl = indeed y
+
+just-inj : ∀{a}{A : Set a}{x y : A} 
+         → _≡_ {A = Maybe A} (just x) (just y) → x ≡ y
+just-inj refl = refl
+
+Maybe-⊥-elim : ∀{a b}{A : Set a}{B : Set b}{x : A} 
+             → _≡_ {A = Maybe A} nothing (just x) → B
+Maybe-⊥-elim () 
+
+Maybe-map-def : ∀{a b}{A : Set a}{B : Set b}{f : A → B}
+              → (x : Maybe A){y : A}
+              → x ≡ just y
+              → Maybe-map f x ≡ just (f y)
+Maybe-map-def nothing ()
+Maybe-map-def (just y) refl = refl 
+
+Maybe-unmap-def : ∀{a b}{A : Set a}{B : Set b}{f : A → B}
+                → (f-inj : ∀{m n} → f m ≡ f n → m ≡ n)
+                → (x : Maybe A){y : A}
+                → Maybe-map f x ≡ just (f y)
+                → x ≡ just y
+Maybe-unmap-def f-inj nothing ()
+Maybe-unmap-def f-inj (just y) hip = cong just (f-inj (just-inj hip)) 
+
 open import Data.Bool
   using (Bool ; true ; false) 
   renaming (_≟_ to _≟B_)
   public
 
 open import Data.Fin 
-  using (Fin ; suc ; zero)
+  using (Fin ; suc ; zero; inject₁)
   public
 
 open import Data.Fin.Properties 
@@ -86,6 +127,14 @@ open import Data.Fin.Properties
 
 open import Data.Nat 
   renaming (_≟_ to _≟N_)
+  hiding (_⊓_)
+  public
+
+NonZero : ℕ → Set
+NonZero zero    = ⊥
+NonZero (suc _) = Unit
+
+open import Data.Nat.Properties.Simple
   public
 
 open import Data.List
@@ -98,9 +147,22 @@ open import Data.List.All
   renaming (map to All-map)
   public
 
+All-∷-inj 
+  : ∀{a}{A : Set a}{P : A → Set}{x : A}{xs : List A}
+  → {px py : P x}{pxs pys : All P xs}
+  → _≡_ {A = All P (x ∷ xs)} (px ∷ pxs) (py ∷ pys) → px ≡ py × pxs ≡ pys
+All-∷-inj refl = refl , refl
+
 open import Data.List.Any
   hiding (map)
   public
+
+Any-there-inj
+  : ∀{a}{A : Set a}{P : A → Set}{x : A}{xs : List A}
+  → {px py : Any P xs}
+  → _≡_ {A = Any P (x ∷ xs)} (there px) (there py)
+  → px ≡ py
+Any-there-inj refl = refl
 
 open import Data.String
   using (String ; primStringEquality)
@@ -111,6 +173,18 @@ open import Data.Vec
   using (Vec ; _∷_; [])
   renaming (map to Vec-map ; lookup to Vec-lookup)
   public
+
+vec-foldr : ∀{a b}{A : Set a}{B : Set b}{n : ℕ}
+          → (A → B → B) → B → Vec A n → B
+vec-foldr f g []       = g
+vec-foldr f g (x ∷ xs) = f x (vec-foldr f g xs)
+
+vec-max : ∀{n} → Vec ℕ (suc n) → Fin (suc n)
+vec-max (x ∷ [])     = zero
+vec-max {suc n} (x ∷ y ∷ ys) with vec-max (y ∷ ys)
+...| my with x ≤? Vec-lookup my (y ∷ ys) 
+...| yes _ = suc my
+...| no _  = inject₁ my
 
 -- * Misc. Library functions
 
@@ -128,6 +202,20 @@ all-foldr : {A : Set}{P : A → Set}{X : List A → Set}
 all-foldr f g [] = g
 all-foldr {A} {P} {X} f g (x ∷ xs) = f x (all-foldr {A} {P} {X} f g xs)
 
+all-max : {A : Set}{P : A → Set}{l : A}{ls : List A}
+        → (measure : ∀{a} → P a → ℕ)
+        → All P (l ∷ ls) → ∃ P
+all-max mes (pa ∷ [])          = _ , pa
+all-max mes (pa ∷ (pa' ∷ pas)) 
+  with mes pa ≤? mes pa'
+...| yes _ = all-max mes (pa' ∷ pas)
+...| no  _ = all-max mes (pa ∷ pas)
+
+all-lookup : {A : Set}{P : A → Set}{l : List A}
+           → Fin (length l) → All P l → ∃ (λ a → P a)
+all-lookup () []
+all-lookup {l = l ∷ ls} zero      (px ∷ a) = l , px
+all-lookup {l = l ∷ ls} (suc idx) (px ∷ a) = all-lookup idx a
 
 zipd : {A : Set}{P Q : A → Set}{xs : List A} 
      → All P xs → All Q xs → All (λ x → P x × Q x) xs
@@ -140,3 +228,11 @@ All-set : {A : Set}{P : A → Set}{xs : List A}
         → Set
 All-set f [] = Unit
 All-set f (x ∷ xs) = f x × All-set f xs
+
+All-head : {A : Set}{P : A → Set}{x : A}{xs : List A}
+         → All P (x ∷ xs) → P x
+All-head (px ∷ _) = px
+
+All-tail : {A : Set}{P : A → Set}{x : A}{xs : List A}
+         → All P (x ∷ xs) → All P xs
+All-tail (_ ∷ pxs) = pxs
