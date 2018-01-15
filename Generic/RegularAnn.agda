@@ -20,6 +20,13 @@ data Ann : Set where
 fmapSₐ : ∀{σ X Y} → (X → Y) → ⟦ σ ⟧Sₐ X → ⟦ σ ⟧Sₐ Y
 fmapSₐ f (ann , x) = ann , fmapS f x
 
+fmapSₐ-∘ : ∀{σ X Y Z}(g : Y → Z)(f : X → Y)(s : ⟦ σ ⟧Sₐ X)
+         → fmapSₐ g (fmapSₐ f s) ≡ fmapSₐ (g ∘ f) s
+fmapSₐ-∘ g f (ann , s) = cong (λ P → ann , P) (fmapS-∘ g f s)
+
+fmapSₐ-id : ∀{σ X}(s : ⟦ σ ⟧Sₐ X) → fmapSₐ id s ≡ s
+fmapSₐ-id (ann , s) = cong (λ P → ann , P) (fmapS-id s)
+
 data Fixₐ (σ : Sum) : Set where
   ⟨_⟩ : ⟦ σ ⟧Sₐ (Fixₐ σ) → Fixₐ σ 
 
