@@ -12,7 +12,7 @@ open import Generic.RegularAnn
 --   We start by defining the cost semantics and 
 --   the '⊓' operation
 --
-module Regular.ES.Annotate (σμ : Sum) where
+module Regular.Operations.Annotate.Oracle.ES (σμ : Sum) where
 
   open import Data.List using (_++_)
   open import Regular.ES.Fixpoint σμ

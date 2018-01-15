@@ -2,7 +2,7 @@ open import Prelude
 open import Generic.Regular
 open import Generic.RegularAnn
 
-module Regular.ES.Annotate.FromPatch (μσ : Sum) where
+module Regular.Operations.Annotate.Oracle.Patch (μσ : Sum) where
 
   open import Regular.Functor (Fix μσ) _≟Fix_
   open import Regular.Fixpoint μσ
@@ -12,15 +12,6 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
   open DecEq (Fix μσ) _≟Fix_
   open FixpointApplication
 
-  -- * General purpose 'all-copy' and 'all-move'
-
-  ann-all : Ann → Fix μσ → Fixₐ μσ
-  ann-all ann = cata (λ s → ⟨ ann , s ⟩)
-  
-  annAt-all : ∀{α} → Ann → ⟦ α ⟧A (Fix μσ) → ⟦ α ⟧A (Fixₐ μσ)
-  annAt-all {K _} _   x = x
-  annAt-all {I}   ann x = ann-all ann x
-
   -- * First we use a patch between a value x and y
   --   to generate annotated versions of x and y;
   --   After, we prove that extracting a patch
@@ -28,7 +19,6 @@ module Regular.ES.Annotate.FromPatch (μσ : Sum) where
 
   -- * Annotating the source; one function for each part
   --   of the universe.
-
 
   -- ** Annotating Fixpoints with Alμ's;
   {-# TERMINATING #-}

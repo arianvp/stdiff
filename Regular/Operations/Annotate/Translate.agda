@@ -2,7 +2,7 @@ open import Prelude
 open import Generic.Regular
 open import Generic.RegularAnn
 
-module Regular.ES.Annotate.Enum (μσ : Sum) where
+module Regular.Operations.Annotate.Translate (μσ : Sum) where
 
   open import Regular.Internal.Functor (Fix μσ) _≟Fix_
   open import Regular.Internal.Fixpoint μσ
@@ -18,6 +18,9 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
 
   -- * If a given subtree has no more copies, we can only resort
   --   to Schg to produce a patch; We call this the stiff patch.
+  --   In the sense that it completely fixes one element in the
+  --   domain and one in the image of the application function.
+  --   This is the worst patch to transform an x into a y.
   --
   --   One option would be to fall back to the diff algorithm that enumerates
   --   all possibilities and choose the one with the least cost.
@@ -114,31 +117,20 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   diffAtμ {K κ} x y = set (x , y)
   diffAtμ {I}   x y = fix (diffAlμ x y)
 
-  non-zero-sum-trans : ∀{m n} → 1 ≤ m + n → m ≤ n → 1 ≤ n
-  non-zero-sum-trans 1≤m+n z≤n       = 1≤m+n
-  non-zero-sum-trans 1≤m+n (s≤s m≤n) = s≤s z≤n
-
-  ≤-monotone-l : ∀{m n o} → m ≤ n → m ≤ o + n
-  ≤-monotone-l                      z≤n    = z≤n
-  ≤-monotone-l {suc m} {suc n} {o} (s≤s r) 
-    rewrite +-suc o n = s≤s (≤-monotone-l {o = o} r)
-
+  -- Some auxiliary lemmas follow; I somehow feel I'd like to change
+  -- these (1 ≤) to a simpler NonZero predicate.
   ≤-monotone-r : ∀{m n o} → m ≤ n → m ≤ n + o
   ≤-monotone-r z≤n     = z≤n
   ≤-monotone-r (s≤s r) = s≤s (≤-monotone-r r)
 
-  ≤-refl : ∀{m} → m ≤ m
-  ≤-refl {zero}  = z≤n
-  ≤-refl {suc m} = s≤s ≤-refl
+  private
+    aux-lemma-1 : ∀{m n o} → 1 ≤ m + (n + o) → ¬ (m ≤ n) → 1 ≤ m + o
+    aux-lemma-1 {zero} hipa hipb = ⊥-elim (hipb z≤n)
+    aux-lemma-1 {suc m} hipa hipb = s≤s z≤n
 
-  ≤-antisym : ∀{m n} → ¬ (m ≤ n) → n ≤ m
-  ≤-antisym {zero}  abs = ⊥-elim (abs z≤n)
-  ≤-antisym {suc m} {zero}  abs = z≤n
-  ≤-antisym {suc m} {suc n} abs = s≤s (≤-antisym (abs ∘ s≤s)) 
-
-  aux-lemma-1 : ∀{m n o} → 1 ≤ m + (n + o) → ¬ (m ≤ n) → 1 ≤ m + o
-  aux-lemma-1 {zero} hipa hipb = ⊥-elim (hipb z≤n)
-  aux-lemma-1 {suc m} hipa hipb = s≤s z≤n
+    aux-lemma-2 : ∀{m n} → 1 ≤ m + n → m ≤ n → 1 ≤ n
+    aux-lemma-2 1≤m+n z≤n       = 1≤m+n
+    aux-lemma-2 1≤m+n (s≤s m≤n) = s≤s z≤n
 
   Ctx-swap : ∀{α α' π} → Ctx (α' ∷ α ∷ π) → Ctx (α ∷ α' ∷ π)
   Ctx-swap (here spμ (a ∷ p))     = there a (here spμ p)
@@ -149,15 +141,22 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   diffAlμDI CtxDel x y = diffAlμ y x
   diffAlμDI CtxIns x y = diffAlμ x y
 
-  ≤-pi : ∀{m n}(p q : m ≤ n) → p ≡ q
-  ≤-pi z≤n     z≤n     = refl
-  ≤-pi (s≤s p) (s≤s q) = cong s≤s (≤-pi p q)
-
-  open import Regular.ES.Annotate.FromPatch μσ
-
-  -- And we simply call the 'diffCtxMax' from here; noting that
-  -- if the whole product has at least one copy, the tree with the
-  -- most copies inside the product also has at least one!
+  -- Now, diffCtx is a hack. We were using a single definition
+  -- to facilitate proofs. Turns out the proofs were still
+  -- pretty complex (branch es-to-tree-proof-3-nonzero).
+  --
+  -- Nevertheless, an simpler spec for diffCtx is:
+  --
+  -- diffCtx cid x ats = let idx = max (map count-CA ats)
+  --                      in diffCtxIdx cid idx x ats
+  --
+  -- diffCtxIdx cid n x (at₁ ∷ at₂ ∷ ⋯ ∷ atₙ ∷ ats)
+  --   = there at₁ (⋯ (here (diffAlμDI cid x atₙ) ats))
+  -- 
+  -- In the implementation below, we force the
+  -- product to be non-empty and use the first atom
+  -- in the procut as an auxiliary value, where
+  -- we store the local maximum under count-CA.
   diffCtx            cid x₁ [] ()
   diffCtx {K _ ∷ []} cid x₁ (at ∷ []) ()
   diffCtx {I   ∷ []} cid x₁ (at ∷ []) hip 
@@ -167,7 +166,7 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
   ...| yes at≤at' 
      = there (fmapA {α} 𝓤 at) 
              (diffCtx cid x₁ (at' ∷ ats) 
-                   (non-zero-sum-trans 
+                   (aux-lemma-2 
                        {count-CA {μσ} {α} at} 
                        {count-CA {μσ} {α'} at' + count-C*-sum ats}
                        hip (≤-monotone-r at≤at')))
@@ -179,74 +178,6 @@ module Regular.ES.Annotate.Enum (μσ : Sum) where
                      {m = count-CA {μσ} {α} at} 
                      {n = count-CA {μσ} {α'} at'} 
                      hip at≰at') ))
-
-  -- ** Simpler properties about diffCtx,
-  --    These make life simpler when reasoning about it.
-
-  postulate 
-    count-C-zero-lemma : (x : Fix μσ) → count-C (ann-all M x) ≡ 0
-
-  count-CA-zero-lemma
-    : ∀{α}(a : ⟦ α ⟧A (Fix μσ)) → count-CA {μσ} {α} (annAt-all {α} M a) ≡ 0
-  count-CA-zero-lemma {K _} a = refl
-  count-CA-zero-lemma {I  } a = count-C-zero-lemma a
-
-  count-C*-sum-zero-lemma
-    : ∀{π}(xs : ⟦ π ⟧P (Fix μσ))
-    → count-C*-sum (All-map (λ {α} → annAt-all {α} M) xs) ≡ 0
-  count-C*-sum-zero-lemma []       = refl
-  count-C*-sum-zero-lemma {α ∷ π} (x ∷ xs) 
-    rewrite count-CA-zero-lemma {α} x = count-C*-sum-zero-lemma xs
-
-  count-C*-sum-annAt-M-lemma
-    : ∀{π}(x : Fixₐ μσ)(xs : ⟦ π ⟧P (Fix μσ))
-    → 1 ≤ count-C x
-    → 1 ≤ count-C*-sum {π = I ∷ π} (x ∷ All-map (λ {α} → annAt-all {α} M) xs)
-  count-C*-sum-annAt-M-lemma x xs hip 
-    rewrite count-C*-sum-zero-lemma xs 
-          | +-comm (count-CA {μσ} {I} x) 0
-          = hip
-
-  postulate
-    𝓤-correctA
-      : ∀{α}{ann : Ann}(x : ⟦ α ⟧A (Fix μσ)) → fmapA {α} 𝓤 (annAt-all {α} ann x) ≡ x
-
-    abs-lemma-1 : ∀{m n} → 1 ≤ m → m ≤ n → n ≡ 0 → ⊥
-  
-
-  diffCtx≡here
-    : ∀{π}{cid : CtxInsDel}(x y : Fixₐ μσ)(xs : ⟦ π ⟧P (Fix μσ))
-    → (hip : 1 ≤ count-C x) 
-    → diffCtx {I ∷ π} cid y 
-              (x ∷ All-map (λ {α} → annAt-all {α} M) xs) 
-              (count-C*-sum-annAt-M-lemma x xs hip)
-    ≡ here (diffAlμDI cid y x) xs
-  diffCtx≡here         x y []        hip = refl
-  diffCtx≡here {α ∷ π} {cid} x y (x' ∷ xs) hip 
-    with count-CA {μσ} {I} x ≤? count-CA {μσ} {α} (annAt-all {α} M x') 
-  ...| yes abs = ⊥-elim (abs-lemma-1 hip abs (count-CA-zero-lemma {α} x'))
-  ...| no  ¬p   
-    rewrite 𝓤-correctA {α} {M} x' 
-          | ≤-pi (aux-lemma-1 (count-C*-sum-annAt-M-lemma {α ∷ π} x (x' ∷ xs) hip) ¬p)
-                 (count-C*-sum-annAt-M-lemma x xs hip)
-          | diffCtx≡here {π} {cid}  x y xs hip
-          = refl
-
-  postulate
-    diffCtx≡there
-      : ∀{α α' π}{cid : CtxInsDel}(x : ⟦ α ⟧A (Fixₐ μσ))
-      → (x' : ⟦ α' ⟧A (Fixₐ μσ))(xs : ⟦ π ⟧P (Fixₐ μσ))(y : Fixₐ μσ)
-      → (hip₀ : 1 ≤ count-C*-sum {μσ} {α ∷ α' ∷ π} (x ∷ x' ∷ xs))
-      → (hip₁  : 1 ≤ count-C*-sum {μσ} {α' ∷ π} (x' ∷ xs))
-      → (x≤x' : count-CA {_} {α} x ≤ count-CA {_} {α'} x')
-      → diffCtx {α ∷ α' ∷ π} cid y (x ∷ x' ∷ xs) hip₀
-      ≡ there (fmapA {α} 𝓤 x) (diffCtx cid y (x' ∷ xs) hip₁)
-{-
-  diffCtx≡there {α} {α'} {π} {cid} x x' xs y hips hip x≤x'
-    with count-CA {μσ} {α'} x' ≤? count-CA {μσ} {α} x
-  ...| no  abs = {!!} -- ⊥-elim (abs x≤x') 
-  ...| yes _  = {!!} -- cong₂ there ? ?
--}
 
   diffS : ∀{σ}(s₁ s₂ : ⟦ σ ⟧S (Fixₐ μσ)) → Patch Alμ σ
   diffS s₁ s₂ = S-map (uncurry diffAtμ) (al-map (uncurry diffAtμ) ∘ uncurry align)

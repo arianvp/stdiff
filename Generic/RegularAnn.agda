@@ -47,6 +47,14 @@ cataₐ-uni f h hip ⟨ ann , x ⟩
   rewrite hip ⟨ ann , x ⟩ 
         = cong (λ P → f (ann , fmapS P x)) (fun-ext (cataₐ-uni f h hip))
 
+-- * General purpose 'all-copy' and 'all-move'
+
+ann-all : ∀{σ} → Ann → Fix σ → Fixₐ σ
+ann-all ann = cata (λ s → ⟨ ann , s ⟩)
+
+annAt-all : ∀{α σ} → Ann → ⟦ α ⟧A (Fix σ) → ⟦ α ⟧A (Fixₐ σ)
+annAt-all {K _} _   x = x
+annAt-all {I}   ann x = ann-all ann x
 
 module AnnCounter where
 {-
