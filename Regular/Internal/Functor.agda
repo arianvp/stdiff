@@ -22,6 +22,7 @@ module Regular.Internal.Functor
            (ats : All At (typeOf σ C)) →
            S At Al σ
     Schg : (C₁ C₂ : Constr σ){q : C₁ ≢ C₂}
+           {r₁ : isRec σ C₁}{r₂ : isRec σ C₂}
            (al : Al (typeOf σ C₁) (typeOf σ C₂)) →
            S At Al σ
 
@@ -33,7 +34,8 @@ module Regular.Internal.Functor
         → S At₁ Al₁ σ → S At₂ Al₂ σ
   S-map f g Scp                 = Scp
   S-map f g (Scns C ps)         = Scns C (All-map f ps)
-  S-map f g (Schg C₁ C₂ {q} al) = Schg C₁ C₂ {q} (g al)
+  S-map f g (Schg C₁ C₂ {q} {r₁} {r₂} al) 
+    = Schg C₁ C₂ {q} {r₁} {r₂} (g al)
 
 -- *** Spine application
 

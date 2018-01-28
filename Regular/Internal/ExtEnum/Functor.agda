@@ -19,13 +19,17 @@ module Regular.Internal.ExtEnum.Functor
 
 -- ** Spine identification
 
-  spine : ∀ {σ} → ⟦ σ ⟧S Rec → ⟦ σ ⟧S Rec → S TrivialA TrivialP σ
-  spine s₁ s₂ with s₁ ≟S s₂
-  ... | yes refl = Scp
+  spine : ∀ {σ} → ⟦ σ ⟧S Rec → ⟦ σ ⟧S Rec → M (S TrivialA TrivialP σ)
+  spine {σ} s₁ s₂ with s₁ ≟S s₂
+  ... | yes refl = return Scp
   ... | no ¬p  with sop s₁ | sop s₂
   ... | tag C₁ p₁ | tag C₂ p₂ with C₁ ≟F C₂
-  ... | yes refl = Scns C₁ (zipd p₁ p₂)
-  ... | no ¬q = Schg C₁ C₂ {¬q} (p₁ , p₂)
+  ... | yes refl = return (Scns C₁ (zipd p₁ p₂))
+  ... | no ¬q with isRec? σ C₁
+  ... | no _ = ∅
+  ... | yes r₁ with isRec? σ C₂
+  ... | no _ = ∅ 
+  ... | yes r₂ = return (Schg C₁ C₂ {¬q} {r₁} {r₂} (p₁ , p₂))
   
   _⊆M_ : (At₁ At₂ : Atom → Set) → Set
   At₁ ⊆M At₂ = At₁ ⊆ M ∘ At₂
@@ -41,7 +45,7 @@ module Regular.Internal.ExtEnum.Functor
         → S At₁ Al₁ σ → M (S At₂ Al₂ σ)
   S-mapM f g Scp = return Scp
   S-mapM f g (Scns C ps) = Scns C <$> All-mapM f ps
-  S-mapM f g (Schg C₁ C₂ {q} al) = Schg C₁ C₂ {q} <$> g al
+  S-mapM f g (Schg C₁ C₂ {q} {r₁} {r₂} al) = Schg C₁ C₂ {q} {r₁} {r₂} <$> g al
 
 -- ** Enumerating alignments
 
@@ -71,6 +75,6 @@ module Regular.Internal.ExtEnum.Functor
 
   diffS : ∀{PatchRec σ} → (Rec → Rec → M PatchRec)
          → ⟦ σ ⟧S Rec → ⟦ σ ⟧S Rec → M (S (At PatchRec) (Al (At PatchRec)) σ)
-  diffS {PatchRec} diffR s₁ s₂ = S-mapM (uncurry (diffAt diffR)) (uncurry alignP) (spine s₁ s₂)
+  diffS {PatchRec} diffR s₁ s₂ = spine s₁ s₂ >>= S-mapM (uncurry (diffAt diffR)) (uncurry alignP) 
          where alignP : ∀ {π₁ π₂} → ⟦ π₁ ⟧P Rec → ⟦ π₂ ⟧P Rec → M (Al (At PatchRec) π₁ π₂)
                alignP p₁ p₂ = align p₁ p₂ >>= al-mapM (uncurry (diffAt diffR))

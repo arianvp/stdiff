@@ -17,6 +17,14 @@ Sum = List Prod
 prodIsRec : Prod → Set
 prodIsRec = Any (_≡_ I)
 
+prodIsRec? : (p : Prod) → Dec (prodIsRec p)
+prodIsRec? []        = no (λ ())
+prodIsRec? (I   ∷ _) = yes (here refl)
+prodIsRec? (K _ ∷ p) with prodIsRec? p
+...| yes pr = yes (there pr) 
+...| no ¬pr = no (λ { (here ()) ;
+                      (there abs) → ¬pr abs })
+
 -- ** Interpretation
 
 ⟦_⟧A : Atom → Set → Set
@@ -147,8 +155,11 @@ typeOf (π ∷ σ) (suc C) = typeOf σ C
 
 -- Should be inhabitted iff C is a recursive
 -- constructor; that is, typeOf σ C has an I
-isRec : {σ : Sum}(C : Constr σ) → Set
-isRec {σ} C = prodIsRec (typeOf σ C)
+isRec : (σ : Sum)(C : Constr σ) → Set
+isRec σ C = prodIsRec (typeOf σ C)
+
+isRec? : (σ : Sum)(C : Constr σ) → Dec (isRec σ C)
+isRec? σ C = prodIsRec? (typeOf σ C)
 
 inj : {σ : Sum}{X : Set} → (C : Constr σ) → ⟦ typeOf σ C ⟧P X → ⟦ σ ⟧S X
 inj {σ = []} () _
