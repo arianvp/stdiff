@@ -7,7 +7,7 @@ module Regular.Fixpoint (σμ : Sum) where
 
   open import Regular.Internal.Fixpoint σμ
     public
-  open import Regular.Internal.ExtEnum.Fixpoint σμ List Data.List.monadPlus
+  open import Regular.Internal.NFEnum.Fixpoint σμ List Data.List.monadPlus
     public
     
   

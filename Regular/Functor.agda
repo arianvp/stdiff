@@ -10,7 +10,7 @@ module Regular.Functor
 
   open import Regular.Internal.Functor Rec _≟Rec_
     public
-  open import Regular.Internal.ExtEnum.Functor Rec _≟Rec_ List Data.List.monadPlus
+  open import Regular.Internal.NFEnum.Functor Rec _≟Rec_ List Data.List.monadPlus
     public
     
   
