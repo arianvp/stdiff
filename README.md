@@ -9,4 +9,66 @@ to the universe of Regular Tree Types.
 
 # Agda Versions
 
-The development is made on Agda 2.5.2 and standard library 0.13
+The development is made on Agda 2.5.3 and standard library 0.14
+
+# Branches
+
+## master
+
+Finished results; The latest being that the merge of disjoint pathes commute.
+For any regular type `t`, and patches `p , q` for elements of type `t`,
+if `p` and `q` are disjoint (that is, alter different parts of the tree),
+then:
+
+```
+apply (merge p q) . apply p == apply (merge q p) . apply q
+```
+
+## multirec
+
+Starts extending the algorithm to mutually-recursive families of types
+instead of regular types. Very preliminary; only description
+of types are done.
+
+## experimental-algorithm
+
+Experiments with a different enumeration heuristic; had the hopes of speeding
+things up. Not so much luck though.
+
+## es-to-tree-proof
+
+Here we are trying to convert Lempsink's notion of patches (linear edit scripts
+on the list of constructors as seen in a preorder traversal of the trees) to
+our tree-structured pathces.
+
+The idea here being that we might be able to have the best of both worls:
+i)  Linear patches are easy to compute and hard to merge
+ii) Tree-structured patches are hard to compute but easy to merge;
+iii) Computing a linear patch and translating to a tree-structured patch
+     might just be the solution.
+     
+### Sub-branches
+
+  1) The 'master' of this development.
+  
+  2) Tried to mimick the annotation structure of 
+     the linear patches: one annotation function for the source and
+     another for the dest, carying a proof that those elements
+     were applicable to the patch (and it's inverse).
+     Did not really work and required a lot of work
+     on the inverse of a Patch, which is something we don't really
+     want to porsue.
+     
+  3) Will look into making a relation that lets pattern matching
+     be easier; The relation should be:
+     
+     ```
+     Applies x p y <==> apply p x == just y
+     ```
+
+## identity-postulate-removal
+
+Working on removing the postulates about identity patches; Not critical
+but will require some work.
+
+
