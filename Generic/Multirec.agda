@@ -19,8 +19,9 @@ Sum = List ∘ Prod
 
 -- ** Interpretation
 
+open import Relation.Unary
 Setⁿ : ℕ → Set₁
-Setⁿ n = Fin n → Set
+Setⁿ n = Pred (Fin n) _
 
 ⟦_⟧A : {n : ℕ} → Atom n → Setⁿ n → Set
 ⟦ K κ ⟧A X = ⟦ κ ⟧K

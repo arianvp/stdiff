@@ -3,7 +3,7 @@ open import Generic.Multirec
 
 module Multirec.Internal.Functor
            {n : ℕ}
-           (Rec : Setⁿ n)
+           (Rec : Setⁿ n) 
            (_≟Rec_ : ∀{ν}(x y : Rec ν) → Dec (x ≡ y))
        where
 
