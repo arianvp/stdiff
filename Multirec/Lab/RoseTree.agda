@@ -57,7 +57,7 @@ open FixpointApplication
 
 -- * Unit tests
 --- * Simply do nothing
-patch : Alμ listPos
+patch : Alμ↓ rosePos
 patch = spn Scp
 
 x : (y : List') → ⟪ spn Scp ⟫μ y ≡ just y
@@ -71,17 +71,19 @@ t₁ = rose "1" (cons (rose "2" nil) nil)
 t₂ : List'
 t₂ = cons (rose "1" nil) nil
 
+t₃ : Rose'
+t₃ = rose "2" (cons (rose "2" nil) nil)
 
--- DONE is this something we ant to do? Go from Rose to List?
--- Answer: Yes.  Remember, we can Chng, (not so much in a rose treee)
--- which would require aligning the products, but the products my have different recursive atoms
--- TODO: Make an example of this
--- p12 : Alμ rosePos
--- p12 = del `rose (there "1" {!!})
+p12 : Alμ rosePos listPos
+p12 = del `rose (there "1" (here (spn Scp) []))
 
-
-
+p23 : Alμ listPos rosePos
+p23 = ins `rose (there "2" (here (spn Scp) []))
 
 
+p13 : Alμ↓ rosePos
+p13 = del `rose (there "1" (here (ins `rose (there "2" (here (spn Scp) []))) []))
 
+y : ⟪ p13 ⟫μ t₁ ≡ just t₃
+y = refl
 
