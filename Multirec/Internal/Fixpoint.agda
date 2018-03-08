@@ -6,28 +6,42 @@ module Multirec.Internal.Fixpoint {n : ℕ}(φ : Fam n) where
   open import Data.Maybe using (monadPlus)
   open RawMonadPlus {lz} monadPlus
 
-  data Alμ : Fin n → Set
-  data Ctx  (ν : Fin n) : Prod n → Set
+  -- Heterogenous
+  data Alμ : Fin n → Fin n → Set
 
-  data Ctx (ν : Fin n) where
-    here  : {π : Prod n} → Alμ ν → All (λ α → ⟦ α ⟧A (Fix φ)) π → Ctx ν (I ν ∷ π)
-    there : {α : Atom n}{π : Prod n} → ⟦ α ⟧A (Fix φ) → Ctx ν π → Ctx ν (α ∷ π)
+  Alμᵒ : Fin n → Fin n → Set
+  Alμᵒ = flip Alμ
+  -- Homogeneous
+  Alμ↓ : Fin n → Set
+  Alμ↓ ν = Alμ ν ν
+
+  data Ctx  (P : Fin n → Set) : Prod n → Set
+
+  InsCtx : Fin n → Prod n → Set
+  InsCtx ν = Ctx (Alμ ν)
+
+  DelCtx : Fin n → Prod n → Set
+  DelCtx ν = Ctx (flip Alμ ν)
+
+  data Ctx (P : Fin n → Set) where
+    here  : {ν : Fin n}{π : Prod n} → (P ν) → All (λ α → ⟦ α ⟧A (Fix φ)) π → Ctx P (I ν ∷ π)
+    there : {α : Atom n}{π : Prod n} → ⟦ α ⟧A (Fix φ) → Ctx P π → Ctx P (α ∷ π)
 
   data Alμ where
-    spn : {ν : Fin n}(sp : Patch (λ ν₁ → Alμ ν₁) (⟦ φ ⟧F ν)) → Alμ ν
-    ins : {ν : Fin n}(C : Constr (⟦ φ ⟧F ν)) → Ctx ν (typeOf (⟦ φ ⟧F ν) C) → Alμ ν
-    del : {ν : Fin n}(C : Constr (⟦ φ ⟧F ν)) → Ctx ν (typeOf (⟦ φ ⟧F ν) C) → Alμ ν
+    spn : ∀{ν} → Patch Alμ↓ (⟦ φ ⟧F ν) → Alμ↓ ν
+    ins : ∀ {ν₁ ν₂} (C : Constr' φ ν₂) → InsCtx ν₁ (typeOf' φ ν₂ C) → Alμ ν₁ ν₂
+    del : ∀ {ν₁ ν₂} (C : Constr' φ ν₁) → DelCtx ν₂ (typeOf' φ ν₁ C) → Alμ ν₁ ν₂
 
-
-  getCtx : {ν : Fin n}{π : Prod n} →  Ctx ν π → Alμ ν
+  {-getCtx : {ν : Fin n}{π : Prod n} →  Ctx ν π → Alμ ν
   getCtx (here x _) = x
   getCtx (there _ x) = getCtx x
+  -}
 
 
   {-# TERMINATING #-}
-  applyAlμ : {ν : Fin n} → Alμ ν → Fix φ ν → Maybe (Fix φ ν)
-  insCtx : ∀ {π ν} → Ctx ν π → Fix φ ν → Maybe (⟦ π ⟧P (Fix φ))
-  delCtx : ∀ {π ν} → Ctx ν π → ⟦ π ⟧P (Fix φ) → Maybe (Fix φ ν)
+  applyAlμ : ∀{ν₁ ν₂} → Alμ ν₁ ν₂ → Fix φ ν₁ → Maybe (Fix φ ν₂)
+  insCtx : ∀ {π ν} → InsCtx ν π → Fix φ ν → Maybe (⟦ π ⟧P (Fix φ))
+  delCtx : ∀ {π ν} → DelCtx ν π → ⟦ π ⟧P (Fix φ) → Maybe (Fix φ ν)
 
   applyAlμ (spn sp) x₁ = ⟨_⟩ <$> (applyPatch applyAlμ sp (unfix x₁))
   applyAlμ (ins C x) x₁ =  ⟨_⟩ <$> (inj C <$> insCtx x x₁)
