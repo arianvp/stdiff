@@ -3,18 +3,17 @@ open import Generic.Regular
 
 module Regular.Fixpoint (σμ : Sum) where
  
-  open import Data.List using (monadPlus)
+  open import Data.List.Categorical using (monadPlus)
 
   open import Regular.Internal.Fixpoint σμ
+
+  open import Regular.Internal.ExtEnum.Fixpoint σμ List monadPlus
     public
-  open import Regular.Internal.ExtEnum.Fixpoint σμ List Data.List.monadPlus
-    public
-    
-  
+
   diffFix : Fix σμ → Fix σμ → Alμ
   diffFix x y with diff x y
   ...| [] = magic
-    where postulate magic : Alμ
+    where postulate magic : Alμ -- TODO what are those?!!!
   ...| (p ∷ ps) = aux p ps
     where
       aux : Alμ → List Alμ → Alμ

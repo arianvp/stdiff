@@ -69,3 +69,11 @@ open import Regular.Lab.ForkTree
 
 -- ** Experimental
 open import Regular.ES.Fixpoint
+
+open import Multirec.Internal.Fixpoint
+open import Multirec.Internal.Functor
+
+open import Multirec.Fixpoint
+open import Multirec.Functor
+
+open import Multirec.Lab.RoseTree

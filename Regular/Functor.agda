@@ -5,15 +5,15 @@ module Regular.Functor
            (Rec : Set)
            (_≟Rec_ : (x y : Rec) → Dec (x ≡ y))
        where
- 
-  open import Data.List using (monadPlus)
+
+  open import Data.List.Categorical using (monadPlus)
 
   open import Regular.Internal.Functor Rec _≟Rec_
     public
-  open import Regular.Internal.ExtEnum.Functor Rec _≟Rec_ List Data.List.monadPlus
+  open import Regular.Internal.ExtEnum.Functor Rec _≟Rec_ List monadPlus
     public
-    
-  
+
+
   module FunctorApplication
          (PatchRec : Set)
          (applyR   : PatchRec → Rec → Maybe Rec)
@@ -31,4 +31,3 @@ module Regular.Functor
     ⟪_⟫S : {σ : Sum} → Patch PatchRec σ → ⟦ σ ⟧S Rec → Maybe (⟦ σ ⟧S Rec)
     ⟪ p ⟫S = applyS ⟪_⟫A ⟪_⟫P p
 
-                

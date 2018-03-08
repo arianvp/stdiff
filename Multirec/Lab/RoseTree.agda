@@ -72,9 +72,12 @@ t₂ : List'
 t₂ = cons (rose "1" nil) nil
 
 
--- TODO: is this something we ant to do? Go from Rose to List?
-p12 : Alμ rosePos
-p12 = del `rose (there "1" {!!})
+-- DONE is this something we ant to do? Go from Rose to List?
+-- Answer: Yes.  Remember, we can Chng, (not so much in a rose treee)
+-- which would require aligning the products, but the products my have different recursive atoms
+-- TODO: Make an example of this
+-- p12 : Alμ rosePos
+-- p12 = del `rose (there "1" {!!})
 
 
 

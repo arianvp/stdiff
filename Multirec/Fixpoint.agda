@@ -3,7 +3,7 @@ open import Generic.Multirec
 
 module Multirec.Fixpoint {n : ℕ}(φ : Fam n) where
  
-  open import Data.List using (monadPlus)
+  open import Data.List.Categorical using (monadPlus)
 
   open import Multirec.Internal.Fixpoint φ
     public
