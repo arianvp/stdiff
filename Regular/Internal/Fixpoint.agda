@@ -22,7 +22,7 @@ module Regular.Internal.Fixpoint (μσ : Sum) where
     del : (C : Constr μσ)(spμ : Ctx (typeOf μσ C)) → Alμ
 
   data Ctx where
-    here  : ∀{π} → (spμ : Alμ)(atμs : All (λ α → ⟦ α ⟧A (Fix μσ)) π) → Ctx (I ∷ π)
+    here  : ∀{π} → (spμ : Alμ)(atμs : ⟦ π ⟧P (Fix μσ))  → Ctx (I ∷ π)
     there : ∀{α π} → (atμ : ⟦ α ⟧A (Fix μσ))(alμs : Ctx π) → Ctx (α ∷ π)
 
   Atμ = At Alμ
