@@ -21,10 +21,11 @@ module Multirec.Internal.Fixpoint {n : ℕ}(φ : Fam n) where
   InsCtx ν = Ctx (Alμ ν)
 
   DelCtx : Fin n → Prod n → Set
-  DelCtx ν = Ctx (flip Alμ ν)
+  DelCtx ν = Ctx (Alμᵒ ν)
+
 
   data Ctx (P : Fin n → Set) where
-    here  : {ν : Fin n}{π : Prod n} → (P ν) → All (λ α → ⟦ α ⟧A (Fix φ)) π → Ctx P (I ν ∷ π)
+    here  : {ν : Fin n}{π : Prod n} → (P ν) → ⟦ π ⟧P (Fix φ) → Ctx P (I ν ∷ π)
     there : {α : Atom n}{π : Prod n} → ⟦ α ⟧A (Fix φ) → Ctx P π → Ctx P (α ∷ π)
 
   data Alμ where
