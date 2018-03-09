@@ -6,6 +6,7 @@ module Regular.Fixpoint (σμ : Sum) where
   open import Data.List.Categorical using (monadPlus)
 
   open import Regular.Internal.Fixpoint σμ
+    public
 
   open import Regular.Internal.ExtEnum.Fixpoint σμ List monadPlus
     public
