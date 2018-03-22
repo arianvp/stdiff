@@ -136,6 +136,9 @@ _≟Fix_ {φ = φ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix φ) _≟Fix_ sx 
 
 module Paths where
 
+  -- A value of (AllBut P prf), for (prf : x ∈ l) is
+  -- isomorphic to All P (delete prf l)
+  --
   data AllBut {A : Set}(P : A → Set) : {l : List A}{x : A} → x ∈ l → Set where
     here  : ∀{x xs}      → All P xs → AllBut P {x ∷ xs} (here refl)
     there : ∀{x x' xs p} → (hip : P x) → AllBut P {xs} {x'} p → AllBut P {x ∷ xs} (there p)
@@ -144,6 +147,9 @@ module Paths where
   fill .(here refl) hip (here rest)   = hip ∷ rest
   fill .(there _) hip   (there px ab) = px ∷ fill _ hip ab
 
+  -- A value of type (∂ φ i j) indicates a path inside
+  -- some values of type Fix φ i leading to a subtree of type Fix φ j.
+  --
   data ∂ {n : ℕ}(φ : Fam n) : Fin n → Fin n → Set where
     here : ∀{i} → ∂ φ i i
     peel : ∀{i k j}{C : Constr' φ i} 
@@ -166,3 +172,7 @@ module Paths where
   inject-∂ here el = el
   inject-∂ (peel {C = C} prf els rest) el 
     = ⟨ inj C (fill prf (inject-∂ rest el) els) ⟩
+
+  -- I can envision defining an Alμ with ∂ above.
+  --   data Alμ : Fin n → Set where
+  --     peel : (del : ∂ φ i j)(ins : ∂ φ j i) → Patch Alμ (⟦ j ⟧F φ) → Alμ i
