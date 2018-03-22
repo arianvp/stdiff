@@ -4,6 +4,10 @@ open import Prelude
 open import Generic.Opaque
   public
 
+-- * We need monadic functionality for Maybe
+open import Data.Maybe using (monadPlus)
+open RawMonadPlus {lz} monadPlus renaming (_<=<_ to _∙_)
+
 -- * Sum-of-product universe
 -- ** Code
 
@@ -128,3 +132,37 @@ _≟Fix_ {φ = φ} ⟨ sx ⟩ ⟨ sy ⟩ with DecEq._≟S_ (Fix φ) _≟Fix_ sx 
 ... | yes refl = yes refl
 ... | no ¬p = no (λ { refl → ¬p refl })
 
+-- * Paths over a Mutually Recursive Value
+
+module Paths where
+
+  data AllBut {A : Set}(P : A → Set) : {l : List A}{x : A} → x ∈ l → Set where
+    here  : ∀{x xs}      → All P xs → AllBut P {x ∷ xs} (here refl)
+    there : ∀{x x' xs p} → (hip : P x) → AllBut P {xs} {x'} p → AllBut P {x ∷ xs} (there p)
+
+  fill : ∀{A l x}{P : A → Set} → (prf : x ∈ l) → P x → AllBut P prf → All P l
+  fill .(here refl) hip (here rest)   = hip ∷ rest
+  fill .(there _) hip   (there px ab) = px ∷ fill _ hip ab
+
+  data ∂ {n : ℕ}(φ : Fam n) : Fin n → Fin n → Set where
+    here : ∀{i} → ∂ φ i i
+    peel : ∀{i k j}{C : Constr' φ i} 
+         → (prf : I k ∈ typeOf' φ i C)
+         → AllBut (λ x → ⟦ x ⟧A (Fix φ)) prf  
+         → ∂ φ k j 
+         → ∂ φ i j 
+
+  select : ∀{n k}{φ : Fam n}{π : Prod n} 
+         → I k ∈ π → ⟦ π ⟧P (Fix φ) → Fix φ k
+  select (here refl) (p ∷ ps) = p
+  select (there prf) (p ∷ ps) = select prf ps
+
+  match-∂ : ∀{n i j}{φ : Fam n} → ∂ φ i j → Fix φ i → Maybe (Fix φ j)
+  match-∂ here                    el = just el
+  match-∂ (peel {C = C} prf _ rest) ⟨ el ⟩ 
+    = match C el >>= match-∂ rest ∘ select prf
+
+  inject-∂ : ∀{n i j}{φ : Fam n} → ∂ φ i j → Fix φ j → Fix φ i
+  inject-∂ here el = el
+  inject-∂ (peel {C = C} prf els rest) el 
+    = ⟨ inj C (fill prf (inject-∂ rest el) els) ⟩
