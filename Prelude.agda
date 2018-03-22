@@ -138,7 +138,7 @@ open import Data.Nat.Properties.Simple
   public
 
 open import Data.List
-  using (List ; _∷_ ; [] ; length)
+  using (List ; _∷_ ; [] ; length ; _++_)
   renaming (map to List-map ; zip to List-zip)
   public
 
@@ -163,6 +163,66 @@ Any-there-inj
   → _≡_ {A = Any P (x ∷ xs)} (there px) (there py)
   → px ≡ py
 Any-there-inj refl = refl
+
+-- List disjointness
+
+_∈_ : ∀{a}{A : Set a} → A → List A → Set a
+x ∈ l = Any (_≡_ x) l
+
+_∉_ : ∀{a}{A : Set a} → A → List A → Set a
+x ∉ l = ¬ (x ∈ l)
+
+∉-∷ : ∀{a}{A : Set a}{x y : A}{l : List A}
+    → x ≢ y → x ∉ l → x ∉ (y ∷ l)
+∉-∷ x≢y x∉l (here  abs) = x≢y abs
+∉-∷ x≢y x∉l (there abs) = x∉l abs
+
+∉-head : ∀{a}{A : Set a}{x y : A}{l : List A}
+       → x ∉ (y ∷ l) → x ≢ y
+∉-head hip abs = hip (here abs)
+
+∉-tail : ∀{a}{A : Set a}{x y : A}{l : List A}
+       → x ∉ (y ∷ l) → x ∉ l
+∉-tail hip abs = hip (there abs)
+
+data Disj {a}{A : Set a} : List A → List A → Set a where
+  nil  : ∀{l}       → Disj l []
+  cons : ∀{x l₁ l₂} → x ∉ l₁ → Disj l₁ l₂ → Disj l₁ (x ∷ l₂)
+
+disj-prepend : ∀{a}{A : Set a}{l₁ l₂ : List A}{x : A}
+             → x ∉ l₂ → Disj l₁ l₂ → Disj (x ∷ l₁) l₂
+disj-prepend hip nil        = nil
+disj-prepend hip (cons h d) 
+  = cons (∉-∷ (∉-head hip ∘ sym) h) 
+         (disj-prepend (∉-tail hip) d)
+
+disj-nil : ∀{a}{A : Set a}{l : List A}
+         → Disj [] l
+disj-nil {l = []}    = nil
+disj-nil {l = x ∷ l} = cons (λ ()) (disj-nil {l = l})
+
+disj-sym : ∀{a}{A : Set a}{l₁ l₂ : List A} 
+         → Disj l₁ l₂ → Disj l₂ l₁
+disj-sym nil        = disj-nil
+disj-sym (cons p h) = disj-prepend p (disj-sym h)
+
+∈-dec : ∀{a}{A : Set a}(_≟A_ : (a₁ a₂ : A) → Dec (a₁ ≡ a₂))
+      → (x : A) → (l : List A) → Dec (x ∈ l)
+∈-dec _≟A_ x [] = no (λ ())
+∈-dec _≟A_ x (y ∷ l) with x ≟A y
+...| yes x≡y = yes (here x≡y)
+...| no  x≢y with ∈-dec _≟A_ x l
+...| yes x∈l = yes (there x∈l)
+...| no  x∉l = no (∉-∷ x≢y x∉l)
+
+disj-dec : ∀{a}{A : Set a}(_≟A_ : (a₁ a₂ : A) → Dec (a₁ ≡ a₂))
+         → (l₁ l₂ : List A) → Dec (Disj l₁ l₂)
+disj-dec _≟A_ l₁ []       = yes nil
+disj-dec _≟A_ l₁ (x ∷ l₂) with ∈-dec _≟A_ x l₁ 
+...| yes x∈l₁ = no (λ { (cons abs _) → abs x∈l₁ })
+...| no  x∉l₁ with disj-dec _≟A_ l₁ l₂
+...| no  ¬disj = no (λ { (cons _ abs) → ¬disj abs })  
+...| yes  disj = yes (cons x∉l₁ disj)
 
 open import Data.String
   using (String ; primStringEquality)
