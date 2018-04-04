@@ -9,13 +9,15 @@ module Multirec.Internal.Fixpoint {n : ℕ}(φ : Fam n) where
   -- Heterogenous
   data Alμ : Fin n → Fin n → Set
 
+  -- Homogenous
+  data Alμ₂ : Fin n → Set 
   Alμᵒ : Fin n → Fin n → Set
   Alμᵒ = flip Alμ
   -- Homogeneous
   Alμ↓ : Fin n → Set
   Alμ↓ ν = Alμ ν ν
 
-  data Ctx  (P : Fin n → Set) : Prod n → Set
+  data Ctx  (P : Fin n → Set) : Prod n → Set 
 
   InsCtx : Fin n → Prod n → Set
   InsCtx ν = Ctx (Alμ ν)
@@ -28,6 +30,10 @@ module Multirec.Internal.Fixpoint {n : ℕ}(φ : Fam n) where
     here  : {ν : Fin n}{π : Prod n} → (P ν) → ⟦ π ⟧P (Fix φ) → Ctx P (I ν ∷ π)
     there : {α : Atom n}{π : Prod n} → ⟦ α ⟧A (Fix φ) → Ctx P π → Ctx P (α ∷ π)
 
+  open Paths
+  data Alμ₂ where
+    peel : ∀ {ν₁ ν₂} (del : ∂ φ ν₁ ν₂)(ins :  ∂ φ ν₂ ν₁) → Patch Alμ₂ (⟦ φ ⟧F ν₂) → Alμ₂ ν₁
+
   data Alμ where
     spn : ∀{ν} → Patch Alμ↓ (⟦ φ ⟧F ν) → Alμ↓ ν
     ins : ∀ {ν₁ ν₂} (C : Constr' φ ν₂) → InsCtx ν₁ (typeOf' φ ν₂ C) → Alμ ν₁ ν₂
@@ -38,6 +44,13 @@ module Multirec.Internal.Fixpoint {n : ℕ}(φ : Fam n) where
   getCtx (there _ x) = getCtx x
   -}
 
+
+  {-# TERMINATING #-}
+  applyAlμ₂ : ∀ {ν} → Alμ₂ ν → Fix φ ν → Maybe (Fix φ ν)
+  applyAlμ₂ (peel del₁ ins₁ sp) x₁ =
+    match-∂ del₁ x₁ >>=  λ x →
+    (⟨_⟩ <$> applyPatch applyAlμ₂ sp  (unfix x)) >>=  λ x →
+    match-∂ ins₁ x
 
   {-# TERMINATING #-}
   applyAlμ : ∀{ν₁ ν₂} → Alμ ν₁ ν₂ → Fix φ ν₁ → Maybe (Fix φ ν₂)
@@ -53,3 +66,4 @@ module Multirec.Internal.Fixpoint {n : ℕ}(φ : Fam n) where
 
   delCtx (here x x₁) (px ∷ x₂) = applyAlμ x px
   delCtx (there x x₁) (px ∷ x₂) = delCtx x₁ x₂
+
