@@ -118,6 +118,43 @@ module Regular.Internal.Functor
   costAl costAt (Ains a al) = 1 + costAl costAt al
   costAl costAt (AX at al) = costAt at + costAl costAt al
 
+-- ** Normal Form Alignments
+
+  data Alnf (At : Atom → Set) : Prod → Prod → Set where
+    A0 : ∀{π₀ π₁}(del : ⟦ π₀ ⟧P Rec)(ins : ⟦ π₁ ⟧P Rec)
+       → Alnf At π₀ π₁
+    AX : ∀{π₀ π₁ π₀' π₁' α}(del : ⟦ π₀ ⟧P Rec)(ins : ⟦ π₁ ⟧P Rec)
+       → At α → Alnf At π₀' π₁' → Alnf At (π₀ ++ α ∷ π₀') (π₁ ++ α ∷ π₁')
+
+  alnf-ins : ∀{π₁ π₂ α}{At : Atom → Set} 
+           → ⟦ α ⟧A Rec → Alnf At π₁ π₂ → Alnf At π₁ (α ∷ π₂)
+  alnf-ins a (A0 d i)      = A0 d (a ∷ i) 
+  alnf-ins a (AX d i x al) = AX d (a ∷ i) x al
+
+  alnf-del : ∀{π₁ π₂ α}{At : Atom → Set} 
+           → ⟦ α ⟧A Rec → Alnf At π₁ π₂ → Alnf At (α ∷ π₁) π₂
+  alnf-del a (A0 d i)      = A0 (a ∷ d) i
+  alnf-del a (AX d i x al) = AX (a ∷ d) i x al
+
+  normalizeAl : ∀{π₁ π₂}{At : Atom → Set} → Al At π₁ π₂ → Alnf At π₁ π₂
+  normalizeAl A0           = A0 [] []
+  normalizeAl (Ains a' al) = alnf-ins a' (normalizeAl al)
+  normalizeAl (Adel a' al) = alnf-del a' (normalizeAl al)
+  normalizeAl (AX   at al) = AX [] [] at (normalizeAl al)
+
+  isMaximal : ∀{π₁ π₂}{At : Atom → Set} → Alnf At π₁ π₂ → Set
+  isMaximal (A0 {π₁} {π₂} d i)     = Disj π₁ π₂
+  isMaximal (AX {π₁} {π₂} d i x p) = Disj π₁ π₂ × isMaximal p
+
+  isMaximal? : ∀{π₁ π₂}{At : Atom → Set}(al : Alnf At π₁ π₂) → Dec (isMaximal al)
+  isMaximal? (A0 {π₁} {π₂} d i)     = disj-dec _≟Atom_ π₁ π₂
+  isMaximal? (AX {π₁} {π₂} d i x p) 
+    with disj-dec _≟Atom_ π₁ π₂ | isMaximal? p
+  ...| yes l  | yes m  = yes (l , m)
+  ...| yes l  | no abs = no (abs ∘ proj₂)
+  ...| no abs | _      = no (abs ∘ proj₁)
+
+
 -- ** Atoms
 
   data At (PatchRec : Set) : Atom → Set where

@@ -63,6 +63,7 @@ open import Regular.Operations.Annotate.Oracle.ES
 open import Regular.Operations.Annotate.Oracle.Patch
 
 -- ** Laboratories
+open import Regular.Lab.BinTree
 open import Regular.Lab.2-3-Tree
 open import Regular.Lab.SExp
 open import Regular.Lab.ForkTree
