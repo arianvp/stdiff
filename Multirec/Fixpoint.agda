@@ -28,8 +28,8 @@ module Multirec.Fixpoint {n : ℕ}(φ : Fam n) where
 
   module FixpointApplication where
 
-    ⟪_⟫μ : {ν : Fin n} → Alμ↓ ν → Fix φ ν → Maybe (Fix φ ν)
+    ⟪_⟫μ : {ν : Fin n} → Alμ ν → Fix φ ν → Maybe (Fix φ ν)
     ⟪ alμ ⟫μ = applyAlμ alμ
 
     open import Multirec.Functor (Fix φ) _≟Fix_ as RF
-    open RF.FunctorApplication Alμ↓ ⟪_⟫μ public
+    open RF.FunctorApplication Alμ ⟪_⟫μ public

@@ -37,17 +37,17 @@ Rose' =  Fix MyFam rosePos
 List' : Set
 List' =  Fix MyFam listPos
 
-nil : List'
-nil = ⟨ inj `nil [] ⟩
+nil' : List'
+nil' = ⟨ inj `nil [] ⟩
 
-cons : Rose' → List' → List'
-cons x xs = ⟨ inj `cons (x ∷ xs ∷ []) ⟩
+cons' : Rose' → List' → List'
+cons' x xs = ⟨ inj `cons (x ∷ xs ∷ []) ⟩
 
 rose : String → List' → Rose'
 rose s xs = ⟨ inj `rose (s ∷ xs ∷ []) ⟩
 
 leaf : String → Rose'
-leaf s = rose s nil
+leaf s = rose s nil'
 
 open import Multirec.Functor (Fix MyFam) _≟Fix_ public
 open import Multirec.Fixpoint MyFam
@@ -57,7 +57,8 @@ open FixpointApplication
 
 -- * Unit tests
 --- * Simply do nothing
-patch : Alμ↓ rosePos
+{-
+patch : Alμ rosePos
 patch = spn Scp
 
 x : (y : List') → ⟪ spn Scp ⟫μ y ≡ just y
@@ -66,13 +67,13 @@ x ⟨ there x₁ ⟩ = refl
 
 
 t₁ : Rose'
-t₁ = rose "1" (cons (rose "2" nil) nil)
+t₁ = rose "1" (cons' (rose "2" nil') nil')
 
 t₂ : List'
-t₂ = cons (rose "1" nil) nil
+t₂ = cons' (rose "1" nil') nil'
 
 t₃ : Rose'
-t₃ = rose "2" (cons (rose "2" nil) nil)
+t₃ = rose "2" (cons' (rose "2" nil') nil')
 
 p12 : Alμ rosePos listPos
 p12 = del `rose (there "1" (here (spn Scp) []))
@@ -86,4 +87,6 @@ p13 = del `rose (there "1" (here (ins `rose (there "2" (here (spn Scp) []))) [])
 
 y : ⟪ p13 ⟫μ t₁ ≡ just t₃
 y = refl
+
+-} 
 
