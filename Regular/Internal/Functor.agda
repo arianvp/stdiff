@@ -21,7 +21,7 @@ module Regular.Internal.Functor
     Scns : (C : Constr σ)
            (ats : All At (typeOf σ C)) →
            S At Al σ
-    Schg : (C₁ C₂ : Constr σ){q : C₁ ≢ C₂}
+    Schg : (C₁ C₂ : Constr σ)
            (al : Al (typeOf σ C₁) (typeOf σ C₂)) →
            S At Al σ
 
@@ -33,7 +33,7 @@ module Regular.Internal.Functor
         → S At₁ Al₁ σ → S At₂ Al₂ σ
   S-map f g Scp                 = Scp
   S-map f g (Scns C ps)         = Scns C (All-map f ps)
-  S-map f g (Schg C₁ C₂ {q} al) = Schg C₁ C₂ {q} (g al)
+  S-map f g (Schg C₁ C₂ al) = Schg C₁ C₂ (g al)
 
 -- *** Spine application
 
@@ -87,6 +87,13 @@ module Regular.Internal.Functor
     Ains : ∀ {α π₁ π₂} → ⟦ α ⟧A Rec → Al At π₁ π₂ → Al At π₁ (α ∷ π₂)
     AX : ∀{α π₁ π₂} → At α → Al At π₁ π₂ → Al At (α ∷ π₁) (α ∷ π₂)
 
+  TrivialAl : (At : Atom → Set ) → Prod → Set
+  TrivialAl At π = Al At  π π
+
+  All-to-Al : (At : Atom → Set) (π : Prod) → All At π → Al At π π
+  All-to-Al At .[] [] = A0
+  All-to-Al At .(_ ∷ _) (px ∷ x) = AX px (All-to-Al At _ x)
+
   al-map : ∀{π₁ π₂}
             {At₁ At₂ : Atom → Set}
           → (At₁ ⊆ At₂) 
@@ -120,11 +127,16 @@ module Regular.Internal.Functor
 
 -- ** Normal Form Alignments
 
+
   data Alnf (At : Atom → Set) : Prod → Prod → Set where
     A0 : ∀{π₀ π₁}(del : ⟦ π₀ ⟧P Rec)(ins : ⟦ π₁ ⟧P Rec)
        → Alnf At π₀ π₁
     AX : ∀{π₀ π₁ π₀' π₁' α}(del : ⟦ π₀ ⟧P Rec)(ins : ⟦ π₁ ⟧P Rec)
        → At α → Alnf At π₀' π₁' → Alnf At (π₀ ++ α ∷ π₀') (π₁ ++ α ∷ π₁')
+
+  All-to-Alnf : (At : Atom → Set) (π : Prod) → All At π → Alnf At π π
+  All-to-Alnf At [] [] = A0 [] []
+  All-to-Alnf At (x ∷ π) (px ∷ pxs) = AX [] [] px (All-to-Alnf At π pxs)
 
   alnf-ins : ∀{π₁ π₂ α}{At : Atom → Set} 
            → ⟦ α ⟧A Rec → Alnf At π₁ π₂ → Alnf At π₁ (α ∷ π₂)
